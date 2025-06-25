@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .chatgpt-container {
+        max-width: 700px;
+        margin: 40px auto;
+        background: #181c24;
+        border-radius: 16px;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+        display: flex;
+        flex-direction: column;
+        height: 70vh;
+        overflow: hidden;
+    }
+    .chatgpt-header {
+        padding: 24px 32px 12px 32px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        border-bottom: 1px solid #23272f;
+        background: #181c24;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .toggle-mode {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+        color: #22c55e;
+    }
+    .form-switch .form-check-input {
+        width: 2.5em;
+        height: 1.3em;
+    }
+    .quick-questions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 18px 32px 0 32px;
+        background: #181c24;
+        border-bottom: 1px solid #23272f;
+    }
+    .quick-question-btn {
+        background: #23272f;
+        color: #22c55e;
+        border: 1px solid #22c55e;
+        border-radius: 8px;
+        padding: 7px 18px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+    .quick-question-btn:hover {
+        background: #22c55e;
+        color: #fff;
+    }
+    .chatgpt-messages {
+        flex: 1;
+        padding: 24px 32px;
+        overflow-y: auto;
+        background: #181c24;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .chatgpt-message {
+        max-width: 80%;
+        padding: 14px 20px;
+        border-radius: 16px;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        word-break: break-word;
+        margin-bottom: 4px;
+    }
+    .chatgpt-message.user {
+        align-self: flex-end;
+        background: linear-gradient(90deg, #2563eb 0%, #1e293b 100%);
+        color: #fff;
+    }
+    .chatgpt-message.bot {
+        align-self: flex-start;
+        background: #23272f;
+        color: #e5e7eb;
+    }
+    .chatgpt-input-area {
+        display: flex;
+        align-items: center;
+        padding: 16px 32px;
+        background: #181c24;
+        border-top: 1px solid #23272f;
+    }
+    .chatgpt-input {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: none;
+        background: #23272f;
+        color: #fff;
+        font-size: 1rem;
+        margin-right: 12px;
+    }
+    .chatgpt-send-btn {
+        background: #22c55e;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background 0.2s;
+    }
+    .chatgpt-send-btn:hover {
+        background: #16a34a;
+    }
+</style>
+<div class="chatgpt-container">
+    <div class="chatgpt-header">
+        Chat Page
+        <div class="toggle-mode">
+            <span id="mode-label">Quick Help</span>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="modeSwitch">
+            </div>
+            <span>AI Chat</span>
+        </div>
+    </div>
+    <div class="quick-questions" id="quick-questions">
+        <button class="quick-question-btn" data-question="How do I deposit funds?">How do I deposit funds?</button>
+        <button class="quick-question-btn" data-question="How do I withdraw my earnings?">How do I withdraw my earnings?</button>
+        <button class="quick-question-btn" data-question="How do I refer a friend?">How do I refer a friend?</button>
+        <button class="quick-question-btn" data-question="How do I choose an investment tier?">How do I choose an investment tier?</button>
+        <button class="quick-question-btn" data-question="How do I view my dashboard?">How do I view my dashboard?</button>
+        <button class="quick-question-btn" data-question="How do I contact support?">How do I contact support?</button>
+    </div>
+    <div class="chatgpt-messages" id="chat-box">
+        <!-- Messages will appear here -->
+    </div>
+    <form class="chatgpt-input-area" id="chat-form" autocomplete="off">
+        {% csrf_token %}
+        <input type="text" id="chat-input" class="chatgpt-input" placeholder="Type your message..." required>
+        <button class="chatgpt-send-btn" type="submit">Send</button>
+    </form>
+</div>
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const quickBtns = document.querySelectorAll('.quick-question-btn');
+    const modeSwitch = document.getElementById('modeSwitch');
+    const modeLabel = document.getElementById('mode-label');
+    const quickQuestionsDiv = document.getElementById('quick-questions');
+    let aiMode = false;
+
+    function appendMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chatgpt-message ' + sender;
+        msgDiv.textContent = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function getBotReply(msg) {
+        switch(msg) {
+            case 'How do I deposit funds?':
+                return 'To deposit funds, go to the Wallet page and click on the Deposit button. Follow the instructions to complete your deposit.';
+            case 'How do I withdraw my earnings?':
+                return 'To withdraw your earnings, visit the Wallet page and select Withdraw. Enter the amount and your bank details, then submit your request.';
+            case 'How do I refer a friend?':
+                return 'You can refer a friend by sharing your referral link found on the Referrals page. When your friend signs up using your link, you both get rewards!';
+            case 'How do I choose an investment tier?':
+                return 'Go to the Investment Tiers page to view available tiers. Click Invest on the tier that suits you and follow the prompts.';
+            case 'How do I view my dashboard?':
+                return 'Click on Dashboard in the navigation bar to see your investments, earnings, and account stats.';
+            case 'How do I contact support?':
+                return 'To contact support, go to the Support page from the navigation menu and fill out the contact form.';
+            default:
+                return 'This is a sample bot reply. (Replace with AI response)';
+        }
+    }
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if (msg) {
+            appendMessage(msg, 'user');
+            chatInput.value = '';
+            if (aiMode) {
+                // AI Chat mode: send to backend
+                appendMessage('...', 'bot'); // loading indicator
+                const csrfToken = getCookie('csrftoken');
+                console.log('CSRF:', csrfToken);
+                fetch('/chat/ai/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: 'message=' + encodeURIComponent(msg)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove loading
+                    const loading = chatBox.querySelector('.chatgpt-message.bot:last-child');
+                    if (loading && loading.textContent === '...') loading.remove();
+                    if (data.response) {
+                        appendMessage(data.response, 'bot');
+                    } else if (data.error) {
+                        appendMessage('Error: ' + data.error, 'bot');
+                    }
+                })
+                .catch(() => {
+                    const loading = chatBox.querySelector('.chatgpt-message.bot:last-child');
+                    if (loading && loading.textContent === '...') loading.remove();
+                    appendMessage('Error: Could not reach AI service.', 'bot');
+                });
+            } else {
+                // Quick Help mode
+                setTimeout(() => {
+                    appendMessage(getBotReply(msg), 'bot');
+                }, 400);
+            }
+        }
+    });
+
+    quickBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            chatInput.value = btn.getAttribute('data-question');
+            chatForm.dispatchEvent(new Event('submit'));
+        });
+    });
+
+    modeSwitch.addEventListener('change', function() {
+        aiMode = modeSwitch.checked;
+        modeLabel.textContent = aiMode ? 'AI Chat' : 'Quick Help';
+        quickQuestionsDiv.style.display = aiMode ? 'none' : 'flex';
+    });
+
+    // CSRF helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %} 
