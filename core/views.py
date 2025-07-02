@@ -15,7 +15,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
 from .forms import VoucherForm
 import logging
-import openai
+# import openai  # Removed OpenAI import
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.views.decorators.http import require_POST
@@ -1247,83 +1247,6 @@ def deposit_dashboard_view(request):
     }
     
     return render(request, 'admin/deposit_dashboard.html', context)
-
-@csrf_exempt
-@login_required
-def chat_ai_api(request):
-    """API endpoint for chat AI with rate limiting, OpenAI integration, and conversation memory (context-aware, secure)"""
-    if request.method == 'POST':
-        user = request.user
-        message = request.POST.get('message', '').strip()
-        if not message:
-            return JsonResponse({'error': 'Message is required'}, status=400)
-        # Rate limiting: Check if user has used chat more than 10 times today
-        start_of_day = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        usage_count = ChatUsage.objects.filter(user=user, timestamp__gte=start_of_day).count()
-        if usage_count >= 10:
-            return JsonResponse({'error': 'Daily chat limit reached. Please try again tomorrow.'}, status=429)
-        # Record this usage
-        ChatUsage.objects.create(user=user)
-
-        # App knowledge
-        tiers = Company.objects.all().order_by('amount')
-        tier_info = '\n'.join([
-            f"- {tier.name}: Invest R{tier.amount}, get R{tier.return_amount} in {tier.duration_days} days. {tier.description}" for tier in tiers
-        ])
-        app_knowledge = (
-            "SafeChain AI is a crypto investment platform. Features: user authentication, investment tiers, wallet, referrals, admin dashboard, deposits, withdrawals. "
-            "Investment Tiers available:\n" + tier_info +
-            "\nUsers can view their dashboard, track earnings, and refer friends for rewards."
-        )
-
-        # User context (non-sensitive)
-        wallet, _ = Wallet.objects.get_or_create(user=user)
-        active_investments = Investment.objects.filter(user=user, is_active=True)
-        completed_investments = Investment.objects.filter(user=user, is_active=False)
-        referrals = Referral.objects.filter(inviter=user)
-        user_context = (
-            f"User info: Name: {user.get_full_name()}, Email: {user.email}, "
-            f"Wallet balance: R{wallet.balance}, "
-            f"Active investments: {active_investments.count()}, "
-            f"Completed investments: {completed_investments.count()}, "
-            f"Referral count: {referrals.count()}. "
-            "Do not reveal sensitive information."
-        )
-
-        # Conversation history (store in session)
-        history = request.session.get('chat_history', [])
-        # Add previous exchanges to messages
-        messages_list = [
-            {"role": "system", "content": app_knowledge},
-            {"role": "system", "content": user_context},
-        ]
-        for entry in history[-10:]:  # Limit to last 10 exchanges
-            messages_list.append(entry)
-        # Add the new user message
-        messages_list.append({"role": "user", "content": message})
-
-        # OpenAI API integration (new syntax)
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages_list,
-                max_tokens=256,
-                temperature=0.7,
-            )
-            ai_message = response.choices[0].message.content.strip()
-        except Exception as e:
-            return JsonResponse({'error': f'AI service error: {str(e)}'}, status=500)
-        # Update conversation history in session
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": ai_message})
-        request.session['chat_history'] = history[-20:]  # Keep only the last 10 exchanges (20 messages)
-        return JsonResponse({
-            'response': ai_message,
-            'usage_count': usage_count + 1,
-            'daily_limit': 10
-        })
-    return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
 @login_required
 def chat_page_view(request):
