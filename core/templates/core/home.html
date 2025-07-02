@@ -1,22 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}SafeChain AI{% endblock %}
+{% block title %}CapitalXPlatform{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <div class="container text-center py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <span class="badge bg-success mb-2">Live</span>
-            <h1 class="display-3 fw-bold">Grow Your Wealth with SafeChain AI</h1>
+            <div class="mb-3">
+                <span class="badge">New</span>
+            </div>
+            <h1 class="display-3 fw-bold">Buy Shares. Get <span style="color:#FFD700;">R50 Free</span>.</h1>
             <p class="lead text-muted my-4">
-                Secure, smart, and automated investing — starting from just R50.
+                Start investing with <span class="logo-x">CapitalX<span class="logo-x-gold">Platform</span></span> and win <span style="color:#FFD700;">R100</span> on your first trade!
             </p>
             {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg" style="color: #fff !important;">Go to Dashboard</a>
             {% else %}
-                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started Now</a>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg" style="color: #fff !important;">Start for Free</a>
             {% endif %}
         </div>
     </div>
@@ -46,31 +48,31 @@
     </div>
 </div>
 
-<!-- Investment Tiers Section -->
+<!-- Companies You Can Invest In Section -->
 <div class="container my-5">
-    <h2 class="text-center fw-bold mb-4"><span class="text-primary">Investment Tiers</span></h2>
+    <h2 class="text-center fw-bold mb-4"><span class="text-primary">Companies You Can Invest In</span></h2>
     <div class="row g-4">
-        {% for tier in investment_tiers %}
+        {% for company in companies %}
         <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
             <div class="card p-4 h-100 w-100 d-flex flex-column">
-                <h3 class="fw-bold">{{ tier.name }}</h3>
+                <h3 class="fw-bold">{{ company.name }}</h3>
                 
-                {% if tier.min_level > user.level %}
-                    <span class="badge bg-secondary mb-2">Level {{ tier.min_level }} Required</span>
+                {% if company.min_level > user.level %}
+                    <span class="badge bg-secondary mb-2">Level {{ company.min_level }} Required</span>
                 {% endif %}
 
-                <p class="text-muted mb-1">Duration: {{ tier.duration_days }} days</p>
-                <p class="text-muted">Return: R{{ tier.return_amount }}</p>
+                <p class="text-muted mb-1">Duration: {{ company.duration_days }} days</p>
+                <p class="text-muted">Expected Return: R{{ company.expected_return }}</p>
                 
                 <div class="mt-auto">
                 {% if user.is_authenticated %}
-                    {% if tier.min_level <= user.level %}
-                        <a href="{% url 'invest' tier.id %}" class="btn btn-primary w-100">Invest Now</a>
+                    {% if company.min_level <= user.level %}
+                        <a href="{% url 'invest' company.id %}" class="btn btn-primary w-100" style="color: #fff !important;">Invest Now</a>
                     {% else %}
-                        <button class="btn btn-secondary w-100" disabled>Locked</button>
+                        <button class="btn btn-secondary w-100" disabled style="color: #fff !important;">Locked</button>
                     {% endif %}
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary w-100">Login to Invest</a>
+                    <a href="{% url 'login' %}" class="btn btn-primary w-100" style="color: #fff !important;">Login to Invest</a>
                 {% endif %}
                 </div>
             </div>
@@ -87,7 +89,7 @@
             <p class="text-muted">Get R10 for every real user who signs up and deposits.</p>
             <div class="input-group">
                 <input type="text" id="referralLink" class="form-control" value="{{ referral_link }}" readonly>
-                <button class="btn btn-secondary" type="button" id="copyButton">Copy</button>
+                <button class="btn btn-secondary" type="button" id="copyButton" style="color: #fff !important;">Copy</button>
             </div>
         </div>
         <div class="col-lg-5 offset-lg-1">
@@ -107,23 +109,72 @@
     <div class="row g-4 text-center">
         <div class="col-md-4">
             <div class="card p-4 h-100">
-                <h3 class="display-4">🤖</h3>
-                <h4 class="fw-bold">AI-Powered Selection</h4>
-                <p class="text-muted">Our AI analyzes market data to select low-risk crypto tokens with high potential.</p>
+                <h3 class="display-4">🎁</h3>
+                <h4 class="fw-bold">Sign Up & Get R50 Bonus</h4>
+                <p class="text-muted">Register and instantly receive a R50 bonus to start investing.</p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card p-4 h-100">
-                <h3 class="display-4">⚡</h3>
-                <h4 class="fw-bold">Automated Trading</h4>
-                <p class="text-muted">Trades are executed automatically and secured with advanced encryption.</p>
+                <h3 class="display-4">💸</h3>
+                <h4 class="fw-bold">Buy Your First Share & Win R100</h4>
+                <p class="text-muted">Make your first trade and get an extra R100 bonus, automatically credited.</p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card p-4 h-100">
-                <h3 class="display-4">💰</h3>
-                <h4 class="fw-bold">Profit Sharing</h4>
-                <p class="text-muted">You earn returns based on the profits generated by our AI trading system.</p>
+                <h3 class="display-4">🔓</h3>
+                <h4 class="fw-bold">Deposit 50% to Unlock Withdrawals</h4>
+                <p class="text-muted">To withdraw, simply deposit 50% of your total balance. It's that easy!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trust Section -->
+<div class="container my-5">
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h4 class="fw-bold" style="color:#3399ff;">Fully Regulated</h4>
+                <p class="text-muted">Your investments are protected and compliant with financial regulations.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h4 class="fw-bold" style="color:#FFD700;">Smart Win Logic</h4>
+                <p class="text-muted">Built with clever onboarding – The House Always Wins.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h4 class="fw-bold" style="color:#3399ff;">Secure & Instant</h4>
+                <p class="text-muted">Secure deposits and instant trades for peace of mind.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Preview / Feature Highlights -->
+<div class="container my-5">
+    <h2 class="text-center fw-bold mb-4">Platform Highlights</h2>
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h3 class="display-6">📈 Simulated Trading</h3>
+                <p class="text-muted">Experience real-time or simulated share trading with instant feedback.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h3 class="display-6">💰 Bonus vs Real Balance</h3>
+                <p class="text-muted">Track your bonus and real balances separately for full transparency.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h3 class="display-6">⚡ Quick Actions</h3>
+                <p class="text-muted">Deposit, withdraw, or reinvest with a single click from your dashboard.</p>
             </div>
         </div>
     </div>
@@ -167,7 +218,7 @@
                 {% csrf_token %}
                 <div class="input-group">
                     <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
-                    <button class="btn btn-primary" type="submit">Subscribe</button>
+                    <button class="btn btn-primary" type="submit" style="color: #fff !important;">Subscribe</button>
                 </div>
             </form>
             <p class="text-muted small mt-2">Secure payments · Advanced AI · Trusted by 2+ users</p>

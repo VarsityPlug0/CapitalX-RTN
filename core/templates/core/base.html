@@ -14,9 +14,7 @@
             <a href="{% url 'home' %}">
                 AI Crypto Vault
             </a>
-            <button type="button">
-                <span>Menu</span>
-            </button>
+            <button type="button">Menu</button>
             <div>
                 <ul>
                     {% if user.is_authenticated %}
@@ -27,7 +25,7 @@
                         </li>
                         <li>
                             <a href="{% url 'tiers' %}">
-                                Investment Tiers
+                                Companies
                             </a>
                         </li>
                         <li>

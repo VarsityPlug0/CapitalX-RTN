@@ -26,7 +26,7 @@ def health_check(request):
     return HttpResponse("OK")
 
 urlpatterns = [
-    path('admin/', admin_site.urls),  # Use our custom admin site
+    path('capitalx_admin/', admin_site.urls),  # Use our custom admin site at /capitalx_admin/
     path('healthz/', health_check, name='health_check'),
     path('', include('core.urls')),
     path('admin_dashboard/', views.admin_dashboard_view, name='admin_dashboard'),

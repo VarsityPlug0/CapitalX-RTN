@@ -1,19 +1,20 @@
 /* Main CSS */
 :root {
     /* Colors */
-    --primary: #2563eb;
-    --secondary: #10b981;
-    --accent: #19ff4b;
+    --primary: #061a40; /* Dark Blue */
+    --secondary: #3399ff; /* Bright Blue */
+    --accent: #FFD700; /* Gold/Yellow */
     --background: #0f172a;
     --surface: #1e293b;
-    --text: #f8fafc;
-    --text-muted: #94a3b8;
+    --text: #ffffff;
+    --text-muted: #b0b8c1;
     --border: #334155;
     --error: #ef4444;
     --success: #22c55e;
-    --primary-green: #00ff00;
-    --dark-bg: #1a1a1a;
-    --card-bg: #2c2c2c;
+    --primary-blue: #3399ff;
+    --gold: #FFD700;
+    --dark-bg: #061a40;
+    --card-bg: #11224d;
     --text-color: #ffffff;
     
     /* Spacing */
@@ -40,24 +41,14 @@
 /* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-body {
-    background-color: var(--background);
-    color: var(--text);
-    min-height: 100vh;
-    font-family: 'Inter', sans-serif;
-    line-height: 1.6;
-    background: #0f172a;
-}
-
-body.bg-dark {
-    background-color: var(--dark-bg) !important;
+body, body.bg-dark {
+    background-color: var(--background) !important;
     color: var(--text-color);
-    font-family: 'Poppins', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', 'Poppins', 'SF Pro', Arial, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Inter', 'SF Pro', Arial, sans-serif;
     font-weight: 700;
     color: var(--text-color);
     letter-spacing: -0.5px;
@@ -87,8 +78,8 @@ p, a, li, span {
 }
 
 .text-primary {
-    color: var(--primary-green) !important;
-    text-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+    color: var(--primary-blue) !important;
+    text-shadow: 0 0 8px rgba(51, 153, 255, 0.3);
 }
 
 .navbar-brand span {
@@ -114,7 +105,7 @@ p, a, li, span {
 
 /* --- Modern Navigation Bar --- */
 .nav {
-    background: #1e293b;
+    background: var(--primary) !important;
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -150,7 +141,7 @@ p, a, li, span {
     overflow-x: auto;
 }
 .nav-link {
-    color: var(--text-muted);
+    color: var(--secondary) !important;
     font-weight: 500;
     padding: 0.5rem 1.5rem;
     border-radius: var(--radius-md);
@@ -161,8 +152,8 @@ p, a, li, span {
     font-size: 1rem;
 }
 .nav-link:hover, .nav-link.active {
-    color: var(--primary);
-    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary-blue);
+    background: rgba(51, 153, 255, 0.08);
 }
 .profile-area {
     display: flex;
@@ -176,29 +167,29 @@ p, a, li, span {
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--primary);
-    box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+    border: 2px solid var(--primary-blue);
+    box-shadow: 0 2px 8px rgba(51, 153, 255, 0.15);
 }
 
 /* --- Modern Card --- */
 .card {
     background-color: var(--card-bg);
-    border-radius: var(--radius-xl);
+    border-radius: 1.5rem;
     padding: var(--spacing-xl);
-    border: 1px solid #444;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+    border: 1px solid var(--secondary);
+    box-shadow: 0 8px 32px 0 rgba(51, 153, 255, 0.18);
     transition: box-shadow 0.3s, transform 0.3s;
 }
 .card:hover {
     transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 16px 40px 0 rgba(37, 99, 235, 0.18);
-    border-color: rgba(37, 99, 235, 0.18);
+    box-shadow: 0 16px 40px 0 rgba(51, 153, 255, 0.18);
+    border-color: rgba(51, 153, 255, 0.18);
 }
 .card-title {
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: var(--spacing-md);
-    color: var(--primary);
+    color: var(--primary-blue);
 }
 
 /* --- Modern Buttons --- */
@@ -216,18 +207,17 @@ p, a, li, span {
     font-size: 0.95rem;
 }
 .btn-primary {
-    background-color: var(--primary-green);
-    border-color: var(--primary-green);
-    color: #000000;
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: #fff;
     font-weight: bold;
-    box-shadow: 0 4px 15px rgba(25, 255, 75, 0.3);
+    box-shadow: 0 4px 15px rgba(51, 153, 255, 0.3);
 }
 .btn-primary:hover {
-    background-color: #00dd00;
-    border-color: #00dd00;
-    color: #000000;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(25, 255, 75, 0.4);
+    background-color: var(--gold);
+    border-color: var(--gold);
+    color: #061a40;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
 }
 .btn-secondary {
     background: linear-gradient(135deg, var(--secondary), #059669);
@@ -260,8 +250,8 @@ p, a, li, span {
 }
 .form-input:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(51, 153, 255, 0.2);
 }
 
 /* --- Modern Grid --- */
@@ -293,15 +283,15 @@ th, td {
     border-bottom: 1px solid var(--border);
 }
 th {
-    background: rgba(37, 99, 235, 0.1);
-    color: var(--primary);
+    background: rgba(51, 153, 255, 0.1);
+    color: var(--primary-blue);
     font-weight: 600;
 }
 tr:nth-child(even) {
     background: rgba(255,255,255,0.01);
 }
 tr:hover {
-    background: rgba(37, 99, 235, 0.08);
+    background: rgba(51, 153, 255, 0.08);
     transition: background 0.2s;
 }
 td {
@@ -317,7 +307,7 @@ td {
     to { opacity: 1; transform: none; }
 }
 .shadow-lg {
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(51, 153, 255, 0.18);
 }
 .rounded-xl {
     border-radius: var(--radius-xl);
@@ -387,9 +377,11 @@ td {
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-md);
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    background: var(--gold);
+    color: var(--primary);
 }
 
 .badge-success {
@@ -417,7 +409,7 @@ td {
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue));
     border-radius: var(--radius-full);
     transition: width 0.3s ease;
 }
@@ -434,14 +426,14 @@ td {
 }
 
 .theme-toggle:hover {
-    background: rgba(37, 99, 235, 0.1);
-    border-color: var(--primary);
-    color: var(--primary);
+    background: rgba(51, 153, 255, 0.1);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
 }
 
 /* Footer */
 .footer {
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--primary) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid var(--border);
@@ -450,7 +442,7 @@ td {
 }
 
 .footer.bg-dark {
-    background-color: #1a1a2e !important;
+    background-color: #061a40 !important;
 }
 
 .footer-content {
@@ -482,7 +474,7 @@ td {
 .glass-card {
     background: rgba(40, 60, 110, 0.35);
     border-radius: 2rem;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18), 0 1.5px 6px rgba(80, 120, 255, 0.10);
+    box-shadow: 0 8px 32px 0 rgba(51, 153, 255, 0.18), 0 1.5px 6px rgba(80, 120, 255, 0.10);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
     border: 1.5px solid rgba(120, 180, 255, 0.25);
@@ -556,19 +548,23 @@ td {
     color: #eaf2ff;
     transform: translateY(-2px) scale(1.03);
 }
-body {
-    background: linear-gradient(120deg, #181a20 0%, #232a3d 100%);
-    color: #eaf2ff;
-    font-family: 'Inter', 'Poppins', Arial, sans-serif;
+
+.logo-x {
+    color: var(--secondary);
+    font-weight: 900;
+    font-size: 1.5em;
+    letter-spacing: 1px;
 }
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', Arial, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-    margin-bottom: 1rem;
+.logo-x-gold {
+    color: var(--gold);
 }
 
-.text-primary {
-    color: var(--primary-green) !important;
+a, .navbar-brand span {
+    color: var(--secondary) !important;
+}
+
+/* --- FORCE ALL BUTTON TEXT WHITE (OVERRIDE ALL) --- */
+button, .btn, .btn-primary, .btn-secondary, .btn-info, .btn-warning, .btn-danger, .btn-success, .btn-outline-primary, .btn-outline-light, .btn-accent, .glass-btn, .quick-question-btn, .chatgpt-send-btn, .accordion-button, .btn-close,
+.btn *, .btn-primary *, .btn-secondary *, .btn-info *, .btn-warning *, .btn-danger *, .btn-success *, .btn-outline-primary *, .btn-outline-light *, .btn-accent *, .glass-btn *, .quick-question-btn *, .chatgpt-send-btn *, .accordion-button *, .btn-close * {
+    color: #fff !important;
 } 

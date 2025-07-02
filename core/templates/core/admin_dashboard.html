@@ -88,7 +88,7 @@
                             <thead>
                                 <tr>
                                     <th>User</th>
-                                    <th>Tier</th>
+                                    <th>Company</th>
                                     <th>Amount</th>
                                     <th>Date</th>
                                 </tr>
@@ -97,7 +97,7 @@
                                 {% for investment in recent_investments %}
                                 <tr>
                                     <td>{{ investment.user.email }}</td>
-                                    <td>{{ investment.tier.name }}</td>
+                                    <td>{{ investment.company.name }}</td>
                                     <td>R{{ investment.amount }}</td>
                                     <td>{{ investment.created_at|date:"Y-m-d H:i" }}</td>
                                 </tr>
@@ -117,7 +117,7 @@
                             <thead>
                                 <tr>
                                     <th>User</th>
-                                    <th>Tier</th>
+                                    <th>Company</th>
                                     <th>Return</th>
                                     <th>Date</th>
                                 </tr>
@@ -126,7 +126,7 @@
                                 {% for return in recent_returns %}
                                 <tr>
                                     <td>{{ return.user.email }}</td>
-                                    <td>{{ return.tier.name }}</td>
+                                    <td>{{ return.company.name }}</td>
                                     <td>R{{ return.return_amount }}</td>
                                     <td>{{ return.end_date|date:"Y-m-d H:i" }}</td>
                                 </tr>
@@ -189,12 +189,12 @@
         <div class="col-12">
             <div class="card bg-dark text-light">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Tier Statistics</h4>
+                    <h4 class="card-title mb-4">Company Statistics</h4>
                     <div class="table-responsive">
                         <table class="table table-dark table-hover">
                             <thead>
                                 <tr>
-                                    <th>Tier Name</th>
+                                    <th>Company Name</th>
                                     <th>Amount</th>
                                     <th>Total Investments</th>
                                     <th>Total Invested</th>
@@ -207,8 +207,8 @@
                             <tbody>
                                 {% for stat in tier_stats %}
                                 <tr>
-                                    <td>{{ stat.tier.name }}</td>
-                                    <td>R{{ stat.tier.amount }}</td>
+                                    <td>{{ stat.company.name }}</td>
+                                    <td>R{{ stat.company.amount }}</td>
                                     <td>{{ stat.total_investments }}</td>
                                     <td>R{{ stat.total_invested }}</td>
                                     <td>R{{ stat.total_returns }}</td>

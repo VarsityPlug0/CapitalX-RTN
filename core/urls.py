@@ -9,7 +9,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('tiers/', views.tiers_view, name='tiers'),
-    path('invest/<int:tier_id>/', views.invest_view, name='invest'),
+    path('invest/<int:company_id>/', views.invest_view, name='invest'),
     path('cash-out/<int:investment_id>/', views.cash_out_view, name='cash_out'),
     path('check-cash-out/<int:investment_id>/', views.check_cash_out_view, name='check_cash_out'),
     path('get-server-time/', views.get_server_time_view, name='get_server_time'),
@@ -30,6 +30,7 @@ urlpatterns = [
     path('portfolio/', views.portfolio_view, name='portfolio'),
     path('tutorial/', views.tutorial_view, name='tutorial'),
     path('support/', views.support_view, name='support'),
+    path('claim-bonus/', views.claim_bonus_view, name='claim_bonus'),
 
     # Admin action URLs for deposit management
     path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='admin_approve_deposit'),

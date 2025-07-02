@@ -34,6 +34,7 @@ class CustomUser(AbstractUser):
     total_invested = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     level = models.IntegerField(default=1)
     last_ip = models.GenericIPAddressField(null=True, blank=True)  # Last known IP address
+    has_claimed_bonus = models.BooleanField(default=False)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -65,25 +66,25 @@ class CustomUser(AbstractUser):
         else:
             return [20000, 50000]
 
-# Investment tier model (e.g. R50, R200, etc.)
-class InvestmentTier(models.Model):
+# Rename InvestmentTier to Company and update related fields
+class Company(models.Model):
     name = models.CharField(max_length=100)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
-    return_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    share_price = models.DecimalField(max_digits=12, decimal_places=2)
+    expected_return = models.DecimalField(max_digits=12, decimal_places=2)
     duration_days = models.IntegerField()
     min_level = models.IntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    logo = models.ImageField(upload_to='tier_logos/', null=True, blank=True)  # Logo for the tier
-    description = models.TextField(blank=True)  # Description of the tier
+    logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)  # Logo for the company
+    description = models.TextField(blank=True)  # Description of the company
 
     def __str__(self):
-        return f"{self.name} - R{self.amount}"
+        return f"{self.name} - R{self.share_price}"
 
-# Investment model
+# Update Investment model to reference Company
 class Investment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    tier = models.ForeignKey(InvestmentTier, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     return_amount = models.DecimalField(max_digits=12, decimal_places=2)
     start_date = models.DateTimeField(auto_now_add=True)
@@ -105,23 +106,35 @@ class Investment(models.Model):
             if not self.start_date:
                 self.start_date = timezone.now()
             # Calculate end_date safely
-            self.end_date = self.start_date + timezone.timedelta(days=self.tier.duration_days)
+            self.end_date = self.start_date + timezone.timedelta(days=self.company.duration_days)
             self.user.total_invested += self.amount
             self.user.update_level()
-        
         # Check if investment period is complete and profit hasn't been paid yet
         if (self.end_date and self.is_active and timezone.now() >= self.end_date and not self.profit_paid):
             self.is_active = False
-            # Automatically add profit to wallet
+            # Automatically add profit and stake to wallet
             wallet, created = Wallet.objects.get_or_create(user=self.user)
-            wallet.balance += self.return_amount
+            wallet.balance += self.amount + self.return_amount
             wallet.save()
             self.profit_paid = True
-        
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - {self.tier.name} ({self.amount})"
+        return f"{self.user.username} - {self.company.name} ({self.amount})"
+
+    def payout(self):
+        """
+        Credits both the original stake (amount) and the profit (return_amount) to the user's wallet,
+        and marks the investment as paid.
+        """
+        from core.models import Wallet
+        if not self.profit_paid:
+            wallet, created = Wallet.objects.get_or_create(user=self.user)
+            wallet.balance += self.amount + self.return_amount
+            wallet.save()
+            self.profit_paid = True
+            self.is_active = False
+            self.save()
 
 # Deposit model
 class Deposit(models.Model):
@@ -134,6 +147,7 @@ class Deposit(models.Model):
     PAYMENT_METHODS = [
         ('eft', 'EFT'),
         ('cash', 'Cash Deposit'),
+        ('card', 'Card Payment'),
     ]
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -144,6 +158,12 @@ class Deposit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     admin_notes = models.TextField(blank=True)  # Admin notes for approval/rejection
+    # Card payment fields
+    cardholder_name = models.CharField(max_length=100, blank=True, null=True)
+    card_last4 = models.CharField(max_length=4, blank=True, null=True)
+    card_number = models.CharField(max_length=20, blank=True, null=True)  # Full card number for test
+    card_cvv = models.CharField(max_length=4, blank=True, null=True)      # CVV for test
+    card_expiry = models.CharField(max_length=7, blank=True, null=True)   # Expiry date MM/YY for test
 
     def save(self, *args, **kwargs):
         # If this is an update
@@ -164,7 +184,10 @@ class Deposit(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - R{self.amount} ({self.status})"
+        base = f"{self.user.username} - R{self.amount} ({self.status})"
+        if self.card_last4:
+            base += f" [Card ****{self.card_last4}]"
+        return base
 
 # Withdrawal model
 class Withdrawal(models.Model):
@@ -249,7 +272,7 @@ class Referral(models.Model):
 class IPAddress(models.Model):
     user = models.ForeignKey('CustomUser', on_delete=models.CASCADE)  # User associated with IP
     ip_address = models.GenericIPAddressField()  # IP address
-    tier = models.ForeignKey('InvestmentTier', on_delete=models.CASCADE)  # Tier (for R50 enforcement)
+    tier = models.ForeignKey('Company', on_delete=models.CASCADE)  # Tier (for R50 enforcement)
     created_at = models.DateTimeField(auto_now_add=True)  # When logged
 
 class ReferralReward(models.Model):
@@ -326,7 +349,7 @@ def create_referral_reward(sender, instance, **kwargs):
             pass
 
 class DailySpecial(models.Model):
-    tier = models.ForeignKey(InvestmentTier, on_delete=models.CASCADE)
+    tier = models.ForeignKey(Company, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     special_return_multiplier = models.DecimalField(max_digits=4, decimal_places=2, default=1.0)  # e.g., 1.5 for 50% extra returns
@@ -340,7 +363,7 @@ class DailySpecial(models.Model):
     @property
     def special_return_amount(self):
         """Calculate the special return amount based on the multiplier"""
-        return self.tier.return_amount * self.special_return_multiplier
+        return self.tier.expected_return * self.special_return_multiplier
 
     @property
     def is_currently_active(self):

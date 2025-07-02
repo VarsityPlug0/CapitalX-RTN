@@ -6,66 +6,66 @@ from decimal import Decimal
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'safechain_ai.settings')
 django.setup()
 
-from core.models import InvestmentTier
+from core.models import Company
 
 def create_tiers_like_screenshot():
     tiers = [
         {
-            'name': 'Starter',
-            'amount': Decimal('50.00'),
-            'return_amount': Decimal('100.00'),
+            'name': 'Sasol',
+            'share_price': Decimal('50.00'),
+            'expected_return': Decimal('100.00'),
             'duration_days': 1,
             'min_level': 1,
-            'description': 'Perfect for first-time investors. Quick 1-day return with 100% profit.'
+            'description': 'Integrated energy and chemical company.'
         },
         {
-            'name': 'Basic',
-            'amount': Decimal('200.00'),
-            'return_amount': Decimal('400.00'),
+            'name': 'Shoprite Holdings',
+            'share_price': Decimal('200.00'),
+            'expected_return': Decimal('400.00'),
             'duration_days': 3,
             'min_level': 1,
-            'description': 'Ideal for regular investors. 3-day investment with guaranteed returns.'
+            'description': "Africa's largest food retailer."
         },
         {
-            'name': 'Standard',
-            'amount': Decimal('500.00'),
-            'return_amount': Decimal('1000.00'),
+            'name': 'Naspers',
+            'share_price': Decimal('500.00'),
+            'expected_return': Decimal('1000.00'),
             'duration_days': 5,
             'min_level': 1,
-            'description': 'Popular choice for steady growth. 5-day investment with substantial returns.'
+            'description': 'Global internet group and technology investor.'
         },
         {
-            'name': 'Premium',
-            'amount': Decimal('1000.00'),
-            'return_amount': Decimal('2000.00'),
+            'name': 'MTN Group',
+            'share_price': Decimal('1000.00'),
+            'expected_return': Decimal('2000.00'),
             'duration_days': 7,
             'min_level': 1,
-            'description': 'For serious investors. 7-day investment with premium returns.'
+            'description': 'Multinational mobile telecommunications company.'
         },
         {
-            'name': 'Elite',
-            'amount': Decimal('2000.00'),
-            'return_amount': Decimal('4000.00'),
+            'name': 'Woolworths Holdings',
+            'share_price': Decimal('2000.00'),
+            'expected_return': Decimal('4000.00'),
             'duration_days': 10,
             'min_level': 1,
-            'description': 'High-value investment option. 10-day term with elite returns.'
+            'description': 'Retail group with food, clothing, and financial services.'
         },
         {
-            'name': 'Ultimate',
-            'amount': Decimal('5000.00'),
-            'return_amount': Decimal('10000.00'),
+            'name': 'Bidvest Group',
+            'share_price': Decimal('5000.00'),
+            'expected_return': Decimal('10000.00'),
             'duration_days': 15,
             'min_level': 1,
-            'description': 'Maximum returns for experienced investors. 15-day investment period.'
+            'description': 'Diversified industrial group.'
         },
     ]
 
     for tier in tiers:
-        InvestmentTier.objects.update_or_create(
+        Company.objects.update_or_create(
             name=tier['name'],
             defaults={
-                'amount': tier['amount'],
-                'return_amount': tier['return_amount'],
+                'share_price': tier['share_price'],
+                'expected_return': tier['expected_return'],
                 'duration_days': tier['duration_days'],
                 'min_level': tier['min_level'],
                 'description': tier['description']

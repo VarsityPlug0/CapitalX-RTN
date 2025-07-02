@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Invest in {{ tier.name }}</h2>
+    <h2>Invest in {{ company.name }}</h2>
     
     {% if error %}
     <div class="alert alert-danger" role="alert">
@@ -15,14 +15,10 @@
     
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Tier Details</h5>
-            <p class="card-text">Amount: R{{ tier.amount }}</p>
-            <p class="card-text">Return: R{{ tier.return_amount }}</p>
-            {% if tier.amount == 50 %}
-                <p class="card-text">Duration: 12 hours</p>
-            {% else %}
-                <p class="card-text">Duration: {{ tier.duration_days }} days</p>
-            {% endif %}
+            <h5 class="card-title">Company Details</h5>
+            <p class="card-text">Share Price: R{{ company.share_price }}</p>
+            <p class="card-text">Expected Return: R{{ company.expected_return }}</p>
+            <p class="card-text">Duration: {{ company.duration_days }} days</p>
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">Confirm Investment</button>
