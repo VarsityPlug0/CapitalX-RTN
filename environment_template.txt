@@ -1,0 +1,20 @@
+# CapitalX Platform Environment Variables Template
+# Use these variables in your Render environment settings
+
+# Django Settings
+SECRET_KEY=your-secret-key-here-change-in-production
+DEBUG=False
+ALLOWED_HOSTS=.onrender.com,localhost,127.0.0.1
+
+# Database (automatically set by Render for PostgreSQL)
+DATABASE_URL=postgresql://username:password@host:port/database
+
+# Email Configuration
+EMAIL_HOST_USER=standardbankingconfirmation@gmail.com
+EMAIL_HOST_PASSWORD=dbhr uguo hkqk llos
+
+# CSRF Protection
+CSRF_TRUSTED_ORIGINS=https://your-app-name.onrender.com
+
+# Render Configuration (automatically set by Render)
+RENDER_EXTERNAL_HOSTNAME=your-app-name.onrender.com

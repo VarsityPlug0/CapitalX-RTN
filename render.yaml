@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: capitalx-platform
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn safechain_ai.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.4
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: EMAIL_HOST_USER
+        value: standardbankingconfirmation@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: capitalx-database
+          property: connectionString
+
+databases:
+  - name: capitalx-database
+    plan: free

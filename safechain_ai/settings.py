@@ -12,45 +12,60 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 import sys
 
 # Add the parent directory to the Python path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-# Load environment variables
-load_dotenv()
+# Try to load environment variables (optional for production)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# Allow all hosts in development
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# Production-ready ALLOWED_HOSTS
+ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+else:
+    # Production hosts
+    allowed_hosts_env = os.getenv('ALLOWED_HOSTS', '.onrender.com')
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
 
+# Render external hostname support
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# CSRF Settings for local development
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:8001', 'http://127.0.0.1:8001']
-if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = []
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:8001', 'http://127.0.0.1:8001']
+else:
+    # Production CSRF settings
+    if RENDER_EXTERNAL_HOSTNAME:
+        CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
+    
+    # Add any additional trusted origins from environment
+    csrf_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+    if csrf_origins_env:
+        CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_env.split(',')])
 
-# More permissive CSRF settings for development
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access for debugging
+# CSRF settings that adapt to environment
+CSRF_COOKIE_HTTPONLY = not DEBUG  # Allow JavaScript access only in development
 CSRF_USE_SESSIONS = False  # Use cookies instead of sessions
-CSRF_COOKIE_SECURE = False  # Set to False for local development
-CSRF_COOKIE_SAMESITE = 'Lax'  # More permissive for development
+CSRF_COOKIE_SECURE = not DEBUG  # Secure cookies in production
+CSRF_COOKIE_SAMESITE = 'Lax'  # Cross-site request protection
 CSRF_COOKIE_AGE = 3600  # 1 hour
 CSRF_TOKEN_USE_SESSIONS = False
 CSRF_COOKIE_NAME = 'csrftoken'
@@ -213,12 +228,15 @@ else:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
 
-# Email Configuration for Password Reset
+# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-# Hard coded email credentials for development
-EMAIL_HOST_USER = 'standardbankingconfirmation@gmail.com'
-EMAIL_HOST_PASSWORD = 'dbhr uguo hkqk llos'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'standardbankingconfirmation@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'dbhr uguo hkqk llos')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# In production, ensure email credentials are set via environment variables
+if not DEBUG and not EMAIL_HOST_PASSWORD:
+    print("WARNING: EMAIL_HOST_PASSWORD not set in production environment")
