@@ -20,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.views.decorators.http import require_POST
 from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email
+from .decorators import client_only
 
 # Home view
 # Landing page for the application
@@ -175,11 +176,6 @@ def login_view(request):
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
-            # SECURITY: Block admin accounts from client-side login
-            if user.is_staff or user.is_superuser:
-                messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
-                return render(request, 'core/login.html')
-            
             # Check if email is verified
             if not user.is_email_verified:
                 messages.warning(request, 'Please verify your email before logging in.')
@@ -190,7 +186,13 @@ def login_view(request):
                 })
             
             login(request, user)
-            return redirect('dashboard')
+            
+            # Redirect admin users to Lead Manager, regular users to dashboard
+            if user.is_staff or user.is_superuser:
+                messages.success(request, f'Welcome back, {user.first_name or user.username}! You have admin access.')
+                return redirect('lead_manager_dashboard')
+            else:
+                return redirect('dashboard')
         else:
             messages.error(request, 'Invalid email or password.')
     return render(request, 'core/login.html')
@@ -198,6 +200,7 @@ def login_view(request):
 # Dashboard view
 # Shows user balance, investments, and referral stats
 @login_required
+@client_only
 def dashboard_view(request):
     user = request.user
     # Get or create wallet for the user
@@ -297,6 +300,7 @@ def dashboard_view(request):
 # Tiers view
 # Lists all available investment tiers
 @login_required
+@client_only
 def tiers_view(request):
     user = request.user
     tiers = Company.objects.all()
@@ -456,6 +460,7 @@ def invest_view(request, company_id):
 # Wallet view
 # Shows wallet balance and withdrawal option
 @login_required
+@client_only
 def wallet_view(request):
     try:
         user = request.user
@@ -555,6 +560,7 @@ def wallet_view(request):
 # Referral view
 # Shows referral link and stats
 @login_required
+@client_only
 def referral_view(request):
     user = request.user
     referrals = Referral.objects.filter(inviter=user)
