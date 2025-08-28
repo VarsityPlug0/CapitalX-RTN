@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import lead_views
+from . import lead_manager_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -59,6 +60,19 @@ urlpatterns = [
     # Lead System API URLs
     path('api/leads/campaign/<int:campaign_id>/status/', lead_views.api_campaign_status, name='api_campaign_status'),
     path('api/leads/campaign/<int:campaign_id>/toggle/', lead_views.api_toggle_campaign, name='api_toggle_campaign'),
+    
+    # Lead Manager URLs (User-friendly interface)
+    path('lead-manager/', lead_manager_views.lead_manager_dashboard, name='lead_manager_dashboard'),
+    path('lead-manager/campaigns/', lead_manager_views.campaign_manager_list, name='campaign_manager_list'),
+    path('lead-manager/campaign/<int:campaign_id>/', lead_manager_views.campaign_manager_detail, name='campaign_manager_detail'),
+    path('lead-manager/create-campaign/', lead_manager_views.create_automated_campaign, name='create_automated_campaign'),
+    path('lead-manager/campaign/<int:campaign_id>/process/', lead_manager_views.process_campaign_leads, name='process_campaign_leads'),
+    path('lead-manager/campaign/<int:campaign_id>/generate/', lead_manager_views.generate_more_leads, name='generate_more_leads'),
+    path('lead-manager/campaign/<int:campaign_id>/toggle/', lead_manager_views.toggle_campaign_status, name='toggle_campaign_status'),
+    path('lead-manager/campaign/<int:campaign_id>/delete/', lead_manager_views.delete_campaign, name='delete_campaign'),
+    
+    # Progress tracking API
+    path('api/leads/progress/<str:operation_id>/', lead_manager_views.get_processing_progress, name='get_processing_progress'),
 
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
