@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invest in {{ plan.name }} - CapitalX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .invest-container {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .invest-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .plan-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .plan-emoji {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 20px;
+    }
+    
+    .plan-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+    
+    .plan-subtitle {
+        color: #b8c5d3;
+        font-size: 1.2rem;
+    }
+    
+    .investment-details {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        color: #b8c5d3;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .detail-value {
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .highlight-amount {
+        color: #2ecc71;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .roi-highlight {
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .wallet-warning {
+        background: rgba(231, 76, 60, 0.1);
+        border: 1px solid #e74c3c;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .wallet-info {
+        background: rgba(46, 204, 113, 0.1);
+        border: 1px solid #2ecc71;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .btn-invest-confirm {
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        border: none;
+        border-radius: 15px;
+        color: white;
+        font-weight: bold;
+        padding: 18px 40px;
+        font-size: 1.2rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-invest-confirm:hover {
+        background: linear-gradient(45deg, #27ae60, #219a52);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(46, 204, 113, 0.4);
+        color: white;
+    }
+    
+    .btn-back {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: #fff;
+        padding: 12px 30px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    .terms-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .terms-title {
+        color: #fff;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .terms-list {
+        color: #b8c5d3;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    .terms-list li {
+        margin-bottom: 8px;
+    }
+    
+    @media (max-width: 768px) {
+        .invest-card {
+            padding: 20px;
+            margin: 20px;
+        }
+        
+        .plan-title {
+            font-size: 2rem;
+        }
+        
+        .plan-emoji {
+            font-size: 3rem;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="invest-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="invest-card">
+                    <!-- Plan Header -->
+                    <div class="plan-header">
+                        <span class="plan-emoji">{{ plan.emoji }}</span>
+                        <h1 class="plan-title">{{ plan.name }}</h1>
+                        <p class="plan-subtitle">{{ plan.phase }}</p>
+                    </div>
+                    
+                    <!-- Investment Details -->
+                    <div class="investment-details">
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="bi bi-cash-coin me-2"></i>
+                                Investment Amount
+                            </span>
+                            <span class="detail-value highlight-amount">R{{ plan.min_amount|floatformat:0 }}</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="bi bi-graph-up me-2"></i>
+                                Expected Returns
+                            </span>
+                            <span class="detail-value highlight-amount">R{{ plan.return_amount|floatformat:0 }}</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="bi bi-clock me-2"></i>
+                                Investment Duration
+                            </span>
+                            <span class="detail-value">{{ plan.get_duration_display }}</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="bi bi-percent me-2"></i>
+                                Return on Investment
+                            </span>
+                            <span class="roi-highlight">{{ plan.get_roi_percentage|floatformat:1 }}%</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="bi bi-arrow-repeat me-2"></i>
+                                Total Profit
+                            </span>
+                            <span class="detail-value highlight-amount">R{{ plan.return_amount|add:plan.min_amount|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Wallet Status -->
+                    {% if wallet_balance >= plan.min_amount %}
+                        <div class="wallet-info">
+                            <h5 class="text-success mb-2">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Sufficient Balance
+                            </h5>
+                            <p class="mb-1">Current Wallet Balance: <strong>R{{ wallet_balance|floatformat:2 }}</strong></p>
+                            <p class="mb-0 text-muted">After Investment: <strong>R{{ wallet_balance|add:plan.min_amount|floatformat:2|add:"-"|add:plan.min_amount|floatformat:2 }}</strong></p>
+                        </div>
+                    {% else %}
+                        <div class="wallet-warning">
+                            <h5 class="text-danger mb-2">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Insufficient Balance
+                            </h5>
+                            <p class="mb-1">Current Balance: <strong>R{{ wallet_balance|floatformat:2 }}</strong></p>
+                            <p class="mb-0">You need <strong>R{{ plan.min_amount|add:wallet_balance|floatformat:2|add:"-"|add:wallet_balance|floatformat:2 }}</strong> more to invest</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Terms and Conditions -->
+                    <div class="terms-section">
+                        <h6 class="terms-title">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Investment Terms
+                        </h6>
+                        <ul class="terms-list">
+                            <li>✅ This is a <strong>one-time investment</strong> opportunity per user per plan</li>
+                            <li>✅ Returns are <strong>guaranteed</strong> and will be automatically credited</li>
+                            <li>✅ Investment period is <strong>{{ plan.get_duration_display }}</strong> starting immediately</li>
+                            <li>✅ You will receive <strong>R{{ plan.return_amount|floatformat:0 }}</strong> profit plus your original <strong>R{{ plan.min_amount|floatformat:0 }}</strong> stake</li>
+                            <li>✅ No hidden fees or charges - what you see is what you get</li>
+                            <li>⚠️ Investment cannot be cancelled once confirmed</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Plan Description -->
+                    <div class="mb-4">
+                        <h6 class="text-white mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            About This Plan
+                        </h6>
+                        <p class="text-muted">{{ plan.description }}</p>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-3">
+                        {% if wallet_balance >= plan.min_amount %}
+                            <form method="post" class="d-grid">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-invest-confirm">
+                                    <i class="bi bi-arrow-up-circle me-3"></i>
+                                    Confirm Investment - R{{ plan.min_amount|floatformat:0 }}
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'deposit' %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Add Funds to Wallet
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'investment_plans' %}" class="btn-back text-center">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Back to Plans
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add confirmation dialog for investment
+    const investForm = document.querySelector('form');
+    if (investForm) {
+        investForm.addEventListener('submit', function(e) {
+            const confirmed = confirm('Are you sure you want to invest R{{ plan.min_amount|floatformat:0 }} in {{ plan.name }}? This action cannot be undone.');
+            if (!confirmed) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

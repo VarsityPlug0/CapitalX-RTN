@@ -42,12 +42,18 @@ if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # CSRF Settings for local development
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8001', 'http://127.0.0.1:8001']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:8001', 'http://127.0.0.1:8001']
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
-CSRF_COOKIE_HTTPONLY = True
-CSRF_USE_SESSIONS = True
+# More permissive CSRF settings for development
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access for debugging
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions
+CSRF_COOKIE_SECURE = False  # Set to False for local development
+CSRF_COOKIE_SAMESITE = 'Lax'  # More permissive for development
+CSRF_COOKIE_AGE = 3600  # 1 hour
+CSRF_TOKEN_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
 
 # Application definition
 
@@ -70,6 +76,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.AdminClientSeparationMiddleware',  # Security: Block admin from client
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -176,7 +183,14 @@ AUTH_USER_MODEL = 'core.CustomUser'
 # Authentication settings
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Session settings
+SESSION_COOKIE_AGE = 3600  # 1 hour session timeout
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
+SESSION_SAVE_EVERY_REQUEST = True  # Refresh session on every request
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookies
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 
 # Security Settings for Production (when DEBUG is False)
 if not DEBUG:
@@ -204,6 +218,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# Hard coded email credentials for development
+EMAIL_HOST_USER = 'standardbankingconfirmation@gmail.com'
+EMAIL_HOST_PASSWORD = 'dbhr uguo hkqk llos'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

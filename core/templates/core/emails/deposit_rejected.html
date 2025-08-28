@@ -1,0 +1,63 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block subject %}❌ Deposit Declined - R{{ amount }}{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    Hello {{ user.first_name|default:user.username }},
+</div>
+
+<div class="main-content">
+    <p>We regret to inform you that your deposit request has been <strong style="color: #dc3545;">declined</strong>.</p>
+    
+    <div class="info-box" style="border-left: 4px solid #dc3545;">
+        <h3>📋 Deposit Details</h3>
+        <table class="info-table">
+            <tr>
+                <td class="label">Amount:</td>
+                <td class="value"><span class="amount">R{{ amount|floatformat:2 }}</span></td>
+            </tr>
+            <tr>
+                <td class="label">Payment Method:</td>
+                <td class="value">{{ payment_method }}</td>
+            </tr>
+            <tr>
+                <td class="label">Status:</td>
+                <td class="value" style="color: #dc3545; font-weight: bold;">❌ Declined</td>
+            </tr>
+            <tr>
+                <td class="label">Review Date:</td>
+                <td class="value">{{ rejected_date|date:"M d, Y H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    {% if admin_notes %}
+    <div class="info-box" style="border-left: 4px solid #ffc107;">
+        <h3>📝 Review Notes</h3>
+        <p style="margin: 10px 0; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+            {{ admin_notes|linebreaks }}
+        </p>
+    </div>
+    {% endif %}
+    
+    <div class="info-box">
+        <h3>🔄 Next Steps</h3>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+            <li><strong>Check payment details:</strong> Ensure all information is correct and complete</li>
+            <li><strong>Verify payment method:</strong> Make sure your payment method is valid and has sufficient funds</li>
+            <li><strong>Try again:</strong> You can submit a new deposit request at any time</li>
+            <li><strong>Contact support:</strong> If you need assistance, our team is here to help</li>
+        </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url }}/deposit/" class="btn" style="background: #3498db;">Try New Deposit</a>
+        <a href="{{ site_url }}/support/" class="btn" style="background: #6c757d; margin-left: 10px;">Contact Support</a>
+    </div>
+    
+    <p style="margin-top: 30px;">We apologize for any inconvenience. Please don't hesitate to reach out if you have any questions.</p>
+    
+    <p>Best regards,<br><strong>The CapitalX Support Team</strong></p>
+</div>
+{% endblock %}

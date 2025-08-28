@@ -1,78 +1,204 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Register - SafeChain AI{% endblock %}
+{% block title %}Register - CapitalX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mobile-form {
+        max-width: 100%;
+        padding: 1rem;
+    }
+    
+    .header-minimal {
+        margin-bottom: 1.5rem;
+    }
+    
+    .header-minimal h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .header-minimal p {
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+    
+    .form-clean {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+    }
+    
+    .form-floating-custom label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+    
+    .form-floating-custom .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 0.875rem 0.75rem;
+    }
+    
+    .form-floating-custom .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #3399ff;
+        box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
+        color: white;
+    }
+    
+    .form-floating-custom .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-register {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #3399ff 0%, #0066cc 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-register:hover {
+        background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+        transform: translateY(-1px);
+    }
+    
+    .form-compact .mb-3 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .checkbox-custom {
+        accent-color: #3399ff;
+    }
+    
+    .link-clean {
+        color: #3399ff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .link-clean:hover {
+        color: #66b3ff;
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 576px) {
+        .container {
+            padding: 0 0.75rem;
+        }
+        
+        .header-minimal h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-clean {
+            margin: 0;
+            border-radius: 0.75rem;
+        }
+        
+        .form-floating-custom .form-control {
+            padding: 0.75rem;
+            font-size: 0.95rem;
+        }
+        
+        .btn-register {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mobile-form">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-12 col-md-8 col-lg-6">
             <!-- Registration Header -->
-            <div class="text-center mb-5">
-                <h1 class="display-4 mb-3">Create Account</h1>
-                <p class="lead text-muted">Join our platform and start investing today</p>
+            <div class="text-center header-minimal">
+                <h1 class="text-white">
+                    <i class="bi bi-person-plus text-primary me-2"></i>
+                    Create Account
+                </h1>
+                <p class="text-muted">Join CapitalX and start investing today</p>
             </div>
 
             <!-- Registration Form -->
-            <div class="card">
-                <div class="card-body p-4">
+            <div class="card form-clean shadow-lg">
+                <div class="card-body p-4 form-compact">
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
 
                         <!-- Full Name -->
-                        <div class="mb-3">
-                            <label for="full_name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" required>
-                            <div class="invalid-feedback">
-                                Please enter your full name
-                            </div>
+                        <div class="form-floating-custom mb-3">
+                            <input type="text" class="form-control" id="full_name" name="full_name" placeholder="John Doe" required>
+                            <label for="full_name">
+                                <i class="bi bi-person me-2"></i>Full Name
+                            </label>
                         </div>
 
                         <!-- Email -->
-                        <div class="form-floating mb-3">
+                        <div class="form-floating-custom mb-3">
                             <input type="email" name="email" id="email" class="form-control" placeholder="name@example.com" required autocomplete="username">
-                            <label for="email">Email address</label>
+                            <label for="email">
+                                <i class="bi bi-envelope me-2"></i>Email Address
+                            </label>
                         </div>
 
                         <!-- Phone Number -->
-                        <div class="form-floating mb-3">
-                            <input type="tel" name="phone" id="phone" class="form-control" placeholder="Phone Number" required>
-                            <label for="phone">Phone Number</label>
+                        <div class="form-floating-custom mb-3">
+                            <input type="tel" name="phone" id="phone" class="form-control" placeholder="+27 123 456 7890" required>
+                            <label for="phone">
+                                <i class="bi bi-phone me-2"></i>Phone Number
+                            </label>
                         </div>
 
                         <!-- Password -->
-                        <div class="form-floating mb-3">
+                        <div class="form-floating-custom mb-3">
                             <input type="password" name="password" id="password" class="form-control" placeholder="Password" required autocomplete="new-password">
-                            <label for="password">Password</label>
+                            <label for="password">
+                                <i class="bi bi-lock me-2"></i>Password
+                            </label>
                         </div>
 
                         <!-- Confirm Password -->
-                        <div class="form-floating mb-3">
+                        <div class="form-floating-custom mb-3">
                             <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm Password" required autocomplete="new-password">
-                            <label for="confirm_password">Confirm Password</label>
+                            <label for="confirm_password">
+                                <i class="bi bi-lock-fill me-2"></i>Confirm Password
+                            </label>
                         </div>
 
                         <!-- Referral Code (Optional) -->
-                        <div class="mb-4">
-                            <label for="referral_code" class="form-label">Referral Code (Optional)</label>
-                            <input type="text" class="form-control" id="referral_code" name="referral_code">
+                        <div class="form-floating-custom mb-3">
+                            <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Enter code (optional)">
+                            <label for="referral_code">
+                                <i class="bi bi-gift me-2"></i>Referral Code (Optional)
+                            </label>
                         </div>
 
                         <!-- Terms and Conditions -->
                         <div class="mb-4">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="terms" required>
-                                <label class="form-check-label" for="terms">
-                                    I agree to the <a href="{% url 'terms' %}" class="text-decoration-none">Terms of Service</a> and <a href="{% url 'privacy' %}" class="text-decoration-none">Privacy Policy</a>
+                                <input class="form-check-input checkbox-custom" type="checkbox" id="terms" required>
+                                <label class="form-check-label text-white" for="terms" style="font-size: 0.9rem;">
+                                    I agree to the <a href="{% url 'terms' %}" class="link-clean">Terms of Service</a> and <a href="{% url 'privacy' %}" class="link-clean">Privacy Policy</a>
                                 </label>
-                                <div class="invalid-feedback">
-                                    You must agree to the terms and conditions
-                                </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                        <button type="submit" class="btn btn-register w-100">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Create Account
+                        </button>
                     </form>
 
                     <!-- Login Link -->
@@ -94,6 +220,7 @@
         const forms = document.querySelectorAll('.needs-validation');
         Array.from(forms).forEach(form => {
             form.addEventListener('submit', event => {
+                // Only prevent submission if form is invalid
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -117,5 +244,14 @@
 
     password.addEventListener('change', validatePassword);
     confirmPassword.addEventListener('keyup', validatePassword);
+
+    // Ensure form can submit even with validation errors (let server handle validation)
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Remove any custom validation that might prevent submission
+        const inputs = this.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.setCustomValidity('');
+        });
+    });
 </script>
 {% endblock %} 

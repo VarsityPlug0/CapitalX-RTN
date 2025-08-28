@@ -1,0 +1,82 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    🔒 Security Alert - CapitalX
+</div>
+
+<div class="main-content">
+    <p>Hello {{ user.full_name|default:user.username }},</p>
+    
+    <p>We've detected a security-related event on your CapitalX account that requires your attention.</p>
+    
+    <div class="info-box">
+        <h3>⚠️ Alert Details:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Alert Type:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; color: #e74c3c; font-weight: bold;">{{ alert_type }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Date:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ "now"|date:"F j, Y" }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;"><strong>Time:</strong></td>
+                <td style="padding: 8px 0; text-align: right;">{{ "now"|date:"g:i A" }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="info-box">
+        <h3>📋 Event Details:</h3>
+        <p>{{ details }}</p>
+    </div>
+    
+    <div class="info-box">
+        <h3>🛡️ Immediate Actions Required:</h3>
+        <ol style="margin-left: 20px;">
+            <li><strong>Verify Account Access:</strong> Check if you can still log in to your account</li>
+            <li><strong>Review Recent Activity:</strong> Check your transaction history for any unauthorized activity</li>
+            <li><strong>Change Password:</strong> Update your password if you suspect it may have been compromised</li>
+            <li><strong>Enable 2FA:</strong> Activate two-factor authentication for additional security</li>
+        </ol>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'#' }}/login" class="btn">Secure My Account</a>
+        <a href="{{ site_url|default:'#' }}/profile" class="btn btn-secondary" style="margin-left: 10px;">View Profile</a>
+    </div>
+    
+    <div class="info-box">
+        <h3>🔐 Security Best Practices:</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>Strong Password:</strong> Use a unique, complex password</li>
+            <li><strong>Two-Factor Authentication:</strong> Enable 2FA for extra protection</li>
+            <li><strong>Regular Monitoring:</strong> Check your account activity regularly</li>
+            <li><strong>Secure Devices:</strong> Only access your account from trusted devices</li>
+            <li><strong>Logout:</strong> Always log out when using shared computers</li>
+        </ul>
+    </div>
+    
+    <p><strong>If This Wasn't You:</strong></p>
+    <ul style="margin-left: 20px;">
+        <li>Immediately change your password</li>
+        <li>Contact our support team right away</li>
+        <li>Monitor your account for any suspicious activity</li>
+        <li>Consider freezing your account temporarily</li>
+    </ul>
+    
+    <p><strong>If This Was You:</strong></p>
+    <p>You can safely ignore this alert. We send these notifications to help keep your account secure.</p>
+    
+    <p>For immediate assistance, contact our security team:</p>
+    <ul style="margin-left: 20px;">
+        <li><strong>Email:</strong> security@capitalx.com</li>
+        <li><strong>Support:</strong> Available 24/7 through your dashboard</li>
+    </ul>
+    
+    <p>Stay safe!</p>
+    <p>The CapitalX Security Team</p>
+</div>
+{% endblock %}

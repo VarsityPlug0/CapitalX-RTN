@@ -1,48 +1,195 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login - SafeChain AI{% endblock %}
+{% block title %}Login - CapitalX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 100%;
+        padding: 1rem;
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .login-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        width: 100%;
+    }
+    
+    .login-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .login-header h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .login-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .login-input:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #3399ff;
+        box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
+        color: white;
+    }
+    
+    .login-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .input-icon {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .btn-login {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #3399ff 0%, #0066cc 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-login:hover {
+        background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+        transform: translateY(-1px);
+    }
+    
+    .login-links a {
+        color: #3399ff;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .login-links a:hover {
+        color: #66b3ff;
+        text-decoration: underline;
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (max-width: 576px) {
+        .login-container {
+            padding: 0 0.75rem;
+            min-height: 60vh;
+        }
+        
+        .login-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .login-card {
+            border-radius: 0.75rem;
+        }
+        
+        .login-input {
+            padding: 0.75rem;
+            font-size: 0.95rem;
+        }
+        
+        .btn-login {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+        
+        .login-links {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="card shadow-sm">
+<div class="container login-container">
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-md-8 col-lg-5">
+            <div class="card login-card shadow-lg">
                 <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">Welcome Back</h2>
+                    <div class="text-center login-header">
+                        <h2 class="text-white">
+                            <i class="bi bi-shield-lock text-primary me-2"></i>
+                            Welcome Back
+                        </h2>
+                        <p class="text-muted">Sign in to your CapitalX account</p>
+                    </div>
+                    
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
+                        
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
+                            <label for="email" class="form-label text-white">
+                                <i class="bi bi-envelope me-2"></i>Email Address
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text">
+                                <span class="input-group-text input-icon">
                                     <i class="bi bi-envelope"></i>
                                 </span>
-                                <input type="email" class="form-control" id="email" name="email" required 
+                                <input type="email" class="form-control login-input" id="email" name="email" required 
                                        placeholder="Enter your email">
                             </div>
                         </div>
+                        
                         <div class="mb-4">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label text-white">
+                                <i class="bi bi-lock me-2"></i>Password
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text">
+                                <span class="input-group-text input-icon">
                                     <i class="bi bi-lock"></i>
                                 </span>
-                                <input type="password" class="form-control" id="password" name="password" required 
+                                <input type="password" class="form-control login-input" id="password" name="password" required 
                                        placeholder="Enter your password">
                             </div>
                         </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                        
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-login">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Sign In
+                            </button>
                         </div>
 
-                        <div class="text-center mt-3">
-                            <a href="{% url 'password_reset' %}" class="text-muted small">Forgot Password?</a>
+                        <div class="d-flex justify-content-between login-links">
+                            <a href="{% url 'password_reset' %}">
+                                <i class="bi bi-key me-1"></i>Forgot Password?
+                            </a>
+                            <a href="{% url 'send_verification_otp' %}">
+                                <i class="bi bi-envelope-check me-1"></i>Verify Email
+                            </a>
                         </div>
                     </form>
-                    <div class="text-center mt-4">
-                        <p class="mb-0">Don't have an account? 
-                            <a href="{% url 'register' %}" class="text-decoration-none">Register here</a>
+                    
+                    <div class="login-footer">
+                        <p class="mb-0 text-muted">
+                            Don't have an account? 
+                            <a href="{% url 'register' %}" class="text-primary fw-bold">
+                                Create Account
+                            </a>
                         </p>
                     </div>
                 </div>

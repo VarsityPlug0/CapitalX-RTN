@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Verification - CapitalX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verification-container {
+        max-width: 100%;
+        padding: 1rem;
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .verification-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        width: 100%;
+    }
+    
+    .verification-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .verification-header h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .verification-header p {
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+    
+    .email-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    .email-input:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #3399ff;
+        box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
+        color: white;
+    }
+    
+    .email-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-send {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #3399ff 0%, #0066cc 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-send:hover {
+        background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+        transform: translateY(-1px);
+    }
+    
+    .action-buttons {
+        gap: 0.5rem;
+    }
+    
+    .info-notice {
+        background: rgba(52, 152, 219, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-size: 0.85rem;
+    }
+    
+    @media (max-width: 576px) {
+        .verification-container {
+            padding: 0 0.75rem;
+            min-height: 60vh;
+        }
+        
+        .verification-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .verification-card {
+            border-radius: 0.75rem;
+        }
+        
+        .email-input {
+            padding: 0.75rem;
+            font-size: 0.95rem;
+        }
+        
+        .btn-send {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .col-md-6 {
+            width: 100% !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container verification-container">
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Header -->
+            <div class="text-center verification-header">
+                <h1 class="text-white">
+                    <i class="bi bi-envelope-check text-primary me-2"></i>
+                    Email Verification
+                </h1>
+                <p class="text-muted">Verify your email to secure your account</p>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Verification Form -->
+            <div class="card verification-card shadow-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="bi bi-envelope-check text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="text-white mb-2">Request Verification Code</h5>
+                        <p class="text-muted small">
+                            Enter your email to receive a 6-digit verification code
+                        </p>
+                    </div>
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Email Field -->
+                        <div class="mb-4">
+                            <label for="email" class="form-label text-white">
+                                <i class="bi bi-envelope me-2"></i>Email Address
+                            </label>
+                            <input type="email" 
+                                   class="form-control email-input" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="Enter your email address"
+                                   required 
+                                   autocomplete="email">
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-send">
+                                <i class="bi bi-send me-2"></i>
+                                Send Verification Code
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Additional Links -->
+                    <div class="d-flex action-buttons">
+                        <div class="col-md-6 flex-fill">
+                            <a href="{% url 'login' %}" class="btn btn-outline-light w-100">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Back to Login
+                            </a>
+                        </div>
+                        <div class="col-md-6 flex-fill">
+                            <a href="{% url 'register' %}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Register
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="card-footer text-center" style="background: rgba(255, 255, 255, 0.05); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>
+                        Code expires in 10 minutes
+                    </small>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="info-notice mt-3">
+                <i class="bi bi-shield-lock me-2"></i>
+                <strong>Security Notice:</strong> Keep your verification codes private. CapitalX will never ask for them.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

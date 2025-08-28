@@ -1,0 +1,55 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    Welcome to CapitalX, {{ user.full_name|default:user.username }}! 🎉
+</div>
+
+<div class="main-content">
+    <p>Thank you for joining CapitalX! We're excited to have you on board and help you start your investment journey.</p>
+    
+    <div class="info-box">
+        <h3>🚀 Getting Started</h3>
+        <p><strong>1. Complete Your Profile:</strong> Add your personal information and preferences</p>
+        <p><strong>2. Verify Your Account:</strong> Complete the verification process</p>
+        <p><strong>3. Make Your First Deposit:</strong> Start with as little as <span class="amount">R50</span></p>
+        <p><strong>4. Choose Your Investment:</strong> Select from our curated investment options</p>
+        <p><strong>5. Track Your Progress:</strong> Monitor your portfolio growth</p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'#' }}/dashboard" class="btn">Go to Dashboard</a>
+    </div>
+    
+    <table class="info-table">
+        <tr>
+            <td class="label">Minimum Investment:</td>
+            <td class="value"><span class="amount">R50</span></td>
+        </tr>
+        <tr>
+            <td class="label">Investment Options:</td>
+            <td class="value">Stocks, Bonds, Crypto</td>
+        </tr>
+        <tr>
+            <td class="label">Account Status:</td>
+            <td class="value">Active & Ready</td>
+        </tr>
+        <tr>
+            <td class="label">Support:</td>
+            <td class="value">24/7 Available</td>
+        </tr>
+    </table>
+    
+    <div class="info-box">
+        <h3>💡 Investment Tips</h3>
+        <p><strong>• Start Small:</strong> Begin with an amount you're comfortable with</p>
+        <p><strong>• Diversify:</strong> Spread your investments across different assets</p>
+        <p><strong>• Think Long-term:</strong> Patience often leads to better returns</p>
+        <p><strong>• Stay Informed:</strong> Regular monitoring helps track progress</p>
+    </div>
+    
+    <p><strong>Need Help?</strong> Our support team is here to assist you with any questions. You can reach us through the support section in your dashboard or contact us directly.</p>
+    
+    <p>Happy investing!<br><strong>The CapitalX Team</strong></p>
+</div>
+{% endblock %}

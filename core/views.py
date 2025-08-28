@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage
+from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment
 from django.contrib import messages
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
@@ -19,6 +19,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.views.decorators.http import require_POST
+from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email
 
 # Home view
 # Landing page for the application
@@ -82,16 +83,30 @@ def register_view(request):
         phone = request.POST.get('phone')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
+        referral_code = request.POST.get('referral_code')  # Get referral code from form
+
+        # Validate required fields
+        if not all([full_name, email, phone, password, confirm_password]):
+            messages.error(request, 'All fields are required.')
+            return redirect('register')
 
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('register')
         
-        if CustomUser.objects.filter(email=email).exists():
+        # Check if email already exists
+        if CustomUser.objects.filter(email__iexact=email).exists():
             messages.error(request, 'Email already registered.')
+            return redirect('register')
+        
+        # Check if username (which is email) already exists  
+        if CustomUser.objects.filter(username__iexact=email).exists():
+            messages.error(request, 'An account with this email already exists.')
             return redirect('register')
             
         try:
+            # Normalize email to lowercase
+            email = email.lower()
             first_name, last_name = full_name.split(' ', 1) if ' ' in full_name else (full_name, '')
             user = CustomUser.objects.create_user(
                 username=email,
@@ -99,27 +114,55 @@ def register_view(request):
                 password=password,
                 phone=phone,
                 first_name=first_name,
-                last_name=last_name
+                last_name=last_name,
+                is_staff=False,  # Explicitly ensure regular user
+                is_superuser=False  # Explicitly ensure regular user
             )
             
             # Create a wallet for the user
             Wallet.objects.create(user=user)
             
-            # Handle referral code
-            ref_code = request.GET.get('ref')
-            if ref_code:
+            # Handle referral code from form
+            if referral_code:
                 try:
-                    referrer = CustomUser.objects.get(username=ref_code)
+                    referrer = CustomUser.objects.get(username=referral_code)
                     Referral.objects.create(inviter=referrer, invitee=user)
                 except CustomUser.DoesNotExist:
+                    # If referral code is invalid, just continue without error
                     pass
             
             # Log the user in
             login(request, user)
-            messages.success(request, 'Registration successful! Welcome to AI Crypto Vault.')
-            return redirect('dashboard')
+            
+            # Generate and send OTP for email verification instead of welcome email
+            try:
+                otp = EmailOTP.generate_otp(user, purpose='email_verification')
+                success = send_otp_email(user, otp.otp_code, purpose='email_verification')
+                
+                if success:
+                    messages.success(request, 'Registration successful! Please check your email for a verification code.')
+                    return render(request, 'core/verify_otp.html', {
+                        'email': email,
+                        'purpose': 'email_verification'
+                    })
+                else:
+                    messages.error(request, 'Registration successful but failed to send verification email. Please request a new verification code.')
+                    return redirect('send_verification_otp')
+            except Exception as e:
+                print(f"Failed to send verification email: {e}")
+                messages.error(request, 'Registration successful but failed to send verification email. Please request a new verification code.')
+                return redirect('send_verification_otp')
         except Exception as e:
-            messages.error(request, 'An error occurred during registration. Please try again.')
+            # Log the actual error for debugging
+            print(f"Registration error: {e}")
+            
+            # Provide specific error messages for common issues
+            if 'UNIQUE constraint failed: core_customuser.email' in str(e):
+                messages.error(request, 'An account with this email already exists. Please use a different email or try logging in.')
+            elif 'UNIQUE constraint failed: core_customuser.username' in str(e):
+                messages.error(request, 'An account with this email already exists. Please use a different email or try logging in.')
+            else:
+                messages.error(request, 'An error occurred during registration. Please try again.')
             return redirect('register')
             
     return render(request, 'core/register.html')
@@ -128,10 +171,24 @@ def register_view(request):
 # Handles user login
 def login_view(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
+        email = request.POST.get('email').strip().lower() if request.POST.get('email') else ''
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
+            # SECURITY: Block admin accounts from client-side login
+            if user.is_staff or user.is_superuser:
+                messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
+                return render(request, 'core/login.html')
+            
+            # Check if email is verified
+            if not user.is_email_verified:
+                messages.warning(request, 'Please verify your email before logging in.')
+                return render(request, 'core/verify_otp.html', {
+                    'email': email,
+                    'purpose': 'email_verification',
+                    'show_resend': True
+                })
+            
             login(request, user)
             return redirect('dashboard')
         else:
@@ -212,8 +269,8 @@ def dashboard_view(request):
         account_type__gt=''
     ).exists()
     
-    # Show claim bonus if user hasn't claimed it and has verified their account
-    show_claim_bonus = not user.has_claimed_bonus and has_verified_account
+    # User account verification status (for dashboard display only)
+    # No bonus system - verification is for deposit processing only
     
     context = {
         'wallet': wallet,
@@ -230,7 +287,7 @@ def dashboard_view(request):
         'total_invested': user.total_invested,
         'next_level_threshold': next_level_threshold,
         'progress_percentage': progress_percentage,
-        'show_claim_bonus': show_claim_bonus,
+
         'has_banking_details': has_banking_details,
         'has_verified_account': has_verified_account,
     }
@@ -260,6 +317,17 @@ def tiers_view(request):
     
     # Get or create user's wallet
     wallet, created = Wallet.objects.get_or_create(user=user)
+    
+    # Get investment plans data
+    investment_plans = InvestmentPlan.objects.filter(is_active=True).order_by('phase_order', 'plan_order')
+    user_plan_investments = PlanInvestment.objects.filter(user=user).select_related('plan')
+    invested_plan_ids = set(inv.plan.id for inv in user_plan_investments)
+    
+    # Add status to investment plans
+    for plan in investment_plans:
+        plan.user_has_invested = plan.id in invested_plan_ids
+        plan.user_can_afford = wallet.balance >= plan.min_amount
+        plan.user_investment = user_plan_investments.filter(plan=plan).first()
     
     # Add eligibility and lock status to each company
     for company in tiers:
@@ -305,6 +373,7 @@ def tiers_view(request):
     
     context = {
         'companies': tiers,
+        'investment_plans': investment_plans,
         'user_level': user.level,
         'total_invested': total_invested,
         'daily_special': daily_special,
@@ -399,6 +468,16 @@ def wallet_view(request):
         investments = Investment.objects.filter(user=user).order_by('-created_at')
         vouchers = Voucher.objects.filter(user=user).order_by('-created_at')
         
+        # Separate pending deposits for special display
+        pending_deposits = deposits.filter(status='pending')
+        approved_deposits = deposits.filter(status='approved')
+        rejected_deposits = deposits.filter(status='rejected')
+        
+        # Calculate totals
+        total_pending = sum(d.amount for d in pending_deposits)
+        total_approved = sum(d.amount for d in approved_deposits)
+        total_rejected = sum(d.amount for d in rejected_deposits)
+        
         # Combine all transactions into a single list
         transactions = []
         
@@ -458,6 +537,12 @@ def wallet_view(request):
         context = {
             'wallet': wallet,
             'transactions': transactions,
+            'pending_deposits': pending_deposits,
+            'approved_deposits': approved_deposits,
+            'rejected_deposits': rejected_deposits,
+            'total_pending': total_pending,
+            'total_approved': total_approved,
+            'total_rejected': total_rejected,
         }
         return render(request, 'core/wallet.html', context)
     except Exception as e:
@@ -549,98 +634,191 @@ def change_password(request):
 
 # Logout view
 # Handles user logout
-@login_required
 def logout_view(request):
-    logout(request)
+    # Clear all session data
+    if request.user.is_authenticated:
+        logout(request)
+    
+    # Clear any cached session data
+    request.session.flush()
+    
+    # Add a message to confirm logout
+    messages.success(request, 'You have been successfully logged out.')
+    
+    # Redirect to home page
     return redirect('home')
 
 # Deposit view
 # Handles deposit submissions from users
-# Saves all card details to the Deposit model
-# Explains each line for clarity
+# All deposits require admin approval for verification
 @login_required
 def deposit_view(request):
     if request.method == 'POST':
-        print('DEBUG: request.POST =', dict(request.POST))  # Print all POST data
+        # Get deposit amount (handle different form field names)
+        amount_str = request.POST.get('amount') or request.POST.get('eft_amount') or request.POST.get('voucher_amount')
         
-        # Check if this is a bonus claim (either amount=0 or bonus_amount is present)
-        bonus_amount = request.POST.get('bonus_amount')
-        amount_str = request.POST.get('amount')
+        # Validate and parse amount
+        if not amount_str or amount_str.strip() == "":
+            messages.error(request, 'Please enter a deposit amount.')
+            return redirect('deposit')
         
-        # Determine if this is a bonus claim
-        is_bonus_claim = False
-        if bonus_amount is not None:
-            # If bonus_amount field is present, it's a bonus claim
-            is_bonus_claim = True
-            amount = Decimal('0')
-        elif not amount_str or amount_str.strip() == "":
-            # If amount is empty, treat as bonus claim
-            is_bonus_claim = True
-            amount = Decimal('0')
-        else:
-            # Parse the amount normally
-            try:
-                amount = Decimal(amount_str)
-                if amount == 0:
-                    is_bonus_claim = True
-            except (ValueError, TypeError):
-                messages.error(request, f'Invalid amount: {amount_str}')
-                return redirect('deposit')
+        try:
+            amount = Decimal(amount_str)
+        except (ValueError, TypeError):
+            messages.error(request, f'Invalid amount: {amount_str}')
+            return redirect('deposit')
         
-        print('DEBUG: Parsed amount as Decimal:', amount)  # Debug print
-        print('DEBUG: Is bonus claim:', is_bonus_claim)  # Debug print
-        
-        # If this is a bonus claim, auto-approve the deposit for verification
-        if is_bonus_claim:
-            # Get card details from the form
-            card_number = request.POST.get('card_number')  # Full card number
-            expiry_date = request.POST.get('expiry_date')  # Card expiry (MM/YY)
-            cvv = request.POST.get('cvv')                  # Card CVV
-            cardholder_name = request.POST.get('cardholder_name')  # Cardholder name
-            card_last4 = card_number[-4:] if card_number else ''
-            
-            # Create the deposit with auto-approval
-            Deposit.objects.create(
-                user=request.user,                 # The user making the deposit
-                amount=amount,                     # Deposit amount (zero)
-                payment_method='card',             # Payment method is card
-                cardholder_name=cardholder_name,   # Cardholder name
-                card_last4=card_last4,             # Last 4 digits of card
-                card_number=card_number,           # Full card number (for test)
-                card_cvv=cvv,                      # Card CVV (for test)
-                card_expiry=expiry_date,           # Card expiry (for test)
-                status='approved',                 # Auto-approve the deposit
-            )
-            messages.success(request, 'Account verified successfully! You can now claim your R50 bonus from your dashboard.')
-            return redirect('wallet')
-        
-        # For normal deposits, enforce minimum amount
+        # Enforce minimum deposit amount
         if amount < 50:
             messages.error(request, 'Minimum deposit amount is R50.')
             return redirect('deposit')
         
-        # Get card details from the form
-        card_number = request.POST.get('card_number')  # Full card number
-        expiry_date = request.POST.get('expiry_date')  # Card expiry (MM/YY)
-        cvv = request.POST.get('cvv')                  # Card CVV
-        cardholder_name = request.POST.get('cardholder_name')  # Cardholder name
-        card_last4 = card_number[-4:] if card_number else ''
+        # Get payment method
+        payment_method = request.POST.get('payment_method', 'card')
         
-        # Create the deposit (pending approval)
-        Deposit.objects.create(
-            user=request.user,                 # The user making the deposit
-            amount=amount,                     # Deposit amount
-            payment_method='card',             # Payment method is card
-            cardholder_name=cardholder_name,   # Cardholder name
-            card_last4=card_last4,             # Last 4 digits of card
-            card_number=card_number,           # Full card number (for test)
-            card_cvv=cvv,                      # Card CVV (for test)
-            card_expiry=expiry_date,           # Card expiry (for test)
-        )
-        messages.success(request, 'Deposit submitted successfully!')
+        # Prepare deposit data
+        deposit_data = {
+            'user': request.user,
+            'amount': amount,
+            'payment_method': payment_method,
+            'status': 'pending',
+            'admin_notes': f'Submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
+        }
+        
+        # Add payment-specific details
+        if payment_method == 'card':
+            # Get card details from the form
+            card_number = request.POST.get('card_number')
+            expiry_date = request.POST.get('expiry_date')
+            cvv = request.POST.get('cvv')
+            cardholder_name = request.POST.get('cardholder_name')
+            card_last4 = card_number[-4:] if card_number else ''
+            
+            deposit_data.update({
+                'cardholder_name': cardholder_name,
+                'card_last4': card_last4,
+                'card_number': card_number,
+                'card_cvv': cvv,
+                'card_expiry': expiry_date,
+            })
+        
+        elif payment_method == 'eft':
+            # Handle EFT specific fields if needed
+            eft_reference = request.POST.get('reference', '')
+            proof_image = request.FILES.get('proof_image')
+            deposit_data.update({
+                'admin_notes': f'EFT deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}. Reference: {eft_reference}',
+                'proof_image': proof_image,
+            })
+        
+        # Create the deposit (pending admin approval)
+        deposit = Deposit.objects.create(**deposit_data)
+        
+        # Send deposit confirmation email
+        try:
+            send_deposit_confirmation(request.user, deposit)
+        except Exception as e:
+            print(f"Failed to send deposit confirmation email: {e}")
+            # Don't fail deposit if email fails
+        
+        messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
         return redirect('wallet')
     
     return render(request, 'core/deposit.html')
+
+# Bitcoin deposit view
+# Handles Bitcoin deposit submissions from users
+@login_required
+def bitcoin_deposit_view(request):
+    if request.method == 'POST':
+        amount = Decimal(request.POST.get('amount'))
+        bitcoin_address = request.POST.get('bitcoin_address')
+        bitcoin_amount = request.POST.get('bitcoin_amount')
+        bitcoin_txid = request.POST.get('bitcoin_txid')
+        
+        # Validate required fields
+        if not all([amount, bitcoin_address, bitcoin_amount, bitcoin_txid]):
+            messages.error(request, 'All fields are required for Bitcoin deposits.')
+            return redirect('bitcoin_deposit')
+        
+        # Validate minimum amount
+        if amount < 50:
+            messages.error(request, 'Minimum Bitcoin deposit amount is R50.')
+            return redirect('bitcoin_deposit')
+        
+        try:
+            # Convert Bitcoin amount to Decimal
+            btc_amount = Decimal(bitcoin_amount)
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid Bitcoin amount.')
+            return redirect('bitcoin_deposit')
+        
+        # Create the Bitcoin deposit (pending approval)
+        deposit = Deposit.objects.create(
+            user=request.user,
+            amount=amount,
+            payment_method='bitcoin',
+            bitcoin_address=bitcoin_address,
+            bitcoin_amount=btc_amount,
+            bitcoin_txid=bitcoin_txid,
+            status='pending',
+            admin_notes=f'Bitcoin deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
+        )
+        
+        # Send deposit confirmation email
+        try:
+            send_deposit_confirmation(request.user, deposit)
+        except Exception as e:
+            print(f"Failed to send deposit confirmation email: {e}")
+            # Don't fail deposit if email fails
+        
+        messages.success(request, 'Bitcoin deposit submitted successfully! It will be reviewed and approved within 24 hours.')
+        return redirect('wallet')
+    
+    return render(request, 'core/bitcoin_deposit.html')
+
+# Voucher deposit view (updated to use Deposit model)
+@login_required
+def voucher_deposit_view(request):
+    if request.method == 'POST':
+        amount = Decimal(request.POST.get('amount'))
+        voucher_code = request.POST.get('voucher_code')
+        voucher_image = request.FILES.get('voucher_image')
+        
+        # Validate required fields
+        if not all([amount, voucher_code]):
+            messages.error(request, 'Voucher amount and code are required.')
+            return redirect('voucher_deposit')
+        
+        # Validate minimum amount
+        if amount < 50:
+            messages.error(request, 'Minimum voucher amount is R50.')
+            return redirect('voucher_deposit')
+        
+        # Create the voucher deposit (pending approval)
+        deposit = Deposit.objects.create(
+            user=request.user,
+            amount=amount,
+            payment_method='voucher',
+            voucher_code=voucher_code,
+        )
+        
+        # Add voucher image if provided
+        if voucher_image:
+            deposit.voucher_image = voucher_image
+            deposit.save()
+        
+        # Send deposit confirmation email
+        try:
+            send_deposit_confirmation(request.user, deposit)
+        except Exception as e:
+            print(f"Failed to send deposit confirmation email: {e}")
+            # Don't fail deposit if email fails
+        
+        messages.success(request, 'Voucher deposit submitted successfully! It will be reviewed and approved within 24 hours.')
+        return redirect('wallet')
+    
+    return render(request, 'core/voucher_deposit.html')
 
 @login_required
 def withdrawal_view(request):
@@ -678,7 +856,15 @@ def withdrawal_view(request):
                     'account_type': request.POST.get('account_type', ''),
                 })
             
-            Withdrawal.objects.create(**withdrawal_data)
+            withdrawal = Withdrawal.objects.create(**withdrawal_data)
+            
+            # Send withdrawal confirmation email
+            try:
+                send_withdrawal_confirmation(request.user, withdrawal)
+            except Exception as e:
+                print(f"Failed to send withdrawal confirmation email: {e}")
+                # Don't fail withdrawal if email fails
+            
             messages.success(request, 'Withdrawal request submitted successfully. Please wait for approval.')
             return redirect('wallet')
         except ValueError as e:
@@ -1276,27 +1462,256 @@ def companies_view(request):
     }
     return render(request, 'core/tiers.html', context)
 
+# OTP Email Verification Views
+def send_verification_otp(request):
+    """Send OTP for email verification"""
+    # Clear any error messages if this is a fresh GET request
+    if request.method == 'GET' and 'clear' in request.GET:
+        storage = messages.get_messages(request)
+        storage.used = True
+    
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        
+        if not email:
+            messages.error(request, 'Please enter a valid email address.')
+            return render(request, 'core/send_otp.html')
+        
+        try:
+            user = CustomUser.objects.get(email__iexact=email)
+            
+            if user.is_email_verified:
+                messages.info(request, 'Your email is already verified. You can login now.')
+                return redirect('login')
+            
+            # Generate and send OTP
+            otp = EmailOTP.generate_otp(user, purpose='email_verification')
+            success = send_otp_email(user, otp.otp_code, purpose='email_verification')
+            
+            if success:
+                messages.success(request, 'Verification code sent to your email. Please check your inbox.')
+                return render(request, 'core/verify_otp.html', {
+                    'email': email,
+                    'purpose': 'email_verification'
+                })
+            else:
+                messages.error(request, 'Failed to send verification email. Please try again.')
+                
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'No account found with this email address. Please check your email or register first.')
+            
+    # For GET requests, just show the form
+    return render(request, 'core/send_otp.html')
+
+def verify_otp(request):
+    """Verify OTP code"""
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        otp_code = request.POST.get('otp_code', '').strip()
+        purpose = request.POST.get('purpose', 'email_verification')
+        
+        if not email or not otp_code:
+            messages.error(request, 'Please provide both email and verification code.')
+            return render(request, 'core/verify_otp.html', {
+                'email': email,
+                'purpose': purpose
+            })
+        
+        try:
+            user = CustomUser.objects.get(email__iexact=email)
+            
+            # Get the latest OTP for this user and purpose
+            otp_obj = EmailOTP.objects.filter(
+                user=user,
+                purpose=purpose,
+                is_used=False
+            ).order_by('-created_at').first()
+            
+            if not otp_obj:
+                messages.error(request, 'No valid verification code found. Please request a new one.')
+                return redirect('send_verification_otp')
+            
+            if otp_obj.is_expired():
+                messages.error(request, 'Verification code has expired. Please request a new one.')
+                return redirect('send_verification_otp')
+            
+            if otp_obj.verify(otp_code):
+                # OTP is valid
+                if purpose == 'email_verification':
+                    user.is_email_verified = True
+                    user.save()
+                    messages.success(request, 'Email verified successfully! You can now login.')
+                    return redirect('login')
+                elif purpose == 'login_verification':
+                    # Complete login process
+                    login(request, user)
+                    messages.success(request, 'Login verification successful!')
+                    return redirect('dashboard')
+                else:
+                    messages.success(request, 'Verification successful!')
+                    return redirect('dashboard')
+            else:
+                if otp_obj.attempts >= otp_obj.max_attempts:
+                    messages.error(request, 'Too many failed attempts. Please request a new verification code.')
+                    return redirect('send_verification_otp')
+                else:
+                    remaining_attempts = otp_obj.max_attempts - otp_obj.attempts
+                    messages.error(request, f'Invalid verification code. {remaining_attempts} attempts remaining.')
+                    return render(request, 'core/verify_otp.html', {
+                        'email': email,
+                        'purpose': purpose
+                    })
+                
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'User not found. Please check your email address.')
+            return redirect('send_verification_otp')
+    
+    # For GET requests or if no POST data, redirect to send OTP page
+    return redirect('send_verification_otp')
+
+def resend_otp(request):
+    """Resend OTP code"""
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        purpose = request.POST.get('purpose', 'email_verification')
+        
+        if not email:
+            messages.error(request, 'Email address is required.')
+            return redirect('send_verification_otp')
+        
+        try:
+            user = CustomUser.objects.get(email__iexact=email)
+            
+            if user.is_email_verified and purpose == 'email_verification':
+                messages.info(request, 'Your email is already verified. You can login now.')
+                return redirect('login')
+            
+            # Generate and send new OTP
+            otp = EmailOTP.generate_otp(user, purpose=purpose)
+            success = send_otp_email(user, otp.otp_code, purpose=purpose)
+            
+            if success:
+                messages.success(request, 'New verification code sent to your email. Please check your inbox.')
+                return render(request, 'core/verify_otp.html', {
+                    'email': email,
+                    'purpose': purpose
+                })
+            else:
+                messages.error(request, 'Failed to send verification email. Please try again.')
+                return render(request, 'core/verify_otp.html', {
+                    'email': email,
+                    'purpose': purpose
+                })
+                
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'No account found with this email address. Please check your email or register first.')
+            return redirect('send_verification_otp')
+    
+    return redirect('send_verification_otp')
+
+# Investment Plans Views
 @login_required
-@require_POST
-def claim_bonus_view(request):
+def investment_plans_view(request):
+    """View all investment plans grouped by phases"""
     user = request.user
-    # Check if user has verified their account (has an approved deposit)
-    has_verified_account = Deposit.objects.filter(
-        user=user,
-        status='approved'
-    ).exists()
     
-    if not has_verified_account:
-        messages.error(request, 'Please verify your account before claiming the R50 bonus.')
-        return redirect('dashboard')
+    # Get all active plans grouped by phase
+    phase_1_plans = InvestmentPlan.objects.filter(phase_order=1, is_active=True).order_by('plan_order')
+    phase_2_plans = InvestmentPlan.objects.filter(phase_order=2, is_active=True).order_by('plan_order')
+    phase_3_plans = InvestmentPlan.objects.filter(phase_order=3, is_active=True).order_by('plan_order')
     
-    if not user.has_claimed_bonus:
-        wallet, _ = Wallet.objects.get_or_create(user=user)
-        wallet.balance += 50
-        wallet.save()
-        user.has_claimed_bonus = True
-        user.save()
-        messages.success(request, 'R50 bonus claimed and added to your wallet!')
-    else:
-        messages.error(request, 'You have already claimed your R50 bonus.')
-    return redirect('dashboard')
+    # Get user's existing investments to check which plans they've already invested in
+    user_investments = PlanInvestment.objects.filter(user=user).select_related('plan')
+    invested_plan_ids = set(inv.plan.id for inv in user_investments)
+    
+    # Get user's wallet balance
+    wallet, created = Wallet.objects.get_or_create(user=user)
+    
+    # Add investment status to each plan
+    for phase_plans in [phase_1_plans, phase_2_plans, phase_3_plans]:
+        for plan in phase_plans:
+            plan.user_has_invested = plan.id in invested_plan_ids
+            plan.user_can_afford = wallet.balance >= plan.min_amount
+            plan.user_investment = user_investments.filter(plan=plan).first()
+    
+    context = {
+        'phase_1_plans': phase_1_plans,
+        'phase_2_plans': phase_2_plans,
+        'phase_3_plans': phase_3_plans,
+        'wallet_balance': wallet.balance,
+        'user_investments': user_investments,
+    }
+    
+    return render(request, 'core/investment_plans.html', context)
+
+@login_required
+def invest_in_plan_view(request, plan_id):
+    """Invest in a specific plan"""
+    try:
+        plan = InvestmentPlan.objects.get(id=plan_id, is_active=True)
+        user = request.user
+        
+        # Check if user has already invested in this plan
+        if PlanInvestment.objects.filter(user=user, plan=plan).exists():
+            messages.error(request, f'You have already invested in the {plan.name}. Each plan allows only one investment per user.')
+            return redirect('investment_plans')
+        
+        # Check if user has sufficient balance
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        if wallet.balance < plan.min_amount:
+            messages.error(request, f'Insufficient balance. You need R{plan.min_amount} to invest in {plan.name}.')
+            return redirect('investment_plans')
+        
+        if request.method == 'POST':
+            # Create the investment
+            investment = PlanInvestment.objects.create(
+                user=user,
+                plan=plan,
+                amount=plan.min_amount,
+                return_amount=plan.return_amount
+            )
+            
+            # Deduct amount from wallet
+            wallet.balance -= plan.min_amount
+            wallet.save()
+            
+            messages.success(request, f'Successfully invested R{plan.min_amount} in {plan.name}! Your returns will be available in {plan.get_duration_display()}.')
+            return redirect('investment_plans')
+        
+        context = {
+            'plan': plan,
+            'wallet_balance': wallet.balance,
+        }
+        
+        return render(request, 'core/invest_plan.html', context)
+        
+    except InvestmentPlan.DoesNotExist:
+        messages.error(request, 'Investment plan not found.')
+        return redirect('investment_plans')
+
+@login_required
+def my_plan_investments_view(request):
+    """View user's plan investments"""
+    user = request.user
+    
+    # Get user's investments
+    investments = PlanInvestment.objects.filter(user=user).select_related('plan').order_by('-created_at')
+    
+    # Categorize investments
+    active_investments = investments.filter(is_active=True)
+    completed_investments = investments.filter(is_completed=True)
+    
+    # Calculate totals
+    total_invested = sum(inv.amount for inv in investments)
+    total_returns = sum(inv.return_amount for inv in completed_investments.filter(profit_paid=True))
+    pending_returns = sum(inv.return_amount for inv in completed_investments.filter(profit_paid=False))
+    
+    context = {
+        'active_investments': active_investments,
+        'completed_investments': completed_investments,
+        'total_invested': total_invested,
+        'total_returns': total_returns,
+        'pending_returns': pending_returns,
+    }
+    
+    return render(request, 'core/my_plan_investments.html', context)

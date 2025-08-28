@@ -1,0 +1,89 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    📈 Investment Update - CapitalX
+</div>
+
+<div class="main-content">
+    <p>Hello {{ user.full_name|default:user.username }},</p>
+    
+    <p>Here's your latest investment update from CapitalX. We want to keep you informed about how your investments are performing.</p>
+    
+    <div class="info-box">
+        <h3>💼 Investment Summary:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total Invested:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">R{{ investment.total_invested|default:"0" }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Current Value:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">R{{ investment.current_value|default:"0" }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total Return:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">
+                    <span style="color: {% if investment.total_return >= 0 %}#27ae60{% else %}#e74c3c{% endif %}; font-weight: bold;">
+                        {{ investment.total_return|default:"0" }}%
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;"><strong>Last Updated:</strong></td>
+                <td style="padding: 8px 0; text-align: right;">{{ "now"|date:"F j, Y" }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="info-box">
+        <h3>📊 Performance Highlights:</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>Portfolio Growth:</strong> Your investments continue to show positive momentum</li>
+            <li><strong>Market Trends:</strong> Current market conditions favor your investment strategy</li>
+            <li><strong>Risk Management:</strong> Your portfolio maintains a balanced risk profile</li>
+            <li><strong>Diversification:</strong> Your investments are well-diversified across sectors</li>
+        </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'#' }}/portfolio" class="btn">View Portfolio</a>
+        <a href="{{ site_url|default:'#' }}/invest" class="btn btn-secondary" style="margin-left: 10px;">Make New Investment</a>
+    </div>
+    
+    <div class="info-box">
+        <h3>🎯 Investment Opportunities:</h3>
+        <p>Based on your current portfolio and market analysis, here are some opportunities to consider:</p>
+        <ul style="margin-left: 20px;">
+            <li><strong>Dollar-Cost Averaging:</strong> Consider regular small investments</li>
+            <li><strong>Rebalancing:</strong> Review your asset allocation quarterly</li>
+            <li><strong>New Sectors:</strong> Explore emerging market opportunities</li>
+            <li><strong>Tax Optimization:</strong> Consider tax-efficient investment strategies</li>
+        </ul>
+    </div>
+    
+    <div class="info-box">
+        <h3>📅 Important Dates:</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>Quarterly Review:</strong> Schedule your portfolio review</li>
+            <li><strong>Tax Season:</strong> Prepare for tax reporting</li>
+            <li><strong>Annual Meeting:</strong> Join our investor community meeting</li>
+        </ul>
+    </div>
+    
+    <p><strong>Stay Informed:</strong></p>
+    <p>We'll continue to send you regular updates about your investments. You can also check your portfolio anytime through your dashboard.</p>
+    
+    <p><strong>Need Advice?</strong></p>
+    <p>Our investment advisors are available to help you make informed decisions:</p>
+    <ul style="margin-left: 20px;">
+        <li><strong>Schedule a Call:</strong> Book a consultation through your dashboard</li>
+        <li><strong>Email Support:</strong> investments@capitalx.com</li>
+        <li><strong>Live Chat:</strong> Available during business hours</li>
+    </ul>
+    
+    <p>Keep up the great work with your investments!</p>
+    
+    <p>Best regards,<br>The CapitalX Investment Team</p>
+</div>
+{% endblock %}

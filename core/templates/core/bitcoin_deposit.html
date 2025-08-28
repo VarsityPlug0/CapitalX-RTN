@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bitcoin Deposit - CapitalX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bitcoin-card {
+        background: linear-gradient(135deg, #f7931a 0%, #ff9500 100%);
+        border: none;
+        color: white;
+    }
+    .bitcoin-icon {
+        font-size: 3rem;
+        color: #f7931a;
+    }
+    .form-control-lg {
+        padding: 1rem 1.25rem;
+        font-size: 1.25rem;
+    }
+    .qr-code-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .bitcoin-address {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 14px;
+        word-break: break-all;
+        margin: 15px 0;
+    }
+    .copy-btn {
+        background: #f7931a;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .copy-btn:hover {
+        background: #e6850e;
+    }
+    .instructions-card {
+        background-color: rgba(247, 147, 26, 0.1);
+        border-left: 3px solid #f7931a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 mb-3">
+                    <i class="bi bi-currency-bitcoin bitcoin-icon"></i>
+                    Bitcoin Deposit
+                </h1>
+                <p class="lead text-muted">Deposit Bitcoin to your CapitalX account</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+                <!-- Bitcoin Deposit Form -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bitcoin-card">
+                            <h5 class="mb-0 text-white">
+                                <i class="bi bi-credit-card me-2"></i>Deposit Details
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="post" id="bitcoin-deposit-form">
+                                {% csrf_token %}
+                                
+                                <!-- Amount in Rands -->
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="amount" id="amount" class="form-control form-control-lg" 
+                                           placeholder="Amount" min="50" step="0.01" required>
+                                    <label for="amount">Amount (R)</label>
+                                    <div class="form-text">Minimum: R50</div>
+                                </div>
+
+                                <!-- Bitcoin Amount -->
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="bitcoin_amount" id="bitcoin_amount" class="form-control form-control-lg" 
+                                           placeholder="Bitcoin Amount" step="0.00000001" required>
+                                    <label for="bitcoin_amount">Bitcoin Amount (BTC)</label>
+                                </div>
+
+                                <!-- Your Bitcoin Address -->
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="bitcoin_address" id="bitcoin_address" class="form-control form-control-lg" 
+                                           placeholder="Your Bitcoin Address" required>
+                                    <label for="bitcoin_address">Your Bitcoin Address</label>
+                                </div>
+
+                                <!-- Transaction ID -->
+                                <div class="form-floating mb-4">
+                                    <input type="text" name="bitcoin_txid" id="bitcoin_txid" class="form-control form-control-lg" 
+                                           placeholder="Transaction ID" required>
+                                    <label for="bitcoin_txid">Transaction ID (TXID)</label>
+                                    <div class="form-text">The transaction hash from your Bitcoin wallet</div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-warning btn-lg w-100">
+                                    <i class="bi bi-currency-bitcoin me-2"></i>Submit Bitcoin Deposit
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bitcoin Information -->
+                <div class="col-lg-6">
+                    <!-- Our Bitcoin Address -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-wallet2 me-2"></i>Our Bitcoin Address
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="qr-code-container">
+                                <div class="bitcoin-icon mb-2">
+                                    <i class="bi bi-qr-code"></i>
+                                </div>
+                                <p class="text-muted mb-2">Scan QR code or copy address below</p>
+                            </div>
+                            
+                            <div class="bitcoin-address" id="our-bitcoin-address">
+                                bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+                            </div>
+                            
+                            <button class="copy-btn w-100" onclick="copyBitcoinAddress()">
+                                <i class="bi bi-clipboard me-2"></i>Copy Address
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>How to Deposit
+                            </h6>
+                        </div>
+                        <div class="card-body instructions-card">
+                            <ol class="mb-0">
+                                <li class="mb-2">Copy our Bitcoin address above</li>
+                                <li class="mb-2">Send the exact Bitcoin amount from your wallet</li>
+                                <li class="mb-2">Wait for 1-3 confirmations on the blockchain</li>
+                                <li class="mb-2">Submit this form with your transaction details</li>
+                                <li class="mb-0">We'll credit your account within 24 hours</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Current Bitcoin Price -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-graph-up me-2"></i>Current Bitcoin Price
+                            </h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <h4 class="text-success mb-0" id="btc-price">Loading...</h4>
+                            <small class="text-muted">Live price from CoinGecko</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Copy Bitcoin address to clipboard
+    function copyBitcoinAddress() {
+        const address = document.getElementById('our-bitcoin-address').textContent;
+        navigator.clipboard.writeText(address).then(function() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check me-2"></i>Copied!';
+            btn.style.background = '#28a745';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '#f7931a';
+            }, 2000);
+        });
+    }
+
+    // Auto-calculate Bitcoin amount based on Rand amount
+    document.getElementById('amount').addEventListener('input', function() {
+        const randAmount = parseFloat(this.value);
+        const btcPrice = parseFloat(document.getElementById('btc-price').textContent.replace(/[^0-9.]/g, ''));
+        
+        if (randAmount && btcPrice) {
+            const btcAmount = randAmount / btcPrice;
+            document.getElementById('bitcoin_amount').value = btcAmount.toFixed(8);
+        }
+    });
+
+    // Fetch current Bitcoin price
+    async function fetchBitcoinPrice() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=zar');
+            const data = await response.json();
+            const price = data.bitcoin.zar;
+            document.getElementById('btc-price').textContent = `R${price.toLocaleString()}`;
+        } catch (error) {
+            document.getElementById('btc-price').textContent = 'R1,200,000'; // Fallback price
+        }
+    }
+
+    // Load Bitcoin price on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchBitcoinPrice();
+        
+        // Refresh price every 5 minutes
+        setInterval(fetchBitcoinPrice, 300000);
+    });
+</script>
+{% endblock %}

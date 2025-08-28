@@ -172,20 +172,15 @@
             <h5 class="fw-bold mb-3">Quick Actions</h5>
             <div class="list-group">
                 <a href="{% url 'deposit' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">Make Deposit</a>
+                <a href="{% url 'investment_plans' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">🚀 Investment Plans</a>
                 <a href="{% url 'tiers' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">Invest Now</a>
                 <a href="{% url 'referral' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">Refer Friends</a>
                 <a href="{% url 'profile' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">View Profile</a>
                 {% if not has_verified_account %}
-                <div class="alert alert-warning mt-2">
-                  Your account needs to be verified before claiming your R50 bonus. Please enter your card details to verify your account. You will not be billed anything.
-                  <a href="{% url 'deposit' %}?amount=0" class="btn btn-primary btn-sm mt-2">Verify Your Account</a>
+                <div class="alert alert-info mt-2">
+                  <i class="bi bi-info-circle me-2"></i>Make your first deposit to get verified and start investing!
+                  <a href="{% url 'deposit' %}" class="btn btn-primary btn-sm mt-2">Make Deposit</a>
                 </div>
-                {% endif %}
-                {% if show_claim_bonus %}
-                <form method="post" action="{% url 'claim_bonus' %}" style="margin-top: 1rem;">
-                    {% csrf_token %}
-                    <button type="submit" class="list-group-item list-group-item-action quick-action-card mb-2 rounded bg-warning text-dark fw-bold">Claim R50 Bonus</button>
-                </form>
                 {% endif %}
             </div>
         </div>

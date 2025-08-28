@@ -35,6 +35,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'investment_plans' %}">
+                                <i class="bi bi-diagram-3"></i> Investment Plans
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'tiers' %}">
                                 <i class="bi bi-graph-up"></i> Investment Tiers
                             </a>
@@ -123,5 +128,27 @@
     <!-- Theme JS -->
     <script src="{% static 'js/theme.js' %}"></script>
     {% block extra_js %}{% endblock %}
+    
+    <!-- Clear cache on logout -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if this is after a logout (URL contains logout or has logout message)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasLogoutMessage = document.querySelector('.alert-success') && 
+                                document.querySelector('.alert-success').textContent.includes('logged out');
+        
+        if (window.location.pathname === '/' && hasLogoutMessage) {
+            // Clear any cached data
+            if (typeof(Storage) !== "undefined") {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+            
+            // Clear browser cache by adding timestamp to subsequent requests
+            const timestamp = new Date().getTime();
+            history.replaceState(null, null, '/?_=' + timestamp);
+        }
+    });
+    </script>
 </body>
 </html> 

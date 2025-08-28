@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify Code - CapitalX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mobile-optimized {
+        max-width: 100%;
+        padding: 1rem;
+    }
+    
+    .header-compact {
+        margin-bottom: 2rem;
+    }
+    
+    .header-compact h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .header-compact p {
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+    
+    .card-clean {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+    }
+    
+    .otp-input-mobile {
+        font-size: 1.25rem !important;
+        letter-spacing: 0.3rem;
+        padding: 1rem;
+        text-align: center;
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    .otp-input-mobile:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #3399ff;
+        box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
+    }
+    
+    .btn-mobile {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+    }
+    
+    .action-buttons {
+        gap: 0.5rem;
+    }
+    
+    .security-notice {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-size: 0.85rem;
+    }
+    
+    @media (max-width: 576px) {
+        .container {
+            padding: 0 0.75rem;
+        }
+        
+        .header-compact h1 {
+            font-size: 1.5rem;
+        }
+        
+        .otp-input-mobile {
+            font-size: 1.1rem !important;
+            letter-spacing: 0.2rem;
+            padding: 0.75rem;
+        }
+        
+        .card-clean {
+            margin: 0;
+            border-radius: 0.75rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .col-md-6 {
+            width: 100% !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mobile-optimized">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Header -->
+            <div class="text-center header-compact">
+                <h1 class="text-white">
+                    <i class="bi bi-shield-check text-primary me-2"></i>
+                    Verify Your Email
+                </h1>
+                <p class="text-muted">Enter the 6-digit code sent to your email</p>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Verification Form -->
+            <div class="card card-clean shadow-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="bi bi-envelope-open text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="text-white mb-2">Check Your Email</h5>
+                        <p class="text-muted small">
+                            Code sent to: <strong class="text-primary">{{ email }}</strong>
+                        </p>
+                    </div>
+                    
+                    <form method="post" action="{% url 'verify_otp' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="email" value="{{ email }}">
+                        <input type="hidden" name="purpose" value="{{ purpose }}">
+                        
+                        <!-- OTP Input Field -->
+                        <div class="mb-4">
+                            <label for="otp_code" class="form-label text-center d-block mb-3 text-white">
+                                <i class="bi bi-123 me-2"></i>Enter Verification Code
+                            </label>
+                            <div class="d-flex justify-content-center">
+                                <input type="text" 
+                                       class="form-control otp-input-mobile w-100" 
+                                       id="otp_code" 
+                                       name="otp_code" 
+                                       placeholder="000000"
+                                       maxlength="6"
+                                       pattern="[0-9]{6}"
+                                       autocomplete="off"
+                                       required>
+                            </div>
+                            <small class="text-muted d-block text-center mt-2">
+                                Enter the 6-digit code from your email
+                            </small>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-mobile">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Verify Code
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex action-buttons">
+                        <div class="col-md-6 flex-fill">
+                            <form method="post" action="{% url 'resend_otp' %}" class="w-100">
+                                {% csrf_token %}
+                                <input type="hidden" name="email" value="{{ email }}">
+                                <input type="hidden" name="purpose" value="{{ purpose }}">
+                                <button type="submit" class="btn btn-outline-light w-100 btn-mobile">
+                                    <i class="bi bi-arrow-repeat me-2"></i>
+                                    Resend
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-6 flex-fill">
+                            <a href="{% url 'send_verification_otp' %}" class="btn btn-outline-secondary w-100 btn-mobile">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Change Email
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="card-footer text-center" style="background: rgba(255, 255, 255, 0.05); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>
+                        Expires in 10 min
+                        <span class="mx-2">•</span>
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Keep private
+                    </small>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="security-notice mt-3">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Security Tip:</strong> Never share your verification code. CapitalX staff will never ask for it.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // OTP input handling
+    document.addEventListener('DOMContentLoaded', function() {
+        const otpInput = document.getElementById('otp_code');
+        
+        // Auto-format OTP input (numbers only, max 6 digits)
+        otpInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            if (value.length > 6) {
+                value = value.substr(0, 6); // Limit to 6 digits
+            }
+            e.target.value = value;
+            
+            // Auto-submit when 6 digits are entered
+            if (value.length === 6) {
+                // Optional: Auto-submit form when 6 digits entered
+                // e.target.closest('form').submit();
+            }
+        });
+        
+        // Auto-focus on page load
+        otpInput.focus();
+        
+        // Prevent paste of non-numeric content
+        otpInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            let paste = (e.clipboardData || window.clipboardData).getData('text');
+            let numericPaste = paste.replace(/\D/g, '').substr(0, 6);
+            e.target.value = numericPaste;
+        });
+    });
+</script>
+{% endblock %}

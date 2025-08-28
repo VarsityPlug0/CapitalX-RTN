@@ -13,15 +13,26 @@
 
     <!-- Balance Overview -->
     <div class="row g-4 mb-5">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title text-muted">Available Balance</h5>
-                    <h2 class="display-6 mb-0">R{{ user.wallet.balance|floatformat:2 }}</h2>
+                    <h2 class="display-6 mb-0 text-success">R{{ user.wallet.balance|floatformat:2 }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Pending Deposits</h5>
+                    <h2 class="display-6 mb-0 text-warning">R{{ total_pending|floatformat:2 }}</h2>
+                    {% if pending_deposits %}
+                    <small class="text-muted">{{ pending_deposits|length }} deposit{{ pending_deposits|length|pluralize }} awaiting approval</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title text-muted">Total Earnings</h5>
@@ -56,6 +67,44 @@
             </div>
         </div>
     </div>
+
+    <!-- Pending Deposits Section -->
+    {% if pending_deposits %}
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">⏳ Pending Deposits ({{ pending_deposits|length }})</h5>
+            <small>These deposits are awaiting admin approval. You will receive an email notification once they are reviewed.</small>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date Submitted</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deposit in pending_deposits %}
+                        <tr>
+                            <td>{{ deposit.created_at|date:"M d, Y H:i" }}</td>
+                            <td><span class="text-warning fw-bold">R{{ deposit.amount|floatformat:2 }}</span></td>
+                            <td>{{ deposit.get_payment_method_display }}</td>
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-clock"></i> Pending Review
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Transaction History -->
     <div class="card">

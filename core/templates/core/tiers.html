@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Companies to Invest In{% endblock %}
+{% block title %}Investment Opportunities - CapitalX{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -18,16 +18,177 @@
         font-size: 2rem;
         color: var(--primary-green);
     }
+    
+    .plan-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+    }
+    
+    .plan-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .plan-card.invested {
+        border-color: #2ecc71;
+        background: rgba(46, 204, 113, 0.1);
+    }
+    
+    .plan-card.insufficient {
+        border-color: #e74c3c;
+        background: rgba(231, 76, 60, 0.1);
+        opacity: 0.7;
+    }
+    
+    .plan-emoji {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .roi-badge {
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+    
+    .plan-status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .status-invested {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+        border: 1px solid #2ecc71;
+    }
+    
+    .status-insufficient {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+        border: 1px solid #e74c3c;
+    }
+    
+    .btn-invest-plan {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        border: none;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-invest-plan:hover {
+        background: linear-gradient(45deg, #2980b9, #1f639a);
+        color: white;
+    }
+    
+    .section-header {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <h1 class="text-center fw-bold">Companies to Invest In</h1>
-        <a href="{% url 'deposit' %}" class="btn btn-primary">Top Up Wallet</a>
+        <h1 class="text-center fw-bold">Investment Opportunities</h1>
+        <div>
+            <a href="{% url 'investment_plans' %}" class="btn btn-outline-light me-2">🚀 View All Plans</a>
+            <a href="{% url 'deposit' %}" class="btn btn-primary">Top Up Wallet</a>
+        </div>
+    </div>
+    
+    <!-- Wallet Balance Info -->
+    <div class="alert alert-info text-center mb-4">
+        <strong>💰 Wallet Balance: R{{ wallet_balance|floatformat:2 }}</strong>
     </div>
 
+    <!-- Investment Plans Section -->
+    {% if investment_plans %}
+    <div class="section-header">
+        <h2 class="text-white mb-2">🚀 Investment Plans</h2>
+        <p class="text-muted mb-0">Guaranteed returns with fixed amounts - One investment per plan</p>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        {% for plan in investment_plans %}
+        <div class="col-md-6 col-lg-4">
+            <div class="plan-card {% if plan.user_has_invested %}invested{% elif not plan.user_can_afford %}insufficient{% endif %}">
+                {% if plan.user_has_invested %}
+                    <div class="plan-status-badge status-invested">✅ Invested</div>
+                {% elif not plan.user_can_afford %}
+                    <div class="plan-status-badge status-insufficient">💰 Low Balance</div>
+                {% endif %}
+                
+                <div class="card-body p-4 text-center">
+                    <span class="plan-emoji">{{ plan.emoji }}</span>
+                    <h5 class="text-white fw-bold mb-2">{{ plan.name }}</h5>
+                    <small class="text-muted d-block mb-3">{{ plan.phase }}</small>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Investment:</small>
+                            <small class="text-white fw-bold">R{{ plan.min_amount|floatformat:0 }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Returns:</small>
+                            <small class="text-success fw-bold">R{{ plan.return_amount|floatformat:0 }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Duration:</small>
+                            <small class="text-white">{{ plan.get_duration_display }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">ROI:</small>
+                            <span class="roi-badge">{{ plan.get_roi_percentage|floatformat:1 }}%</span>
+                        </div>
+                    </div>
+                    
+                    {% if plan.user_has_invested %}
+                        <button class="btn btn-success btn-sm w-100" disabled>
+                            <i class="bi bi-check-circle me-1"></i>Already Invested
+                        </button>
+                    {% elif not plan.user_can_afford %}
+                        <button class="btn btn-secondary btn-sm w-100" disabled>
+                            <i class="bi bi-wallet2 me-1"></i>Insufficient Balance
+                        </button>
+                    {% else %}
+                        <a href="{% url 'invest_in_plan' plan.id %}" class="btn btn-invest-plan btn-sm w-100">
+                            <i class="bi bi-arrow-up-circle me-1"></i>Invest R{{ plan.min_amount|floatformat:0 }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Traditional Companies Section -->
+    {% if companies %}
+    <div class="section-header">
+        <h2 class="text-white mb-2">🏢 Traditional Companies</h2>
+        <p class="text-muted mb-0">Flexible investment amounts with company shares</p>
+    </div>
+    
     <div class="row g-4">
         <!-- Investment Tiers -->
         <div class="col-lg-9">
@@ -55,7 +216,7 @@
                 {% endfor %}
             </div>
         </div>
-
+        
         <!-- Investment Calculator -->
         <div class="col-lg-3">
             <div class="card bg-dark text-white p-3 sticky-top" style="top: 100px;">
@@ -85,6 +246,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 

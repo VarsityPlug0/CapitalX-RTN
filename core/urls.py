@@ -20,7 +20,8 @@ urlpatterns = [
     path('delete-account/', views.delete_account, name='delete_account'),
     path('logout/', views.logout_view, name='logout'),
     path('deposit/', views.deposit_view, name='deposit'),
-    path('voucher-deposit/', views.voucher_deposit, name='voucher_deposit'),
+    path('bitcoin-deposit/', views.bitcoin_deposit_view, name='bitcoin_deposit'),
+    path('voucher-deposit/', views.voucher_deposit_view, name='voucher_deposit'),
     path('withdraw/', views.withdrawal_view, name='withdraw'),
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
     path('terms/', views.terms_view, name='terms'),
@@ -29,7 +30,17 @@ urlpatterns = [
     path('portfolio/', views.portfolio_view, name='portfolio'),
     path('tutorial/', views.tutorial_view, name='tutorial'),
     path('support/', views.support_view, name='support'),
-    path('claim-bonus/', views.claim_bonus_view, name='claim_bonus'),
+
+
+    # OTP Email Verification URLs
+    path('send-verification-otp/', views.send_verification_otp, name='send_verification_otp'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('resend-otp/', views.resend_otp, name='resend_otp'),
+    
+    # Investment Plans URLs
+    path('investment-plans/', views.investment_plans_view, name='investment_plans'),
+    path('invest-plan/<int:plan_id>/', views.invest_in_plan_view, name='invest_in_plan'),
+    path('my-plan-investments/', views.my_plan_investments_view, name='my_plan_investments'),
 
     # Admin action URLs for deposit management
     path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='admin_approve_deposit'),

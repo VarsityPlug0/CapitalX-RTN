@@ -1,129 +1,878 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Deposit - CryptoVault{% endblock %}
+{% block title %}Deposit - CapitalX{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-control-lg {
-        padding: 1rem 1.25rem;
-        font-size: 1.25rem;
+    :root {
+        --primary-color: #007bff;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --dark-color: #343a40;
+        --light-color: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        --transition: all 0.3s ease;
     }
-    .custom-file-upload {
-        border: 1px solid #ced4da;
-        display: inline-block;
-        padding: 6px 12px;
-        cursor: pointer;
-        background-color: #343a40;
+
+    .deposit-container {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .deposit-card {
+        background: rgba(30, 30, 30, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+
+    .deposit-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
         color: white;
-        border-radius: .25rem;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
     }
-    .custom-file-upload:hover {
-        background-color: #495057;
+
+    .deposit-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
     }
-    #proof {
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .deposit-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .deposit-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .nav-tabs {
+        border: none;
+        background: #2a2a2a;
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+        margin: 0;
+        flex-wrap: wrap;
+        display: flex;
+        width: 100%;
+    }
+
+    /* Debug styles to ensure visibility */
+    .nav-tabs li {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        border: 1px solid red !important;
+    }
+
+    .nav-tabs button {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        border: 1px solid blue !important;
+    }
+
+    /* Temporary debug borders */
+    .nav-tabs {
+        border: 2px solid green !important;
+    }
+
+    .tab-pane {
+        border: 1px solid orange !important;
+    }
+
+    .nav-tabs .nav-item {
+        flex: 1;
+        min-width: 0;
+        display: block;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: var(--border-radius);
+        color: var(--dark-color);
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        margin: 0 0.25rem;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        width: 100%;
+        text-align: center;
+        display: block;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .nav-tabs .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .nav-tabs .nav-link:hover::before {
+        left: 100%;
+    }
+
+    .nav-tabs .nav-link.active {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+    }
+
+    .nav-tabs .nav-link:hover:not(.active) {
+        background: rgba(0,123,255,0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-section {
+        padding: 2rem;
+        background: #2a2a2a;
+        color: #ffffff;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #444;
+        border-radius: var(--border-radius);
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        background: #2a2a2a;
+        transform: translateY(-2px);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-details-section {
+        background: linear-gradient(135deg, #333 0%, #444 100%);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid #555;
+        color: #ffffff;
+    }
+
+    .card-brand-icons {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #1a1a1a;
+        border-radius: var(--border-radius);
+        border: 1px solid #555;
+        color: #ffffff;
+    }
+
+    .card-icon {
+        height: 40px;
+        transition: var(--transition);
+        filter: grayscale(100%);
+    }
+
+    .card-icon.active {
+        filter: grayscale(0%);
+        transform: scale(1.1);
+    }
+
+    .card-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        transition: var(--transition);
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-submit:hover::before {
+        left: 100%;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(40,167,69,0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    .instructions-section {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8b 100%);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        height: 100%;
+        border-left: 4px solid var(--primary-color);
+        color: #ffffff;
+    }
+
+    .instruction-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        color: #ffffff;
+    }
+
+    .instruction-item:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateX(5px);
+    }
+
+    .instruction-icon {
+        background: var(--primary-color);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+
+        opacity: 0.2;
+        transform: rotate(15deg);
+    }
+
+    .alert {
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .form-text {
+        color: #b0b0b0;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .row.g-2 > .col {
+        margin-bottom: 0.5rem;
+    }
+
+    .bank-info {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        border: 1px solid #555;
+        color: #ffffff;
+    }
+
+    .bank-info strong {
+        color: #3498db;
+    }
+
+    .tab-pane {
         display: none;
     }
-    .instructions-card {
-        background-color: rgba(0, 255, 0, 0.05);
-        border-left: 3px solid var(--primary-green);
+
+    .tab-pane.show {
+        display: block !important;
     }
-    .bonus-card {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 3px solid #ffc107;
+
+    .tab-pane.active {
+        display: block !important;
+    }
+
+    /* Ensure all tab content is visible when needed */
+    #voucher {
+        display: none;
+    }
+
+    #voucher.show,
+    #voucher.active {
+        display: block !important;
+    }
+
+    @media (max-width: 768px) {
+        .deposit-header h1 {
+            font-size: 2rem;
+        }
+        
+        .form-section {
+            padding: 1rem;
+        }
+        
+        .card-brand-icons {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-tabs .nav-item {
+            flex: 1 1 auto;
+            min-width: 120px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .nav-tabs {
+            flex-direction: column;
+        }
+
+        .nav-tabs .nav-item {
+            flex: none;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            margin: 0;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>Make a Deposit</h2>
-    
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
-    {# Show info if claiming bonus (amount=0) #}
-    <div id="bonus-info" style="display:none;">
-        <div class="alert alert-warning bonus-card">
-            <h5><i class="bi bi-gift-fill me-2"></i>Claim Your R50 Bonus!</h5>
-            <p class="mb-2">You are verifying your account to claim your bonus. <strong>No money will be charged to your card</strong>; this is only for account verification and bonus claiming.</p>
-            <p class="mb-0"><small>After verification, you can claim your R50 bonus from your dashboard.</small></p>
+<div class="deposit-container">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="deposit-header mb-4">
+            <h1><i class="bi bi-wallet2 me-3"></i>Fund Your Account</h1>
+            <p>Choose your preferred deposit method and start investing today</p>
         </div>
-    </div>
-    
-    <div class="row">
-        <!-- Deposit Form -->
-        <div class="col-lg-7">
-            <div class="card p-4">
-                <form method="post" enctype="multipart/form-data" id="deposit-form">
-                    {% csrf_token %}
-                    
-                    <!-- Amount field - hidden for bonus claims -->
-                    <div class="form-floating mb-3" id="amount-field">
-                        <input type="number" name="amount" id="amount" class="form-control bg-dark text-white" placeholder="Amount" min="50" step="0.01" required>
-                        <label for="amount">Amount (R)</label>
+
+        <!-- Deposit Method Navigation -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-lg-10">
+                <div class="deposit-card">
+                    <div class="p-3">
+                        <ul class="nav nav-tabs nav-fill justify-content-center" id="depositTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab">
+                                    <i class="bi bi-credit-card me-2"></i>Bank Card
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="eft-tab" data-bs-toggle="tab" data-bs-target="#eft" type="button" role="tab">
+                                    <i class="bi bi-bank me-2"></i>EFT Transfer
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="voucher-tab" data-bs-toggle="tab" data-bs-target="#voucher" type="button" role="tab">
+                                    <i class="bi bi-ticket-perforated me-2"></i>Voucher
+                                </button>
+                            </li>
+                        </ul>
                     </div>
-
-                    <!-- Hidden amount field for bonus claims -->
-                    <input type="hidden" name="bonus_amount" id="bonus_amount" value="0">
-
-                    <!-- Card Details Section -->
-                    <div class="mb-3">
-                        <label class="form-label">Card Details</label>
-                        <div class="d-flex align-items-center mb-2" id="card-brand-icons">
-                            <img src="https://img.icons8.com/color/48/000000/visa.png" id="visa-icon" alt="Visa" style="height:32px; margin-right:8px; opacity:0.4;">
-                            <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" id="mc-icon" alt="MasterCard" style="height:32px; margin-right:8px; opacity:0.4;">
-                            <img src="https://img.icons8.com/color/48/000000/amex.png" id="amex-icon" alt="Amex" style="height:32px; opacity:0.4;">
-                            <span class="ms-2 text-muted">We accept Visa, MasterCard, Amex</span>
-                        </div>
-                        <input type="text" name="card_number" id="card_number" class="form-control bg-dark text-white mb-2" placeholder="Card Number" maxlength="19" pattern="[0-9 ]{13,19}" required autocomplete="cc-number">
-                        <div class="row g-2">
-                            <div class="col">
-                                <input type="text" name="expiry_date" id="expiry_date" class="form-control bg-dark text-white" placeholder="MM/YY" maxlength="5" pattern="(0[1-9]|1[0-2])\/([0-9]{2})" required autocomplete="cc-exp">
-                            </div>
-                            <div class="col">
-                                <input type="text" name="cvv" class="form-control bg-dark text-white" placeholder="CVV" maxlength="4" pattern="[0-9]{3,4}" required autocomplete="cc-csc">
-                            </div>
-                        </div>
-                        <input type="text" name="cardholder_name" class="form-control bg-dark text-white mt-2" placeholder="Cardholder Name" required autocomplete="cc-name">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" id="submit-btn">Submit Deposit</button>
-                </form>
+                </div>
             </div>
         </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+
         
-        <!-- Deposit Instructions -->
-        <div class="col-lg-5">
-            <div class="card p-4 instructions-card h-100">
-                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle-fill me-2"></i> Important Instructions:</h5>
-                <ul class="list-unstyled text-muted" id="normal-instructions">
-                    <li class="mb-2">Minimum deposit amount is R50.</li>
-                    <li class="mb-2">Deposits are processed within 24 hours.</li>
-                    <li class="mb-2">Please use your username as reference when making the payment.</li>
-                    <li>Keep your proof of payment for verification.</li>
-                </ul>
-                
-                <ul class="list-unstyled text-muted" id="bonus-instructions" style="display:none;">
-                    <li class="mb-2">This is for account verification only.</li>
-                    <li class="mb-2">No money will be charged to your card.</li>
-                    <li class="mb-2">After verification, claim your R50 bonus.</li>
-                    <li>Your card details are encrypted and secure.</li>
-                </ul>
-                
-                <!-- Card Payment Instructions -->
-                <hr class="my-4">
-                <h5 class="fw-bold mb-3"><i class="bi bi-credit-card me-2"></i> Card Payment Instructions:</h5>
-                <div class="card-details-info">
-                    <ul class="list-unstyled text-muted">
-                        <li class="mb-2">We accept Visa, MasterCard, and American Express cards.</li>
-                        <li class="mb-2">Your card information is encrypted and secure.</li>
-                        <li class="mb-2">Deposits are processed instantly.</li>
-                        <li class="mb-2" id="min-amount-text">Minimum deposit amount is R50.</li>
-                    </ul>
+        <div class="tab-content" id="depositTabContent">
+            <!-- Bank Card Tab -->
+            <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab">
+                <div class="row justify-content-center">
+                    <!-- Deposit Form -->
+                    <div class="col-lg-7">
+                        <div class="deposit-card">
+                            <div class="form-section">
+                                <h4 class="mb-4 text-center">
+                                    <i class="bi bi-credit-card me-2 text-primary"></i>Bank Card Payment
+                                </h4>
+                                
+                                <form method="post" action="{% url 'deposit' %}" enctype="multipart/form-data" id="card-deposit-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="payment_method" value="card">
+                                    
+                                    <!-- Amount field -->
+                                    <div class="form-floating" id="amount-field">
+                                        <input type="number" name="amount" id="amount" class="form-control" 
+                                               placeholder="Amount" min="50" step="0.01" required>
+                                        <label for="amount">Amount (R)</label>
+                                        <div class="form-text">Minimum deposit amount is R50</div>
+                                    </div>
+
+
+
+                                    <!-- Card Details Section -->
+                                    <div class="card-details-section">
+                                        <h6 class="mb-3">
+                                            <i class="bi bi-shield-check me-2 text-success"></i>Secure Card Information
+                                        </h6>
+                                        
+                                        <div class="card-brand-icons">
+                                            <img src="https://img.icons8.com/color/48/000000/visa.png" id="visa-icon" alt="Visa" class="card-icon">
+                                            <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" id="mc-icon" alt="MasterCard" class="card-icon">
+                                            <img src="https://img.icons8.com/color/48/000000/amex.png" id="amex-icon" alt="Amex" class="card-icon">
+                                            <span class="text-light ms-2">We accept Visa, MasterCard & Amex</span>
+                                        </div>
+
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="card_number" id="card_number" class="form-control" 
+                                                   placeholder="Card Number" maxlength="19" pattern="[0-9 ]{13,19}" required autocomplete="cc-number">
+                                            <label for="card_number">Card Number</label>
+                                        </div>
+
+                                        <div class="row g-2">
+                                            <div class="col">
+                                                <div class="form-floating">
+                                                    <input type="text" name="expiry_date" id="expiry_date" class="form-control" 
+                                                           placeholder="MM/YY" maxlength="5" pattern="(0[1-9]|1[0-2])\/([0-9]{2})" required autocomplete="cc-exp">
+                                                    <label for="expiry_date">Expiry Date</label>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-floating">
+                                                    <input type="text" name="cvv" class="form-control" 
+                                                           placeholder="CVV" maxlength="4" pattern="[0-9]{3,4}" required autocomplete="cc-csc">
+                                                    <label for="cvv">CVV</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="cardholder_name" class="form-control" 
+                                                   placeholder="Cardholder Name" required autocomplete="cc-name">
+                                            <label for="cardholder_name">Cardholder Name</label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-submit" id="card-submit-btn">
+                                        <i class="bi bi-check-circle me-2"></i>Submit Card Deposit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Instructions Section -->
+                    <div class="col-lg-5">
+                        <div class="instructions-section">
+                            <h5 class="fw-bold mb-4 text-primary">
+                                <i class="bi bi-credit-card me-2"></i>Card Payment Info
+                            </h5>
+                            
+                            <div id="normal-instructions">
+                                <div class="instruction-item">
+                                    <div class="instruction-icon">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Minimum Amount:</strong> R50 required for deposits
+                                    </div>
+                                </div>
+                                
+                                <div class="instruction-item">
+                                    <div class="instruction-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Processing Time:</strong> Deposits processed within 24 hours
+                                    </div>
+                                </div>
+                                
+                                <div class="instruction-item">
+                                    <div class="instruction-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Security:</strong> All card information is encrypted and secure
+                                    </div>
+                                </div>
+                                
+                                <div class="instruction-item">
+                                    <div class="instruction-icon">
+                                        <i class="bi bi-credit-card"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Accepted Cards:</strong> Visa, MasterCard, American Express
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Security Notice -->
+                            <div class="mt-4 p-3 bg-dark rounded">
+                                <h6 class="text-success mb-2">
+                                    <i class="bi bi-shield-check me-2"></i>Security Features
+                                </h6>
+                                <ul class="list-unstyled mb-0 small text-light">
+                                    <li><i class="bi bi-check text-success me-1"></i>256-bit SSL encryption</li>
+                                    <li><i class="bi bi-check text-success me-1"></i>PCI DSS compliant</li>
+                                    <li><i class="bi bi-check text-success me-1"></i>Secure data transmission</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EFT Transfer Tab -->
+            <div class="tab-pane fade" id="eft" role="tabpanel" aria-labelledby="eft-tab">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="deposit-card">
+                            <div class="form-section">
+                                <h4 class="mb-4 text-center">
+                                    <i class="bi bi-bank me-2 text-primary"></i>EFT Bank Transfer
+                                </h4>
+                                
+                                <form method="post" action="{% url 'deposit' %}" enctype="multipart/form-data" id="eft-deposit-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="payment_method" value="eft">
+                                    
+                                    <!-- Amount field -->
+                                    <div class="form-floating mb-3">
+                                        <input type="number" name="eft_amount" id="eft_amount" class="form-control" 
+                                               placeholder="Amount" min="50" step="0.01" required>
+                                        <label for="eft_amount">Amount (R)</label>
+                                        <div class="form-text">Minimum deposit amount is R50</div>
+                                    </div>
+
+                                    <!-- Bank Details Section -->
+                                    <div class="card-details-section">
+                                        <h6 class="mb-3">
+                                            <i class="bi bi-bank me-2 text-success"></i>Bank Transfer Details
+                                        </h6>
+                                        
+                                        <div class="bank-info p-3 bg-dark rounded mb-3">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <strong class="text-light">Bank:</strong> Standard Bank<br>
+                                                    <strong class="text-light">Account Name:</strong> CapitalX Investments<br>
+                                                    <strong class="text-light">Account Type:</strong> Business Account
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <strong class="text-light">Account Number:</strong> 1234567890<br>
+                                                    <strong class="text-light">Branch Code:</strong> 051001<br>
+                                                    <strong class="text-light">Reference:</strong> Your Username
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="reference" id="reference" class="form-control" 
+                                                   placeholder="Payment Reference" required>
+                                            <label for="reference">Payment Reference</label>
+                                            <div class="form-text">Use your username as reference</div>
+                                        </div>
+
+                                        <div class="form-floating mb-3">
+                                            <input type="file" name="proof_image" id="proof_image" class="form-control" 
+                                                   accept="image/*" required>
+                                            <label for="proof_image">Proof of Payment</label>
+                                            <div class="form-text">Upload screenshot of your bank transfer</div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-submit" id="eft-submit-btn">
+                                        <i class="bi bi-check-circle me-2"></i>Submit EFT Deposit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-5">
+                        <div class="instructions-section">
+                            <h5 class="fw-bold mb-4 text-primary">
+                                <i class="bi bi-info-circle me-2"></i>EFT Instructions
+                            </h5>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-bank"></i>
+                                </div>
+                                <div>
+                                    <strong>Transfer to:</strong> Standard Bank account provided
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-tag"></i>
+                                </div>
+                                <div>
+                                    <strong>Reference:</strong> Use your username exactly
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                                <div>
+                                    <strong>Processing:</strong> 1-3 business days
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                                <div>
+                                    <strong>Proof Required:</strong> Upload transfer screenshot
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voucher Tab -->
+            <div class="tab-pane fade" id="voucher" role="tabpanel" aria-labelledby="voucher-tab">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="deposit-card">
+                            <div class="form-section">
+                                <h4 class="mb-4 text-center">
+                                    <i class="bi bi-ticket-perforated me-2 text-primary"></i>Voucher Deposit
+                                </h4>
+                                
+                                <form method="post" action="{% url 'voucher_deposit' %}" enctype="multipart/form-data" id="voucher-deposit-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="payment_method" value="voucher">
+                                    
+                                    <!-- Amount field -->
+                                    <div class="form-floating mb-3">
+                                        <input type="number" name="voucher_amount" id="voucher_amount" class="form-control" 
+                                               placeholder="Amount" min="50" step="0.01" required>
+                                        <label for="voucher_amount">Voucher Amount (R)</label>
+                                        <div class="form-text">Minimum voucher amount is R50</div>
+                                    </div>
+
+                                    <!-- Voucher Details Section -->
+                                    <div class="card-details-section">
+                                        <h6 class="mb-3">
+                                            <i class="bi bi-ticket-perforated me-2 text-success"></i>Voucher Information
+                                        </h6>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="voucher_code" id="voucher_code" class="form-control" 
+                                                   placeholder="Voucher Code" required>
+                                            <label for="voucher_code">Voucher Code</label>
+                                            <div class="form-text">Enter the code printed on your voucher</div>
+                                        </div>
+
+                                        <div class="form-floating mb-3">
+                                            <input type="file" name="voucher_image" id="voucher_image" class="form-control" 
+                                                   accept="image/*">
+                                            <label for="voucher_image">Voucher Image (Optional)</label>
+                                            <div class="form-text">Upload photo of your voucher for verification</div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-submit" id="voucher-submit-btn">
+                                        <i class="bi bi-check-circle me-2"></i>Submit Voucher
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-5">
+                        <div class="instructions-section">
+                            <h5 class="fw-bold mb-4 text-primary">
+                                <i class="bi bi-info-circle me-2"></i>Voucher Info
+                            </h5>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div>
+                                    <strong>Accepted:</strong> Gift cards, vouchers, prepaid cards
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                                <div>
+                                    <strong>Processing:</strong> Within 2 hours
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div>
+                                    <strong>Security:</strong> Your voucher details are protected
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-gift"></i>
+                                </div>
+                                <div>
+                                    <strong>Fast Approval:</strong> Usually processed within 2 hours
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+            <!-- Instructions Section -->
+            <div class="col-lg-5">
+                <div class="instructions-section">
+                    <h5 class="fw-bold mb-4 text-primary">
+                        <i class="bi bi-info-circle me-2"></i>Important Information
+                    </h5>
+                    
+                    <div id="normal-instructions">
+                        <div class="instruction-item">
+                            <div class="instruction-icon">
+                                <i class="bi bi-currency-dollar"></i>
+                            </div>
+                            <div>
+                                <strong>Minimum Amount:</strong> R50 required for deposits
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-item">
+                            <div class="instruction-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div>
+                                <strong>Processing Time:</strong> Deposits processed within 24 hours
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-item">
+                            <div class="instruction-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <strong>Security:</strong> All card information is encrypted and secure
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-item">
+                            <div class="instruction-icon">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div>
+                                <strong>Accepted Cards:</strong> Visa, MasterCard, American Express
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div>
+
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-item">
+                            <div class="instruction-icon">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <div>
+                                <strong>Data Protection:</strong> Your information is completely secure
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Notice -->
+                    <div class="mt-4 p-3 bg-dark rounded">
+                        <h6 class="text-success mb-2">
+                            <i class="bi bi-shield-check me-2"></i>Security Features
+                        </h6>
+                        <ul class="list-unstyled mb-0 small text-light">
+                            <li><i class="bi bi-check text-success me-1"></i>256-bit SSL encryption</li>
+                            <li><i class="bi bi-check text-success me-1"></i>PCI DSS compliant</li>
+                            <li><i class="bi bi-check text-success me-1"></i>Secure data transmission</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,60 +886,69 @@
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const amount = urlParams.get('amount');
-        const isBonusClaim = amount === '0';
         
-        if (amount !== null) {
+        if (amount !== null && amount !== '0') {
             document.getElementById('amount').value = amount;
         }
-        
-        if (isBonusClaim) {
-            // Show bonus info
-            document.getElementById('bonus-info').style.display = 'block';
-            
-            // Hide amount field for bonus claims
-            document.getElementById('amount-field').style.display = 'none';
-            
-            // Update form validation
-            document.getElementById('amount').removeAttribute('required');
-            document.getElementById('amount').setAttribute('disabled', 'true');
-            document.getElementById('bonus_amount').setAttribute('required', 'true');
-            
-            // Update instructions
-            document.getElementById('normal-instructions').style.display = 'none';
-            document.getElementById('bonus-instructions').style.display = 'block';
-            document.getElementById('min-amount-text').textContent = 'No minimum amount for bonus verification.';
-            
-            // Update submit button
-            document.getElementById('submit-btn').textContent = 'Verify Account & Claim Bonus';
-            document.getElementById('submit-btn').className = 'btn btn-warning';
-        } else {
-            document.getElementById('amount').removeAttribute('disabled');
-        }
+
+        // Initialize Bootstrap tabs
+        const triggerTabList = document.querySelectorAll('#depositTabs button[data-bs-toggle="tab"]');
+        triggerTabList.forEach(triggerEl => {
+            const tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', event => {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
     });
     
     // Form submission handling
-    document.getElementById('deposit-form').addEventListener('submit', function(e) {
+    document.getElementById('card-deposit-form').addEventListener('submit', function(e) {
+        // Basic form validation
         const amount = document.getElementById('amount').value;
-        const isBonusClaim = amount === '0' || amount === '';
-        
-        if (isBonusClaim) {
-            // For bonus claims, ensure the hidden field is set
-            document.getElementById('bonus_amount').value = '0';
-            // Remove the amount field from form submission
-            document.getElementById('amount').disabled = true;
+        if (!amount || parseFloat(amount) < 50) {
+            e.preventDefault();
+            alert('Please enter a minimum deposit amount of R50.');
+            return false;
         }
     });
-    
-    // File upload handling (only if elements exist)
-    const actualBtn = document.getElementById('proof');
-    const fileChosen = document.getElementById('file-chosen');
-    if (actualBtn && fileChosen) {
-        actualBtn.addEventListener('change', function(){
-            if (this.files[0]) {
-                fileChosen.textContent = this.files[0].name;
-            }
-        });
-    }
+
+    document.getElementById('eft-deposit-form').addEventListener('submit', function(e) {
+        // EFT form validation
+        const amount = document.getElementById('eft_amount').value;
+        const reference = document.getElementById('reference').value;
+        const proofImage = document.getElementById('proof_image').files[0];
+        
+        if (!amount || !reference || !proofImage) {
+            e.preventDefault();
+            alert('Please fill in all required fields for EFT deposit.');
+            return;
+        }
+        
+        if (parseFloat(amount) < 50) {
+            e.preventDefault();
+            alert('Minimum EFT amount is R50.');
+            return;
+        }
+    });
+
+    document.getElementById('voucher-deposit-form').addEventListener('submit', function(e) {
+        // Voucher form validation
+        const amount = document.getElementById('voucher_amount').value;
+        const code = document.getElementById('voucher_code').value;
+        
+        if (!amount || !code) {
+            e.preventDefault();
+            alert('Please fill in all required fields for voucher deposit.');
+            return;
+        }
+        
+        if (parseFloat(amount) < 50) {
+            e.preventDefault();
+            alert('Minimum voucher amount is R50.');
+            return;
+        }
+    });
 
     // Card brand detection and icon highlight
     function detectCardBrand(number) {
@@ -200,11 +958,13 @@
         if (/^3[47]/.test(number)) return 'amex';
         return null;
     }
+    
     function highlightBrand(brand) {
-        document.getElementById('visa-icon').style.opacity = (brand === 'visa') ? '1' : '0.4';
-        document.getElementById('mc-icon').style.opacity = (brand === 'mc') ? '1' : '0.4';
-        document.getElementById('amex-icon').style.opacity = (brand === 'amex') ? '1' : '0.4';
+        document.getElementById('visa-icon').classList.toggle('active', brand === 'visa');
+        document.getElementById('mc-icon').classList.toggle('active', brand === 'mc');
+        document.getElementById('amex-icon').classList.toggle('active', brand === 'amex');
     }
+    
     document.getElementById('card_number').addEventListener('input', function(e) {
         // Input masking for card number
         let value = e.target.value.replace(/\D/g, '');
@@ -212,10 +972,12 @@
         if (/^3[47]/.test(value)) value = value.slice(0, 15); // 15 for Amex
         let formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
         e.target.value = formatted.trim();
+        
         // Card brand detection
         const brand = detectCardBrand(value);
         highlightBrand(brand);
     });
+    
     // Input masking for expiry date
     const expiryInput = document.getElementById('expiry_date');
     expiryInput.addEventListener('input', function(e) {
@@ -225,6 +987,59 @@
             value = value.slice(0,2) + '/' + value.slice(2);
         }
         e.target.value = value;
+    });
+
+    // Add smooth animations
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+
+    // Tab switching with smooth transitions
+    document.querySelectorAll('#depositTabs button').forEach(button => {
+        button.addEventListener('click', function() {
+            console.log('Tab clicked:', this.textContent.trim());
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('#depositTabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Hide all tab content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+                console.log('Hiding tab:', pane.id);
+            });
+            
+            // Show selected tab content
+            const targetId = this.getAttribute('data-bs-target').substring(1);
+            const targetPane = document.getElementById(targetId);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+                console.log('Showing tab:', targetId);
+            } else {
+                console.error('Target tab not found:', targetId);
+            }
+        });
+    });
+
+    // Debug: Log all tabs on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('All nav items:', document.querySelectorAll('#depositTabs .nav-item').length);
+        console.log('All nav links:', document.querySelectorAll('#depositTabs .nav-link').length);
+        console.log('All tab panes:', document.querySelectorAll('.tab-pane').length);
+        
+        document.querySelectorAll('#depositTabs .nav-item').forEach((item, index) => {
+            console.log(`Nav item ${index}:`, item.textContent.trim());
+        });
     });
 </script>
 {% endblock %} 
