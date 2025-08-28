@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.admin.decorators import register
 from .models import (
-    CustomUser, Investment, Deposit, Withdrawal, Wallet, Referral, ReferralReward, IPAddress, DailySpecial, Backup, AdminActivityLog, Voucher, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment
+    CustomUser, Investment, Deposit, Withdrawal, Wallet, Referral, ReferralReward, IPAddress, DailySpecial, Backup, AdminActivityLog, Voucher, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead, EmailValidation, EmailSent
 )
 from django.urls import path, reverse
 from django.shortcuts import redirect, get_object_or_404
@@ -257,4 +257,144 @@ class PlanInvestmentAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
-    ) 
+    )
+
+
+# Email Lead System Admin Classes
+
+class EmailValidationInline(admin.TabularInline):
+    model = EmailValidation
+    extra = 0
+    readonly_fields = ('email_address', 'syntax_valid', 'mx_valid', 'smtp_valid', 'overall_valid', 'validated_at')
+    can_delete = False
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class EmailSentInline(admin.TabularInline):
+    model = EmailSent
+    extra = 0
+    readonly_fields = ('email_address', 'subject', 'document_attached', 'sent_at', 'success', 'opened', 'clicked', 'replied')
+    can_delete = False
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(LeadCampaign, site=admin_site)
+class LeadCampaignAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_by', 'total_leads', 'emails_sent', 'success_rate', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at', 'created_by')
+    search_fields = ('name', 'description')
+    readonly_fields = ('total_leads', 'emails_sent', 'success_rate', 'created_at')
+    
+    fieldsets = (
+        ('Campaign Details', {
+            'fields': ('name', 'description', 'is_active')
+        }),
+        ('Statistics', {
+            'fields': ('total_leads', 'emails_sent', 'success_rate'),
+            'classes': ('collapse',)
+        }),
+        ('Tracking', {
+            'fields': ('created_by', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # New campaign
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(Lead, site=admin_site)
+class LeadAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'domain', 'campaign', 'status', 'success', 'valid_emails_count', 'emails_sent_count', 'created_at')
+    list_filter = ('status', 'success', 'campaign', 'created_at', 'domain')
+    search_fields = ('first_name', 'last_name', 'domain', 'valid_emails', 'emails_sent')
+    readonly_fields = ('generated_emails', 'valid_emails', 'emails_sent', 'documents_created', 'processed_at', 'created_at', 'updated_at')
+    
+    inlines = [EmailValidationInline, EmailSentInline]
+    
+    fieldsets = (
+        ('Lead Information', {
+            'fields': ('campaign', 'first_name', 'last_name', 'domain', 'status')
+        }),
+        ('Processing Results', {
+            'fields': ('generated_emails', 'valid_emails', 'emails_sent', 'documents_created'),
+            'classes': ('collapse',)
+        }),
+        ('Status & Results', {
+            'fields': ('success', 'error_message', 'processed_at')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def valid_emails_count(self, obj):
+        return len(obj.valid_emails) if obj.valid_emails else 0
+    valid_emails_count.short_description = 'Valid Emails'
+    
+    def emails_sent_count(self, obj):
+        return len(obj.emails_sent) if obj.emails_sent else 0
+    emails_sent_count.short_description = 'Emails Sent'
+    
+    actions = ['mark_as_pending', 'mark_as_completed']
+    
+    @admin.action(description='Mark selected leads as pending')
+    def mark_as_pending(self, request, queryset):
+        updated = queryset.update(status='pending')
+        self.message_user(request, f'{updated} leads marked as pending.')
+    
+    @admin.action(description='Mark selected leads as completed')
+    def mark_as_completed(self, request, queryset):
+        updated = queryset.update(status='completed')
+        self.message_user(request, f'{updated} leads marked as completed.')
+
+
+@admin.register(EmailValidation, site=admin_site)
+class EmailValidationAdmin(admin.ModelAdmin):
+    list_display = ('email_address', 'lead', 'overall_valid', 'syntax_valid', 'mx_valid', 'smtp_valid', 'validated_at')
+    list_filter = ('overall_valid', 'syntax_valid', 'mx_valid', 'smtp_valid', 'validated_at')
+    search_fields = ('email_address', 'lead__first_name', 'lead__last_name', 'lead__domain')
+    readonly_fields = ('lead', 'email_address', 'syntax_valid', 'mx_valid', 'smtp_valid', 'overall_valid', 'validated_at')
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(EmailSent, site=admin_site)
+class EmailSentAdmin(admin.ModelAdmin):
+    list_display = ('email_address', 'lead', 'subject', 'document_attached', 'success', 'opened', 'clicked', 'replied', 'sent_at')
+    list_filter = ('success', 'document_attached', 'opened', 'clicked', 'replied', 'sent_at')
+    search_fields = ('email_address', 'subject', 'lead__first_name', 'lead__last_name')
+    readonly_fields = ('lead', 'email_address', 'subject', 'document_attached', 'document_path', 'sent_at', 'success', 'error_message')
+    
+    fieldsets = (
+        ('Email Details', {
+            'fields': ('lead', 'email_address', 'subject')
+        }),
+        ('Attachment', {
+            'fields': ('document_attached', 'document_path')
+        }),
+        ('Delivery Status', {
+            'fields': ('success', 'error_message', 'sent_at')
+        }),
+        ('Engagement Tracking', {
+            'fields': ('opened', 'clicked', 'replied'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False

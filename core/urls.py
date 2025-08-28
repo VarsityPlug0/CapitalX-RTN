@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import lead_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -46,6 +47,18 @@ urlpatterns = [
     path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='admin_approve_deposit'),
     path('admin/deposit/<int:deposit_id>/reject/', views.admin_reject_deposit, name='admin_reject_deposit'),
     path('admin/deposit-dashboard/', views.deposit_dashboard_view, name='deposit_dashboard'),
+
+    # Email Lead System URLs
+    path('admin/leads/', lead_views.lead_dashboard, name='lead_dashboard'),
+    path('admin/leads/analytics/', lead_views.lead_analytics, name='lead_analytics'),
+    path('admin/leads/campaign/<int:campaign_id>/', lead_views.campaign_detail, name='campaign_detail'),
+    path('admin/leads/campaign/<int:campaign_id>/upload/', lead_views.upload_leads, name='upload_leads'),
+    path('admin/leads/campaign/<int:campaign_id>/process/', lead_views.process_leads, name='process_leads'),
+    path('admin/leads/campaign/<int:campaign_id>/export/', lead_views.export_results, name='export_results'),
+    
+    # Lead System API URLs
+    path('api/leads/campaign/<int:campaign_id>/status/', lead_views.api_campaign_status, name='api_campaign_status'),
+    path('api/leads/campaign/<int:campaign_id>/toggle/', lead_views.api_toggle_campaign, name='api_toggle_campaign'),
 
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),

@@ -501,6 +501,106 @@ def create_referral_reward(sender, instance, created, **kwargs):
             # The user was not referred, so no action is needed
             pass
 
+
+# Email Lead System Models
+class LeadCampaign(models.Model):
+    """Model to track lead generation campaigns"""
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    total_leads = models.IntegerField(default=0)
+    emails_sent = models.IntegerField(default=0)
+    success_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.name} ({self.total_leads} leads)"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class Lead(models.Model):
+    """Model to store lead information and tracking"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending Processing'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+
+    campaign = models.ForeignKey(LeadCampaign, on_delete=models.CASCADE, related_name='leads')
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    domain = models.CharField(max_length=200)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Processing results
+    generated_emails = models.JSONField(default=list, blank=True)
+    valid_emails = models.JSONField(default=list, blank=True)
+    emails_sent = models.JSONField(default=list, blank=True)
+    documents_created = models.JSONField(default=list, blank=True)
+    
+    # Tracking
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Results
+    success = models.BooleanField(default=False)
+    error_message = models.TextField(blank=True)
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} @ {self.domain}"
+    
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['campaign', 'first_name', 'last_name', 'domain']
+
+
+class EmailValidation(models.Model):
+    """Model to store email validation results"""
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='email_validations')
+    email_address = models.EmailField()
+    syntax_valid = models.BooleanField(default=False)
+    mx_valid = models.BooleanField(default=False)
+    smtp_valid = models.BooleanField(default=False)
+    overall_valid = models.BooleanField(default=False)
+    validated_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        status = "✓ Valid" if self.overall_valid else "✗ Invalid"
+        return f"{self.email_address} - {status}"
+    
+    class Meta:
+        ordering = ['-validated_at']
+        unique_together = ['lead', 'email_address']
+
+
+class EmailSent(models.Model):
+    """Model to track sent emails"""
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='sent_emails')
+    email_address = models.EmailField()
+    subject = models.CharField(max_length=500)
+    document_attached = models.BooleanField(default=False)
+    document_path = models.CharField(max_length=500, blank=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(default=False)
+    error_message = models.TextField(blank=True)
+    
+    # Email engagement tracking (for future enhancement)
+    opened = models.BooleanField(default=False)
+    clicked = models.BooleanField(default=False)
+    replied = models.BooleanField(default=False)
+    
+    def __str__(self):
+        status = "✓ Sent" if self.success else "✗ Failed"
+        return f"{self.email_address} - {status}"
+    
+    class Meta:
+        ordering = ['-sent_at']
+
 # Signal to send admin notification when a deposit is created
 @receiver(post_save, sender=Deposit)
 def send_admin_deposit_notification_signal(sender, instance, created, **kwargs):
