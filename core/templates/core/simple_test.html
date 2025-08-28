@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .debug-item {
+            margin: 5px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .status.true { background: #d4edda; color: #155724; }
+        .status.false { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+        
+        <div class="success">
+            ✅ {{ message }}
+        </div>
+        
+        <div class="debug-info">
+            <h3>Debug Information:</h3>
+            
+            <div class="debug-item">
+                <strong>User Authenticated:</strong>
+                <span class="status {{ debug_info.user_authenticated|yesno:'true,false' }}">
+                    {{ debug_info.user_authenticated|yesno:'Yes,No' }}
+                </span>
+            </div>
+            
+            <div class="debug-item">
+                <strong>User Is Staff:</strong>
+                <span class="status {{ debug_info.user_is_staff|yesno:'true,false' }}">
+                    {{ debug_info.user_is_staff|yesno:'Yes,No' }}
+                </span>
+            </div>
+            
+            <div class="debug-item">
+                <strong>Session Key:</strong>
+                <code>{{ debug_info.session_key|default:'No session' }}</code>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <h3>Test Links:</h3>
+            <ul>
+                <li><a href="/health/">Health Check (JSON)</a></li>
+                <li><a href="/debug/imports/">Debug Imports (JSON)</a></li>
+                <li><a href="/login/">Login Page</a></li>
+                <li><a href="/capitalx_admin/">Admin Panel</a></li>
+                {% if debug_info.user_is_staff %}
+                <li><a href="/lead-manager/">Lead Manager</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 0.9em;">
+            <p>This is a simple test page to verify that the CapitalX Django application is running correctly on Render.</p>
+            <p>If you can see this page, the basic Django framework is working, static files are being served, and templates are rendering.</p>
+        </div>
+    </div>
+</body>
+</html>

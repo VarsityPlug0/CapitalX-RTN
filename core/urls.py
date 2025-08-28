@@ -3,6 +3,7 @@ from . import views
 from . import lead_views
 from . import lead_manager_views
 from . import admin_test_views
+from . import health_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -78,6 +79,11 @@ urlpatterns = [
     # Admin test URLs for debugging
     path('debug/admin-status/', admin_test_views.debug_admin_status, name='debug_admin_status'),
     path('test/lead-manager/', admin_test_views.simple_lead_manager, name='simple_lead_manager'),
+    
+    # Health check URLs for deployment debugging
+    path('health/', health_views.health_check, name='health_check'),
+    path('debug/imports/', health_views.debug_imports, name='debug_imports'),
+    path('test/', health_views.simple_test_page, name='simple_test_page'),
 
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
