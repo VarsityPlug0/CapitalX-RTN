@@ -2,8 +2,11 @@
 # exit on error
 set -o errexit
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Update pip first
+pip install --upgrade pip
+
+# Install Python dependencies with verbose output
+pip install -r requirements.txt --verbose
 
 # Collect static files
 python manage.py collectstatic --no-input
