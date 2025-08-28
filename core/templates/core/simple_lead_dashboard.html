@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Manager - CapitalX{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">🎯 Lead Manager (Simple Mode)</h1>
+            <p class="text-muted">Basic lead management interface</p>
+        </div>
+        <div>
+            <a href="/debug/imports/" class="btn btn-info me-2" target="_blank">
+                <i class="bi bi-bug"></i> Debug Imports
+            </a>
+            <a href="/test/lead-imports/" class="btn btn-warning">
+                <i class="bi bi-gear"></i> Test System
+            </a>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-{% if system_status == 'operational' %}success{% else %}warning{% endif %}">
+                <h5 class="alert-heading">
+                    {% if system_status == 'operational' %}
+                        ✅ System Operational
+                    {% else %}
+                        ⚠️ System Status: {{ system_status|title }}
+                    {% endif %}
+                </h5>
+                {% if error_message %}
+                    <p class="mb-0">{{ error_message }}</p>
+                {% else %}
+                    <p class="mb-0">Lead Manager is running in simple mode. All basic functions are available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card stats-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-primary me-3">
+                            <i class="bi bi-folder2-open"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Campaigns</h6>
+                            <h3 class="mb-0">{{ total_campaigns }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stats-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-info me-3">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Leads</h6>
+                            <h3 class="mb-0">{{ total_leads }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stats-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-success me-3">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Successful Leads</h6>
+                            <h3 class="mb-0">{{ successful_leads }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stats-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-warning me-3">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Emails Sent</h6>
+                            <h3 class="mb-0">{{ total_emails_sent }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- System Information -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">🔧 System Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if system_status == 'operational' %}
+                        <div class="alert alert-success">
+                            <h6 class="alert-heading">✅ Lead Manager Ready</h6>
+                            <p>The lead management system is operational. You can access full features through the standard Lead Manager interface.</p>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Available Features:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check text-success me-2"></i>Campaign Management</li>
+                                        <li><i class="bi bi-check text-success me-2"></i>Lead Generation</li>
+                                        <li><i class="bi bi-check text-success me-2"></i>Email Processing</li>
+                                        <li><i class="bi bi-check text-success me-2"></i>Statistics Tracking</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>System Capabilities:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-info-circle text-info me-2"></i>{{ suggestions.available_first_names }} First Names</li>
+                                        <li><i class="bi bi-info-circle text-info me-2"></i>{{ suggestions.available_last_names }} Last Names</li>
+                                        <li><i class="bi bi-info-circle text-info me-2"></i>{{ suggestions.available_domains }} Email Domains</li>
+                                        <li><i class="bi bi-info-circle text-info me-2"></i>Batch sizes: {{ suggestions.recommended_batch_sizes|join:", " }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="/lead-manager/" class="btn btn-primary btn-lg">
+                                <i class="bi bi-rocket"></i> Access Full Lead Manager
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading">⚠️ System Issue Detected</h6>
+                            <p>There's an issue with the lead management system. Use the debug tools to identify the problem.</p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Debug Tools</h6>
+                                        <p>Test system components to identify issues:</p>
+                                        <a href="/test/lead-imports/" class="btn btn-warning">
+                                            <i class="bi bi-gear"></i> Test Lead System
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Import Status</h6>
+                                        <p>Check if all dependencies are available:</p>
+                                        <a href="/debug/imports/" class="btn btn-info" target="_blank">
+                                            <i class="bi bi-bug"></i> Debug Imports
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Campaigns -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 Recent Campaigns</h5>
+                </div>
+                <div class="card-body">
+                    {% if campaigns %}
+                        {% for campaign in campaigns %}
+                        <div class="campaign-item border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ campaign.name }}</h6>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <span class="badge bg-info">{{ campaign.total_leads }} leads</span>
+                                        {% if campaign.success_rate > 0 %}
+                                        <span class="badge bg-{% if campaign.success_rate >= 50 %}success{% elif campaign.success_rate >= 25 %}warning{% else %}danger{% endif %}">
+                                            {{ campaign.success_rate|floatformat:0 }}% success
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">{{ campaign.created_at|timesince }} ago</small>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    {% if campaign.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-folder-x display-4 text-muted"></i>
+                            <h6 class="mt-3">No campaigns yet</h6>
+                            <p class="text-muted">Create your first campaign to get started</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-card {
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.campaign-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+</style>
+{% endblock %}

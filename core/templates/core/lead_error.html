@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Manager Error - CapitalX{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">🚫 Lead Manager System Error</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5>System Status: {{ system_status|title }}</h5>
+                        <p>{{ error_message }}</p>
+                    </div>
+                    
+                    {% if debug_info %}
+                    <div class="mb-4">
+                        <h6>Debug Information:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Error Type:</strong></td>
+                                    <td><code>{{ debug_info.error_type }}</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Details:</strong></td>
+                                    <td><code>{{ debug_info.details }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>🔧 Troubleshooting Steps:</h6>
+                            <ol>
+                                <li>Check system imports and dependencies</li>
+                                <li>Verify database models are migrated</li>
+                                <li>Test individual components</li>
+                                <li>Check server logs for detailed errors</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>🔍 Debug Tools:</h6>
+                            <div class="d-grid gap-2">
+                                <a href="/health/" class="btn btn-info btn-sm" target="_blank">
+                                    <i class="bi bi-heart-pulse"></i> Health Check
+                                </a>
+                                <a href="/debug/imports/" class="btn btn-warning btn-sm" target="_blank">
+                                    <i class="bi bi-bug"></i> Debug Imports
+                                </a>
+                                <a href="/test/lead-imports/" class="btn btn-secondary btn-sm">
+                                    <i class="bi bi-gear"></i> Test Lead System
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Alternative Options:</h6>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="/simple-lead-manager/" class="btn btn-primary">
+                                <i class="bi bi-shield-check"></i> Try Simple Mode
+                            </a>
+                            <a href="/capitalx_admin/" class="btn btn-secondary">
+                                <i class="bi bi-gear"></i> Admin Panel
+                            </a>
+                            <a href="/test/" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Test Page
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-top">
+                        <h6>Common Issues & Solutions:</h6>
+                        <div class="accordion" id="troubleshootingAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#import-error">
+                                        Import Errors
+                                    </button>
+                                </h2>
+                                <div id="import-error" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                    <div class="accordion-body">
+                                        <p><strong>Symptoms:</strong> Cannot import lead_generator, lead_system, or dependencies</p>
+                                        <p><strong>Solutions:</strong></p>
+                                        <ul>
+                                            <li>Check if reportlab and dnspython are installed</li>
+                                            <li>Verify Python path and module structure</li>
+                                            <li>Use simple mode as fallback</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#database-error">
+                                        Database Errors
+                                    </button>
+                                </h2>
+                                <div id="database-error" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                    <div class="accordion-body">
+                                        <p><strong>Symptoms:</strong> Lead models not found, migration issues</p>
+                                        <p><strong>Solutions:</strong></p>
+                                        <ul>
+                                            <li>Run database migrations</li>
+                                            <li>Check if LeadCampaign, Lead models exist</li>
+                                            <li>Verify PostgreSQL connection</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            <i class="bi bi-house"></i> Return Home
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-secondary ms-2">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

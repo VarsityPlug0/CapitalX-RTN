@@ -4,6 +4,7 @@ from . import lead_views
 from . import lead_manager_views
 from . import admin_test_views
 from . import health_views
+from . import simple_lead_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -63,8 +64,10 @@ urlpatterns = [
     path('api/leads/campaign/<int:campaign_id>/status/', lead_views.api_campaign_status, name='api_campaign_status'),
     path('api/leads/campaign/<int:campaign_id>/toggle/', lead_views.api_toggle_campaign, name='api_toggle_campaign'),
     
-    # Lead Manager URLs (User-friendly interface)
-    path('lead-manager/', lead_manager_views.lead_manager_dashboard, name='lead_manager_dashboard'),
+    # Lead Manager URLs (User-friendly interface) - Using simple version for now
+    path('lead-manager/', simple_lead_views.simple_lead_dashboard, name='lead_manager_dashboard'),
+    path('lead-manager-full/', lead_manager_views.lead_manager_dashboard, name='lead_manager_full'),
+    path('simple-lead-manager/', simple_lead_views.simple_lead_dashboard, name='simple_lead_manager'),
     path('lead-manager/campaigns/', lead_manager_views.campaign_manager_list, name='campaign_manager_list'),
     path('lead-manager/campaign/<int:campaign_id>/', lead_manager_views.campaign_manager_detail, name='campaign_manager_detail'),
     path('lead-manager/create-campaign/', lead_manager_views.create_automated_campaign, name='create_automated_campaign'),
@@ -84,6 +87,7 @@ urlpatterns = [
     path('health/', health_views.health_check, name='health_check'),
     path('debug/imports/', health_views.debug_imports, name='debug_imports'),
     path('test/', health_views.simple_test_page, name='simple_test_page'),
+    path('test/lead-imports/', simple_lead_views.test_lead_imports, name='test_lead_imports'),
 
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
