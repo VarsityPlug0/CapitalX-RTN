@@ -1,4 +1,5 @@
 # CapitalX Platform - Render Deployment Guide
+**Updated: January 2024 - Now includes Lead Manager System**
 
 ## 🚀 Quick Deployment Steps
 
