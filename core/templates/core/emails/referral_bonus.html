@@ -45,14 +45,14 @@
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-        <a href="{{ site_url }}/wallet/" class="btn" style="background: #28a745;">View Wallet</a>
-        <a href="{{ site_url }}/referral/" class="btn" style="background: #3498db; margin-left: 10px;">Invite More Friends</a>
+        <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/wallet/" class="btn" style="background: #28a745;">View Wallet</a>
+        <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/referral/" class="btn" style="background: #3498db; margin-left: 10px;">Invite More Friends</a>
     </div>
     
     <div class="info-box">
         <h3>🔗 Your Referral Link</h3>
         <p style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; word-break: break-all; margin: 15px 0;">
-            {{ site_url }}/register/?ref={{ referrer.username }}
+            {{ site_url|default:'https://capitalx-rtn.onrender.com' }}/register/?ref={{ referrer.username }}
         </p>
     </div>
     

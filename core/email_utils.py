@@ -11,6 +11,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Production site URL configuration
+PRODUCTION_SITE_URL = 'https://capitalx-rtn.onrender.com'
+
+def get_site_url():
+    """
+    Get the production site URL for use in emails and templates.
+    This ensures all email links point to the correct production domain.
+    """
+    return PRODUCTION_SITE_URL
+
 class EmailService:
     """Comprehensive email service for CapitalX application"""
     
@@ -299,7 +309,7 @@ def send_deposit_status_email(user, deposit, old_status, new_status):
             'amount': deposit.amount,
             'payment_method': deposit.get_payment_method_display(),
             'approved_date': timezone.now(),
-            'site_url': 'http://localhost:8000',  # You can make this dynamic
+            'site_url': get_site_url(),
         }
         
     elif new_status == 'rejected':
@@ -314,7 +324,7 @@ def send_deposit_status_email(user, deposit, old_status, new_status):
             'payment_method': deposit.get_payment_method_display(),
             'rejected_date': timezone.now(),
             'admin_notes': deposit.admin_notes,
-            'site_url': 'http://localhost:8000',
+            'site_url': get_site_url(),
         }
         
     else:
@@ -330,7 +340,7 @@ def send_deposit_status_email(user, deposit, old_status, new_status):
             'new_status': new_status.title(),
             'payment_method': deposit.get_payment_method_display(),
             'updated_date': timezone.now(),
-            'site_url': 'http://localhost:8000',
+            'site_url': get_site_url(),
         }
     
     return email_service.send_email(
@@ -353,7 +363,7 @@ def send_referral_bonus_email(referrer, referred_user, reward_amount, deposit_am
         'reward_amount': reward_amount,
         'deposit_amount': deposit_amount,
         'earned_date': timezone.now(),
-        'site_url': 'http://localhost:8000',
+        'site_url': get_site_url(),
     }
     
     return send_custom_email(
@@ -377,8 +387,8 @@ def send_admin_deposit_notification(deposit):
         'amount': deposit.amount,
         'payment_method': deposit.get_payment_method_display(),
         'submitted_date': deposit.created_at,
-        'admin_panel_url': 'http://localhost:8000/capitalx_admin/core/deposit/',
-        'site_url': 'http://localhost:8000',
+        'admin_panel_url': f'{get_site_url()}/capitalx_admin/core/deposit/',
+        'site_url': get_site_url(),
     }
     
     try:
