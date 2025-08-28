@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Simple Lead Manager Test - CapitalX{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">✅ Lead Manager Access Test</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h5>Success! You have admin access to the Lead Manager</h5>
+                        <p>This confirms that your admin privileges are working correctly.</p>
+                    </div>
+                    
+                    <h6>Your Admin Status:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ debug_info.email }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Staff Status:</strong></td>
+                                <td>
+                                    {% if debug_info.is_staff %}
+                                        <span class="badge bg-success">✓ Staff</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Not Staff</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Superuser Status:</strong></td>
+                                <td>
+                                    {% if debug_info.is_superuser %}
+                                        <span class="badge bg-success">✓ Superuser</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Not Superuser</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Next Steps:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Try Full Lead Manager</h6>
+                                        <p>Now that we've confirmed your access, try the full Lead Manager interface:</p>
+                                        <a href="{% url 'lead_manager_dashboard' %}" class="btn btn-primary">
+                                            <i class="bi bi-envelope-plus"></i> Open Lead Manager
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Debug Information</h6>
+                                        <p>Check detailed user status information:</p>
+                                        <a href="{% url 'debug_admin_status' %}" class="btn btn-info" target="_blank">
+                                            <i class="bi bi-bug"></i> View Debug Info
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="bi bi-house"></i> Return to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

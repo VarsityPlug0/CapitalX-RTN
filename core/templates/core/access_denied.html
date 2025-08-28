@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied - CapitalX{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">🚫 Access Denied</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5>Admin privileges required to access this page</h5>
+                        <p>You need administrator access to use the Lead Manager system.</p>
+                    </div>
+                    
+                    <h6>Debug Information:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ user_info.email }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Staff Status:</strong></td>
+                                <td>
+                                    {% if user_info.is_staff %}
+                                        <span class="badge bg-success">✓ Staff</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Not Staff</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Superuser Status:</strong></td>
+                                <td>
+                                    {% if user_info.is_superuser %}
+                                        <span class="badge bg-success">✓ Superuser</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Not Superuser</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Active Status:</strong></td>
+                                <td>
+                                    {% if user_info.is_active %}
+                                        <span class="badge bg-success">✓ Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Solutions:</h6>
+                        <ul>
+                            <li>Contact the system administrator to grant you admin privileges</li>
+                            <li>Make sure you're logged in with an admin account</li>
+                            <li>Try logging out and logging back in</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            <i class="bi bi-house"></i> Return Home
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-secondary ms-2">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

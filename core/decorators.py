@@ -32,9 +32,18 @@ def admin_only(view_func):
     """
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        # Check if user is authenticated and is not admin
-        if not request.user.is_authenticated or not (request.user.is_staff or request.user.is_superuser):
-            messages.error(request, 'Access denied. Admin privileges required.')
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            messages.error(request, 'Please log in to access this page.')
+            return redirect('login')
+        
+        # Check if user has admin privileges
+        if not (request.user.is_staff or request.user.is_superuser):
+            messages.error(
+                request, 
+                f'Access denied. Admin privileges required. '
+                f'Current user: {request.user.email} (Staff: {request.user.is_staff}, Superuser: {request.user.is_superuser})'
+            )
             return redirect('home')
         
         # Continue with normal view execution

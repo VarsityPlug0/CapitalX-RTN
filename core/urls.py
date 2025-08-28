@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import lead_views
 from . import lead_manager_views
+from . import admin_test_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -73,6 +74,10 @@ urlpatterns = [
     
     # Progress tracking API
     path('api/leads/progress/<str:operation_id>/', lead_manager_views.get_processing_progress, name='get_processing_progress'),
+    
+    # Admin test URLs for debugging
+    path('debug/admin-status/', admin_test_views.debug_admin_status, name='debug_admin_status'),
+    path('test/lead-manager/', admin_test_views.simple_lead_manager, name='simple_lead_manager'),
 
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
