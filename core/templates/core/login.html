@@ -34,21 +34,36 @@
     .login-input {
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
+        color: #ffffff; /* Pure white for maximum visibility */
         border-radius: 0.5rem;
         padding: 0.875rem 1rem;
         font-size: 1rem;
+        font-weight: 500; /* Slightly bolder for better readability */
     }
     
     .login-input:focus {
         background: rgba(255, 255, 255, 0.15);
         border-color: #3399ff;
         box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
-        color: white;
+        color: #ffffff; /* Ensure text stays white when focused */
     }
     
     .login-input::placeholder {
         color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Specific enhancements for number inputs */
+    input[type="number"],
+    input[type="tel"] {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    input[type="number"]:focus,
+    input[type="tel"]:focus {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.15) !important;
     }
     
     .input-icon {

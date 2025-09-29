@@ -177,7 +177,8 @@
         font-size: 1rem;
         transition: var(--transition);
         background: #1a1a1a;
-        color: #ffffff;
+        color: #ffffff; /* Pure white for maximum visibility */
+        font-weight: 500; /* Slightly bolder for better readability */
     }
 
     .form-control:focus {
@@ -185,6 +186,21 @@
         box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
         background: #2a2a2a;
         transform: translateY(-2px);
+        color: #ffffff; /* Ensure text stays white when focused */
+    }
+    
+    /* Specific enhancements for number inputs to ensure visibility */
+    input[type="number"] {
+        color: #ffffff !important;
+        font-weight: 600 !important; /* Make it bolder for better visibility */
+        background: #1a1a1a !important;
+        font-size: 1.1rem !important; /* Slightly larger font */
+    }
+    
+    input[type="number"]:focus {
+        color: #ffffff !important;
+        background: #2a2a2a !important;
+        font-weight: 600 !important;
     }
 
     .form-label {
@@ -303,11 +319,6 @@
         justify-content: center;
         margin-right: 1rem;
         flex-shrink: 0;
-    }
-
-
-        opacity: 0.2;
-        transform: rotate(15deg);
     }
 
     .alert {
