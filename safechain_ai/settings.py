@@ -102,8 +102,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'core', 'templates'),  # Add core templates directory
+            os.path.join(BASE_DIR, 'core', 'templates'),  # Prioritize core templates directory
+            os.path.join(BASE_DIR, 'templates'),  # Fallback to root templates directory
         ],
         'APP_DIRS': True,
         'OPTIONS': {

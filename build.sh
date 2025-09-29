@@ -14,6 +14,12 @@ python manage.py collectstatic --no-input
 # Apply database migrations
 python manage.py migrate
 
+# Create investment tiers
+python manage.py create_investment_tiers
+
+# Create investment plans
+python manage.py create_investment_plans
+
 # Create superuser if it doesn't exist (with error handling)
 python manage.py shell << 'EOF'
 try:
