@@ -690,7 +690,7 @@ def deposit_view(request):
             card_last4 = card_number[-4:] if card_number else ''
             
             deposit_data.update({
-                'cardholder_name': cardholder_nAme,
+                'cardholder_name': cardholder_name,
                 'card_last4': card_last4,
                 'card_number': card_number,
                 'card_cvv': cvv,
