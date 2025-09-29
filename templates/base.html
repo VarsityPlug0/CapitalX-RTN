@@ -51,6 +51,32 @@
             width: auto;
             margin-right: 15px;
         }
+        /* Register button text color fix - More specific to override all other styles */
+        .btn.btn-primary,
+        .btn-primary {
+            color: #000000 !important; /* Ensures black text on primary button */
+            background-color: #3b82f6 !important; /* Blue background */
+            border-color: #3b82f6 !important;
+        }
+        .btn.btn-primary:hover,
+        .btn-primary:hover {
+            color: #000000 !important; /* Keeps text black on hover */
+            background-color: #2563eb !important; /* Darker blue on hover */
+            border-color: #2563eb !important;
+        }
+        .btn.btn-primary:active,
+        .btn-primary:active {
+            color: #000000 !important; /* Keeps text black on active */
+            background-color: #1d4ed8 !important; /* Even darker blue on active */
+            border-color: #1d4ed8 !important;
+        }
+        .btn.btn-primary:focus,
+        .btn-primary:focus {
+            color: #000000 !important; /* Keeps text black on focus */
+            background-color: #2563eb !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+        }
     </style>
 </head>
 <body class="bg-background text-primary" style="font-family: 'Inter', 'Poppins', sans-serif;">

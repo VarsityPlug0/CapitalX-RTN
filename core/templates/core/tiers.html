@@ -62,9 +62,16 @@
                         <h3 class="card-title fw-bold mt-2">{{ company.name }}</h3>
                     </div>
                     <ul class="list-unstyled">
-                        <li><strong>Investment:</strong> R{{ company.share_price|floatformat:2 }}</li>
+                        <li><strong>Investment:</strong> R{{ company.share_price|floatformat:0 }}</li>
                         <li><strong>Duration:</strong> {{ company.duration_days }} days</li>
-                        <li><strong>Expected Return:</strong> R{{ company.expected_return|floatformat:2 }}</li>
+                        <li><strong>Expected Return:</strong> R{{ company.expected_return|floatformat:0 }}</li>
+                        {% if company.name == "Foundation Tier" %}
+                            <li class="text-success"><strong>Beginner Friendly</strong> - Low risk, steady returns</li>
+                        {% elif company.name == "Growth Tier" %}
+                            <li class="text-warning"><strong>Intermediate</strong> - Balanced risk and reward</li>
+                        {% elif company.name == "Premium Tier" %}
+                            <li class="text-primary"><strong>Advanced</strong> - High returns for experienced investors</li>
+                        {% endif %}
                     </ul>
                     <p class="text-muted small">{{ company.description }}</p>
                     <div class="mt-auto">
