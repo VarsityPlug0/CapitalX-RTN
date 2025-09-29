@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,22 +18,38 @@
     {% block extra_css %}{% endblock %}
     <style>
         .logo-x {
-            color: #3399ff;
+            color: #3b82f6;
             font-weight: 900;
             font-size: 1.5em;
             letter-spacing: 1px;
         }
-        .logo-x-gold { color: #FFD700; }
+        .logo-x-gold { 
+            color: #f59e0b; 
+        }
         .navbar-brand span {
             font-family: 'Poppins', 'Inter', sans-serif;
             font-weight: 700;
             font-size: 1.5rem;
         }
+        /* Theme toggle button */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .theme-toggle:hover {
+            background: var(--surface-alt);
+            border-color: var(--text-secondary);
+        }
     </style>
 </head>
-<body class="bg-dark text-white" style="font-family: 'Inter', 'Poppins', sans-serif;">
+<body class="bg-background text-primary" style="font-family: 'Inter', 'Poppins', sans-serif;">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark site-header sticky-top py-1" style="background: #061a40;">
+    <nav class="navbar navbar-expand-lg site-header sticky-top py-1">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
                 <span class="me-2" style="font-size: 2rem; font-weight: 700; letter-spacing: 1px;">
@@ -52,21 +68,26 @@
                     <li class="nav-item"><a href="{% url 'feed' %}" class="nav-link">Feed</a></li>
                 </ul>
                 <div class="d-flex align-items-center navbar-nav">
+                    <!-- Theme Toggle Button -->
+                    <button id="theme-toggle" class="theme-toggle me-3" aria-label="Toggle theme">
+                        <i class="bi bi-sun-fill"></i>
+                    </button>
+                    
                     {% if user.is_authenticated %}
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>
                                 {{ user.email }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                            <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'logout' %}">Log Out</a></li>
                             </ul>
                         </div>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Log In</a>
-                        <a href="{% url 'register' %}" class="btn btn-primary" style="background: #3399ff; border-color: #3399ff;">Start for Free</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline me-2">Log In</a>
+                        <a href="{% url 'register' %}" class="btn btn-primary">Start for Free</a>
                     {% endif %}
                 </div>
             </div>
@@ -85,19 +106,43 @@
         {% block content %}{% endblock %}
     </main>
     <!-- Footer -->
-    <footer class="footer mt-auto py-3" style="background: #061a40; border-top: 2px solid #3399ff;">
+    <footer class="footer mt-auto py-3">
         <div class="container text-center">
-            <p class="text-muted">© 2024 CapitalXPlatform. All rights reserved.</p>
+            <p class="text-secondary">© 2024 CapitalXPlatform. All rights reserved.</p>
             <div>
-                <a href="#" class="text-white me-3">Terms</a>
-                <a href="#" class="text-white me-3">Contact</a>
-                <a href="#" class="text-white me-3">Support</a>
-                <a href="#" class="text-white">Twitter</a>
+                <a href="#" class="text-secondary me-3">Terms</a>
+                <a href="#" class="text-secondary me-3">Contact</a>
+                <a href="#" class="text-secondary me-3">Support</a>
+                <a href="#" class="text-secondary">Twitter</a>
             </div>
         </div>
     </footer>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const htmlElement = document.documentElement;
+            
+            // Check for saved theme or default to dark
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            htmlElement.setAttribute('data-theme', savedTheme);
+            themeIcon.className = savedTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+            
+            // Toggle theme function
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = htmlElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                htmlElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                themeIcon.className = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+            });
+        });
+    </script>
 </body>
-</html> 
+</html>

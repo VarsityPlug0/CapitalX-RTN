@@ -36,6 +36,8 @@ urlpatterns = [
     path('tutorial/', views.tutorial_view, name='tutorial'),
     path('support/', views.support_view, name='support'),
     path('figma-showcase/', views.figma_design_showcase, name='figma_showcase'),
+    path('contrast-test/', views.contrast_test_view, name='contrast_test'),
+    path('whitish-text/', views.whitish_text_test_view, name='whitish_text_test'),
 
 
     # OTP Email Verification URLs

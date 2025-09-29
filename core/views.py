@@ -1349,6 +1349,14 @@ def figma_design_showcase(request):
     """Showcase page for Figma-like design system"""
     return render(request, 'core/figma_design_showcase.html')
 
+def contrast_test_view(request):
+    """Test page for proper text/background contrast"""
+    return render(request, 'core/contrast_test.html')
+
+def whitish_text_test_view(request):
+    """Test page for all whitish text implementation"""
+    return render(request, 'core/whitish_text_test.html')
+
 # Admin action views for deposit management
 @staff_member_required
 def admin_approve_deposit(request, deposit_id):
