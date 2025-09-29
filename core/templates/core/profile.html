@@ -10,6 +10,35 @@
         height: 150px;
         object-fit: cover;
     }
+    
+    /* Enhanced styling for form controls to ensure number visibility */
+    .form-control {
+        background-color: var(--surface-alt) !important;
+        color: #ffffff !important; /* Pure white for maximum visibility */
+        font-weight: 500; /* Slightly bolder for better readability */
+        border: 1px solid var(--border);
+    }
+    
+    .form-control:focus {
+        background-color: var(--surface) !important;
+        color: #ffffff !important; /* Ensure text stays white when focused */
+        border-color: var(--text-secondary);
+        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Specific enhancements for number inputs */
+    input[type="number"],
+    input[type="tel"] {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        background-color: var(--surface-alt) !important;
+    }
+    
+    input[type="number"]:focus,
+    input[type="tel"]:focus {
+        color: #ffffff !important;
+        background-color: var(--surface) !important;
+    }
 </style>
 {% endblock %}
 
