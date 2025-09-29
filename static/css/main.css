@@ -411,15 +411,13 @@ a:hover {
 /* Specific styling for number inputs to ensure visibility */
 input[type="number"] {
     color: #ffffff !important;
-    font-weight: 600 !important; /* Make it bolder for better visibility */
+    font-weight: 500 !important;
     background-color: var(--surface-alt) !important;
-    font-size: 1.1rem !important; /* Slightly larger font */
 }
 
 input[type="number"]:focus {
     color: #ffffff !important;
     background-color: var(--surface) !important;
-    font-weight: 600 !important;
 }
 
 input[type="tel"] {
