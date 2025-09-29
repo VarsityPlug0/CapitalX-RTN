@@ -192,13 +192,15 @@
     /* Specific enhancements for number inputs to ensure visibility */
     input[type="number"] {
         color: #ffffff !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important; /* Make it bolder for better visibility */
         background: #1a1a1a !important;
+        font-size: 1.1rem !important; /* Slightly larger font */
     }
     
     input[type="number"]:focus {
         color: #ffffff !important;
         background: #2a2a2a !important;
+        font-weight: 600 !important;
     }
 
     .form-label {
@@ -317,14 +319,6 @@
         justify-content: center;
         margin-right: 1rem;
         flex-shrink: 0;
-    }
-
-    .alert {
-        border: none;
-        border-radius: var(--border-radius);
-        padding: 1rem 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     .alert {

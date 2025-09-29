@@ -40,17 +40,16 @@
     .form-floating-custom .form-control {
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #ffffff; /* Pure white for maximum visibility */
+        color: white;
         border-radius: 0.5rem;
         padding: 0.875rem 0.75rem;
-        font-weight: 500; /* Slightly bolder for better readability */
     }
     
     .form-floating-custom .form-control:focus {
         background: rgba(255, 255, 255, 0.15);
         border-color: #3399ff;
         box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
-        color: #ffffff; /* Ensure text stays white when focused */
+        color: white;
     }
     
     .form-floating-custom .form-control::placeholder {
@@ -61,14 +60,16 @@
     input[type="number"],
     input[type="tel"] {
         color: #ffffff !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important; /* Make it bolder for better visibility */
         background: rgba(255, 255, 255, 0.1) !important;
+        font-size: 1.1rem !important; /* Slightly larger font */
     }
     
     input[type="number"]:focus,
     input[type="tel"]:focus {
         color: #ffffff !important;
         background: rgba(255, 255, 255, 0.15) !important;
+        font-weight: 600 !important;
     }
     
     .btn-register {
