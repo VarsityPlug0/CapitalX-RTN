@@ -57,18 +57,25 @@
             color: #000000 !important; /* Ensures black text on primary button */
             background-color: #3b82f6 !important; /* Blue background */
             border-color: #3b82f6 !important;
+            padding: 0.5rem 1.5rem; /* Consistent padding */
+            font-weight: 600; /* Bold text */
+            border-radius: 0.5rem; /* Rounded corners */
+            transition: all 0.2s ease-in-out; /* Smooth transitions */
         }
         .btn.btn-primary:hover,
         .btn-primary:hover {
             color: #000000 !important; /* Keeps text black on hover */
             background-color: #2563eb !important; /* Darker blue on hover */
             border-color: #2563eb !important;
+            transform: translateY(-2px); /* Subtle lift effect */
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); /* Shadow on hover */
         }
         .btn.btn-primary:active,
         .btn-primary:active {
             color: #000000 !important; /* Keeps text black on active */
             background-color: #1d4ed8 !important; /* Even darker blue on active */
             border-color: #1d4ed8 !important;
+            transform: translateY(0); /* Reset lift effect */
         }
         .btn.btn-primary:focus,
         .btn-primary:focus {
@@ -76,6 +83,46 @@
             background-color: #2563eb !important;
             border-color: #2563eb !important;
             box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+        }
+        
+        /* Responsive adjustments for navigation buttons */
+        @media (max-width: 991px) {
+            .navbar-nav .btn-primary {
+                margin-top: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1.25rem;
+            }
+            
+            .btn.btn-primary,
+            .btn-primary {
+                padding: 0.4rem 1.25rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar-logo {
+                height: 30px;
+                margin-right: 10px;
+            }
+            
+            .btn.btn-primary,
+            .btn-primary {
+                padding: 0.375rem 1rem;
+                font-size: 0.875rem;
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+            
+            .navbar-nav {
+                text-align: center;
+            }
         }
     </style>
 </head>
