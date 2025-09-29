@@ -1,0 +1,290 @@
+{% extends '../../templates/base.html' %}
+
+{% block title %}Figma Design Showcase - CapitalX{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-6">
+        <h1>Professional Figma Design System</h1>
+        <p class="text-secondary fs-5">Showcasing modern UI/UX components with professional styling</p>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Color Palette</h2>
+            <p class="card-subtitle">Professional color system for consistent branding</p>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 grid-cols-4-md gap-4">
+                <div class="text-center">
+                    <div class="rounded-xl mb-2" style="background-color: #3b82f6; height: 80px;"></div>
+                    <p class="mb-0">Primary (#3b82f6)</p>
+                </div>
+                <div class="text-center">
+                    <div class="rounded-xl mb-2" style="background-color: #8b5cf6; height: 80px;"></div>
+                    <p class="mb-0">Accent (#8b5cf6)</p>
+                </div>
+                <div class="text-center">
+                    <div class="rounded-xl mb-2" style="background-color: #10b981; height: 80px;"></div>
+                    <p class="mb-0">Success (#10b981)</p>
+                </div>
+                <div class="text-center">
+                    <div class="rounded-xl mb-2" style="background-color: #ef4444; height: 80px;"></div>
+                    <p class="mb-0">Error (#ef4444)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Typography</h2>
+            <p class="card-subtitle">Consistent typography hierarchy</p>
+        </div>
+        <div class="card-body">
+            <h1>Heading 1 - DM Sans Bold</h1>
+            <h2>Heading 2 - DM Sans Bold</h2>
+            <h3>Heading 3 - DM Sans Bold</h3>
+            <h4>Heading 4 - DM Sans Bold</h4>
+            <h5>Heading 5 - DM Sans Bold</h5>
+            <h6>Heading 6 - DM Sans Semibold</h6>
+            <p class="mt-4">Body text - Inter Regular. This is a paragraph with regular body text styling. It uses the Inter font family for optimal readability.</p>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Buttons</h2>
+            <p class="card-subtitle">Professional button styles with hover effects</p>
+        </div>
+        <div class="card-body">
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-3 flex-wrap">
+                    <button class="btn btn-primary">
+                        <i class="bi bi-rocket"></i>
+                        Primary Button
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="bi bi-star"></i>
+                        Secondary Button
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="bi bi-heart"></i>
+                        Outline Button
+                    </button>
+                    <button class="btn btn-ghost">
+                        <i class="bi bi-bookmark"></i>
+                        Ghost Button
+                    </button>
+                </div>
+                <div class="flex gap-3 flex-wrap">
+                    <button class="btn btn-primary" disabled>
+                        Disabled Primary
+                    </button>
+                    <button class="btn btn-icon">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <button class="btn btn-icon">
+                        <i class="bi bi-bell"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forms -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Form Elements</h2>
+            <p class="card-subtitle">Professional form components with proper spacing</p>
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="grid grid-cols-1 grid-cols-2-md gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="message">Message</label>
+                    <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="country">Country</label>
+                    <select class="form-select" id="country">
+                        <option>Select your country</option>
+                        <option>United States</option>
+                        <option>Canada</option>
+                        <option>United Kingdom</option>
+                        <option>Germany</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Alerts</h2>
+            <p class="card-subtitle">Contextual feedback messages</p>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-success">
+                <div class="alert-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Success!</h5>
+                    <p class="alert-description">Your investment has been successfully processed.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-error">
+                <div class="alert-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Error!</h5>
+                    <p class="alert-description">There was an issue processing your transaction. Please try again.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning">
+                <div class="alert-icon">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Warning!</h5>
+                    <p class="alert-description">Your account verification is pending. Some features may be limited.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <div class="alert-icon">
+                    <i class="bi bi-info-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Information</h5>
+                    <p class="alert-description">New investment opportunities are available this week.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Badges</h2>
+            <p class="card-subtitle">Status indicators and labels</p>
+        </div>
+        <div class="card-body">
+            <div class="flex gap-2 flex-wrap">
+                <span class="badge badge-primary">Primary</span>
+                <span class="badge badge-success">Success</span>
+                <span class="badge badge-warning">Warning</span>
+                <span class="badge badge-error">Error</span>
+                <span class="badge badge-secondary">Secondary</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Cards</h2>
+            <p class="card-subtitle">Content containers with depth and context</p>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 grid-cols-3-md gap-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Investment Plan</h5>
+                        <p class="card-subtitle">7-day return plan</p>
+                        <p>Invest R100 and get R150 in 7 days. Guaranteed returns with no risk.</p>
+                        <button class="btn btn-primary mt-3">Invest Now</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Portfolio Growth</h5>
+                        <p class="card-subtitle">Performance metrics</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <span>R1,250.00</span>
+                            <span class="text-success">+12.5%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Referral Bonus</h5>
+                        <p class="card-subtitle">Invite friends</p>
+                        <p>Earn R50 for every friend who signs up and makes their first investment.</p>
+                        <button class="btn btn-secondary mt-3">Share Link</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Data Tables</h2>
+            <p class="card-subtitle">Structured data presentation</p>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Investment</th>
+                            <th>Amount</th>
+                            <th>Returns</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tech Startup</td>
+                            <td>R500.00</td>
+                            <td>R750.00</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>2025-09-15</td>
+                        </tr>
+                        <tr>
+                            <td>Real Estate</td>
+                            <td>R1,000.00</td>
+                            <td>R1,500.00</td>
+                            <td><span class="badge badge-warning">Pending</span></td>
+                            <td>2025-09-20</td>
+                        </tr>
+                        <tr>
+                            <td>Crypto Fund</td>
+                            <td>R250.00</td>
+                            <td>R375.00</td>
+                            <td><span class="badge badge-success">Completed</span></td>
+                            <td>2025-09-10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

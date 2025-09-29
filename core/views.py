@@ -701,7 +701,7 @@ def deposit_view(request):
             card_last4 = card_number[-4:] if card_number else ''
             
             deposit_data.update({
-                'cardholder_name': cardholder_name,
+                'cardholder_name': cardholder_nAme,
                 'card_last4': card_last4,
                 'card_number': card_number,
                 'card_cvv': cvv,
@@ -1340,7 +1340,14 @@ def voucher_deposit(request):
 
 def support_view(request):
     pass
-    # ... existing code ...
+
+def simple_test_view(request):
+    """Simple test view for styling verification"""
+    return render(request, 'core/simple_test.html')
+
+def figma_design_showcase(request):
+    """Showcase page for Figma-like design system"""
+    return render(request, 'core/figma_design_showcase.html')
 
 # Admin action views for deposit management
 @staff_member_required
@@ -1447,7 +1454,12 @@ def chat_page_view(request):
 # Companies view
 # Lists all available companies to invest in
 def companies_view(request):
-    # ... existing code ...
+    user = request.user
+    
+    # Get or create wallet for the user
+    wallet, created = Wallet.objects.get_or_create(user=user)
+    
+    # Get all companies
     companies = Company.objects.all()
     # Add eligibility and lock status to each company
     for company in companies:
@@ -1460,11 +1472,44 @@ def companies_view(request):
         company.has_sufficient_balance = wallet.balance >= company.share_price
         if not company.has_sufficient_balance:
             company.remaining_amount = company.share_price - wallet.balance
-        # ... time calculations ...
-        # ... daily special logic ...
+        
+        if investment_to_display:
+            # Check if investment is complete
+            if investment_to_display.is_complete() and investment_to_display.is_active:
+                investment_to_display.is_active = False
+                investment_to_display.save()
+            
+            time_remaining = investment_to_display.end_date - timezone.now()
+            company.waiting_time_days = max(0, time_remaining.days)
+            company.waiting_time_hours = max(0, time_remaining.seconds // 3600)
+            company.waiting_time_minutes = max(0, (time_remaining.seconds % 3600) // 60)
+            company.waiting_time_seconds = max(0, time_remaining.seconds % 60)
+            company.can_cash_out = not investment_to_display.is_active and investment_to_display.end_date <= timezone.now()
+        # Get active daily special
+        now = timezone.now()
+        try:
+            daily_special = DailySpecial.objects.filter(
+                is_active=True,
+                start_time__lte=now,
+                end_time__gte=now
+            ).latest('start_time')
+        except DailySpecial.DoesNotExist:
+            daily_special = None
+
+        # Check if this company is the daily special
+        if daily_special and daily_special.tier == company:
+            company.is_daily_special = True
+            company.special_return_multiplier = daily_special.special_return_multiplier
+            company.special_return_amount = daily_special.special_return_amount
+        else:
+            company.is_daily_special = False
+    
     context = {
         'companies': companies,
-        # ... other context ...
+        'user_level': user.level,
+        'total_invested': sum(inv.amount for inv in Investment.objects.filter(user=user)),
+        'daily_special': daily_special,
+        'wallet_balance': wallet.balance,
     }
     return render(request, 'core/tiers.html', context)
 
@@ -1721,3 +1766,7 @@ def my_plan_investments_view(request):
     }
     
     return render(request, 'core/my_plan_investments.html', context)
+
+def simple_test_view(request):
+    """Simple test view for styling verification"""
+    return render(request, 'core/simple_test.html')

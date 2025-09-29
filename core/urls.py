@@ -35,6 +35,7 @@ urlpatterns = [
     path('portfolio/', views.portfolio_view, name='portfolio'),
     path('tutorial/', views.tutorial_view, name='tutorial'),
     path('support/', views.support_view, name='support'),
+    path('figma-showcase/', views.figma_design_showcase, name='figma_showcase'),
 
 
     # OTP Email Verification URLs
@@ -94,4 +95,4 @@ urlpatterns = [
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='core/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='core/password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='core/password_reset_complete.html'), name='password_reset_complete'),
-] 
+]
