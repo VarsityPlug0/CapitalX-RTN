@@ -19,82 +19,6 @@
         color: var(--primary-green);
     }
     
-    .plan-card {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-        height: 100%;
-        position: relative;
-    }
-    
-    .plan-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(255, 255, 255, 0.3);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
-    
-    .plan-card.invested {
-        border-color: #2ecc71;
-        background: rgba(46, 204, 113, 0.1);
-    }
-    
-    .plan-card.insufficient {
-        border-color: #e74c3c;
-        background: rgba(231, 76, 60, 0.1);
-        opacity: 0.7;
-    }
-    
-    .plan-emoji {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-    }
-    
-    .roi-badge {
-        background: linear-gradient(45deg, #2ecc71, #27ae60);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-    
-    .plan-status-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.75rem;
-        font-weight: bold;
-    }
-    
-    .status-invested {
-        background: rgba(46, 204, 113, 0.2);
-        color: #2ecc71;
-        border: 1px solid #2ecc71;
-    }
-    
-    .status-insufficient {
-        background: rgba(231, 76, 60, 0.2);
-        color: #e74c3c;
-        border: 1px solid #e74c3c;
-    }
-    
-    .btn-invest-plan {
-        background: linear-gradient(45deg, #3498db, #2980b9);
-        border: none;
-        color: white;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-invest-plan:hover {
-        background: linear-gradient(45deg, #2980b9, #1f639a);
-        color: white;
-    }
-    
     .section-header {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 15px;
@@ -121,130 +45,35 @@
         <strong>💰 Wallet Balance: R{{ wallet_balance|floatformat:2 }}</strong>
     </div>
 
-    <!-- Investment Plans Section -->
-    {% if investment_plans %}
+    <!-- Investment Tiers Section -->
+    {% if companies %}
     <div class="section-header">
-        <h2 class="text-white mb-2">🚀 Investment Plans</h2>
-        <p class="text-muted mb-0">Guaranteed returns with fixed amounts - One investment per plan</p>
+        <h2 class="text-white mb-2">🏢 Investment Tiers</h2>
+        <p class="text-muted mb-0">Choose from our carefully curated investment tiers designed for guaranteed returns</p>
     </div>
     
-    <div class="row g-4 mb-5">
-        {% for plan in investment_plans %}
+    <div class="row g-4">
+        {% for company in companies %}
         <div class="col-md-6 col-lg-4">
-            <div class="plan-card {% if plan.user_has_invested %}invested{% elif not plan.user_can_afford %}insufficient{% endif %}">
-                {% if plan.user_has_invested %}
-                    <div class="plan-status-badge status-invested">✅ Invested</div>
-                {% elif not plan.user_can_afford %}
-                    <div class="plan-status-badge status-insufficient">💰 Low Balance</div>
-                {% endif %}
-                
-                <div class="card-body p-4 text-center">
-                    <span class="plan-emoji">{{ plan.emoji }}</span>
-                    <h5 class="text-white fw-bold mb-2">{{ plan.name }}</h5>
-                    <small class="text-muted d-block mb-3">{{ plan.phase }}</small>
-                    
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Investment:</small>
-                            <small class="text-white fw-bold">R{{ plan.min_amount|floatformat:0 }}</small>
-                        </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Returns:</small>
-                            <small class="text-success fw-bold">R{{ plan.return_amount|floatformat:0 }}</small>
-                        </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Duration:</small>
-                            <small class="text-white">{{ plan.get_duration_display }}</small>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">ROI:</small>
-                            <span class="roi-badge">{{ plan.get_roi_percentage|floatformat:1 }}%</span>
-                        </div>
+            <div class="card h-100 company-card bg-dark text-white tier-card">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <span class="tier-icon">🏢</span>
+                        <h3 class="card-title fw-bold mt-2">{{ company.name }}</h3>
                     </div>
-                    
-                    {% if plan.user_has_invested %}
-                        <button class="btn btn-success btn-sm w-100" disabled>
-                            <i class="bi bi-check-circle me-1"></i>Already Invested
-                        </button>
-                    {% elif not plan.user_can_afford %}
-                        <button class="btn btn-secondary btn-sm w-100" disabled>
-                            <i class="bi bi-wallet2 me-1"></i>Insufficient Balance
-                        </button>
-                    {% else %}
-                        <a href="{% url 'invest_in_plan' plan.id %}" class="btn btn-invest-plan btn-sm w-100">
-                            <i class="bi bi-arrow-up-circle me-1"></i>Invest R{{ plan.min_amount|floatformat:0 }}
-                        </a>
-                    {% endif %}
+                    <ul class="list-unstyled">
+                        <li><strong>Investment:</strong> R{{ company.share_price|floatformat:2 }}</li>
+                        <li><strong>Duration:</strong> {{ company.duration_days }} days</li>
+                        <li><strong>Expected Return:</strong> R{{ company.expected_return|floatformat:2 }}</li>
+                    </ul>
+                    <p class="text-muted small">{{ company.description }}</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'invest' company.id %}" class="btn btn-primary w-full hover:opacity-90 transition-opacity">Invest Now</a>
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Traditional Companies Section -->
-    {% if companies %}
-    <div class="section-header">
-        <h2 class="text-white mb-2">🏢 Traditional Companies</h2>
-        <p class="text-muted mb-0">Flexible investment amounts with company shares</p>
-    </div>
-    
-    <div class="row g-4">
-        <!-- Investment Tiers -->
-        <div class="col-lg-9">
-            <div class="row g-4">
-                {% for company in companies %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 company-card bg-dark text-white">
-                        <div class="card-body d-flex flex-column">
-                            <div class="text-center mb-3">
-                                <span class="company-icon">🏢</span>
-                                <h3 class="card-title fw-bold mt-2">{{ company.name }}</h3>
-                            </div>
-                            <ul class="list-unstyled">
-                                <li><strong>Share Price:</strong> R{{ company.share_price }}</li>
-                                <li><strong>Duration:</strong> {{ company.duration_days }} days</li>
-                                <li><strong>Expected Return:</strong> R{{ company.expected_return }}</li>
-                            </ul>
-                            <p class="text-muted small">{{ company.description }}</p>
-                            <div class="mt-auto">
-                                <a href="{% url 'invest' company.id %}" class="btn btn-primary w-full hover:opacity-90 transition-opacity">Invest Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        
-        <!-- Investment Calculator -->
-        <div class="col-lg-3">
-            <div class="card bg-dark text-white p-3 sticky-top" style="top: 100px;">
-                <h4 class="fw-bold text-center">Investment Calculator</h4>
-                <div class="mb-3">
-                    <label for="investmentAmount" class="form-label small">Investment Amount (R)</label>
-                    <input type="number" class="form-control" id="investmentAmount" placeholder="e.g., 500">
-                </div>
-                <div class="mb-3">
-                    <label for="companySelect" class="form-label small">Select Company</label>
-                    <select class="form-select" id="companySelect">
-                        {% for company in companies %}
-                        <option value="{{ company.id }}" data-return="{{ company.expected_return }}" data-duration="{{ company.duration_days }}">
-                            {{ company.name }} (R{{ company.expected_return }} return)
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="text-center bg-secondary bg-opacity-10 p-3 rounded">
-                    <p class="text-muted mb-1 small">Expected Returns</p>
-                    <h5 class="fw-bold" id="totalReturn">R0.00</h5>
-                    <p class="text-muted mb-1 small mt-3">Duration</p>
-                    <h5 class="fw-bold" id="returnDuration">0 days</h5>
-                    <p class="text-muted mb-1 small mt-3">Return Date</p>
-                    <h5 class="fw-bold" id="returnDate">-</h5>
-                </div>
-            </div>
-        </div>
     </div>
     {% endif %}
 </div>

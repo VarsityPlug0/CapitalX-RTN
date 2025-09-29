@@ -45,6 +45,12 @@
             background: var(--surface-alt);
             border-color: var(--text-secondary);
         }
+        /* Logo styling */
+        .navbar-logo {
+            height: 40px;
+            width: auto;
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body class="bg-background text-primary" style="font-family: 'Inter', 'Poppins', sans-serif;">
@@ -52,6 +58,7 @@
     <nav class="navbar navbar-expand-lg site-header sticky-top py-1">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <img src="{% static 'images/logo.png' %}" alt="CapitalX Logo" class="navbar-logo">
                 <span class="me-2" style="font-size: 2rem; font-weight: 700; letter-spacing: 1px;">
                     Capital<span class="logo-x">X</span>Platform
                 </span>
