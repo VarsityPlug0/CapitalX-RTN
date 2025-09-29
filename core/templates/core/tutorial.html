@@ -20,7 +20,7 @@
             </h2>
             <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#tutorialAccordion">
                 <div class="accordion-body">
-                    <p>First, you'll need to register. Go to the <a href="{% url 'register' %}">registration page</a> and fill in your details. If you have a referral code, be sure to enter it to get a bonus!</p>
+                    <p class="text-black">First, you'll need to register. Go to the <a href="{% url 'register' %}">registration page</a> and fill in your details. If you have a referral code, be sure to enter it to get a bonus!</p>
                     <img src="{% static 'images/tutorial/register.png' %}" class="img-fluid" alt="Registration Page">
                 </div>
             </div>
@@ -35,7 +35,7 @@
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#tutorialAccordion">
                 <div class="accordion-body">
-                    <p>Once you're logged in, head over to your <a href="{% url 'wallet' %}">wallet</a> and click "Deposit Funds." You can add money using various payment methods. Your funds will appear in your "Available Balance" once approved.</p>
+                    <p class="text-black">Once you're logged in, head over to your <a href="{% url 'wallet' %}">wallet</a> and click "Deposit Funds." You can add money using various payment methods. Your funds will appear in your "Available Balance" once approved.</p>
                     <img src="{% static 'images/tutorial/deposit.png' %}" class="img-fluid" alt="Deposit Page">
                 </div>
             </div>
@@ -50,7 +50,7 @@
             </h2>
             <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#tutorialAccordion">
                 <div class="accordion-body">
-                    <p>Go to the <a href="{% url 'tiers' %}">companies page</a> to see the available plans. Choose one that suits you and click "Invest Now."</p>
+                    <p class="text-black">Go to the <a href="{% url 'tiers' %}">companies page</a> to see the available plans. Choose one that suits you and click "Invest Now."</p>
                     <img src="{% static 'images/tutorial/companies.png' %}" class="img-fluid" alt="Companies Page">
                 </div>
             </div>
@@ -65,11 +65,26 @@
             </h2>
             <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#tutorialAccordion">
                 <div class="accordion-body">
-                    <p>Your <a href="{% url 'dashboard' %}">dashboard</a> gives you a complete overview of your investments, earnings, and referrals. You can track your progress here.</p>
+                    <p class="text-black">Your <a href="{% url 'dashboard' %}">dashboard</a> gives you a complete overview of your investments, earnings, and referrals. You can track your progress here.</p>
                     <img src="{% static 'images/tutorial/dashboard.png' %}" class="img-fluid" alt="Dashboard Page">
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<style>
+    .text-black {
+        color: #000000 !important;
+    }
+    
+    .text-black a {
+        color: #000000 !important;
+        text-decoration: underline;
+    }
+    
+    .text-black a:hover {
+        color: #333333 !important;
+    }
+</style>
+{% endblock %}

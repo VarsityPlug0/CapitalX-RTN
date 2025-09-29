@@ -25,8 +25,8 @@ from .decorators import client_only
 # Home view
 # Landing page for the application
 def home_view(request):
-    # Get companies
-    companies = Company.objects.all().order_by('share_price')
+    # Get investment plans instead of companies
+    investment_plans = InvestmentPlan.objects.filter(is_active=True)[:3]  # Get first 3 active plans
     
     # Get platform stats
     total_investors = CustomUser.objects.count()
@@ -64,7 +64,7 @@ def home_view(request):
     ]
     
     context = {
-        'companies': companies,
+        'investment_plans': investment_plans,
         'total_investors': total_investors,
         'total_payouts': total_payouts,
         'ai_strategies': ai_strategies,
@@ -322,17 +322,7 @@ def tiers_view(request):
     # Get or create user's wallet
     wallet, created = Wallet.objects.get_or_create(user=user)
     
-    # Get investment plans data
-    investment_plans = InvestmentPlan.objects.filter(is_active=True).order_by('phase_order', 'plan_order')
-    user_plan_investments = PlanInvestment.objects.filter(user=user).select_related('plan')
-    invested_plan_ids = set(inv.plan.id for inv in user_plan_investments)
-    
-    # Add status to investment plans
-    for plan in investment_plans:
-        plan.user_has_invested = plan.id in invested_plan_ids
-        plan.user_can_afford = wallet.balance >= plan.min_amount
-        plan.user_investment = user_plan_investments.filter(plan=plan).first()
-    
+    # Get investment plans data - REMOVED to avoid duplication
     # Add eligibility and lock status to each company
     for company in tiers:
         company.eligible = company.min_level <= user.level
@@ -377,7 +367,6 @@ def tiers_view(request):
     
     context = {
         'companies': tiers,
-        'investment_plans': investment_plans,
         'user_level': user.level,
         'total_invested': total_invested,
         'daily_special': daily_special,
