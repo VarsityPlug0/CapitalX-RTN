@@ -1,4 +1,4 @@
-/* Main CSS - Professional Figma-like Design */
+/* Main CSS - All Text Whitish */
 :root {
     /* Professional Color Palette */
     --primary-dark: #0f172a;     /* Deep slate */
@@ -10,15 +10,18 @@
     --error: #ef4444;            /* Red */
     --info: #0ea5e9;             /* Sky */
     
-    /* Neutrals */
+    /* Whitish Text Colors */
+    --text-primary: #f8fafc;     /* Very light whitish */
+    --text-secondary: #e2e8f0;   /* Light whitish */
+    --text-tertiary: #cbd5e1;    /* Medium whitish */
+    --text-muted: #94a3b8;       /* Muted whitish */
+    
+    /* Background and Surface Colors */
     --background: #0f172a;       /* Deep background */
     --surface: #1e293b;          /* Card surface */
-    --surface-light: #334155;    /* Lighter surface */
-    --text-primary: #f1f5f9;     /* Primary text */
-    --text-secondary: #94a3b8;   /* Secondary text */
-    --text-tertiary: #64748b;    /* Tertiary text */
+    --surface-alt: #334155;      /* Lighter surface */
     --border: #334155;           /* Border color */
-    --border-light: #475569;     /* Light border */
+    --border-alt: #475569;       /* Light border */
     
     /* Spacing System */
     --space-xxs: 0.25rem;        /* 4px */
@@ -93,9 +96,10 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Typography */
+/* Typography - All Whitish */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', 'Inter', sans-serif;
     font-weight: var(--font-weight-bold);
@@ -138,13 +142,13 @@ p {
 }
 
 a {
-    color: var(--secondary);
+    color: var(--text-secondary);
     text-decoration: none;
     transition: color var(--transition-fast);
 }
 
 a:hover {
-    color: var(--accent);
+    color: var(--text-primary);
 }
 
 /* Layout */
@@ -157,7 +161,7 @@ a:hover {
 
 /* Header/Navigation */
 .site-header {
-    background-color: rgba(15, 23, 42, 0.8);
+    background-color: rgba(15, 23, 42, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
@@ -179,7 +183,7 @@ a:hover {
 }
 
 .navbar-brand span:first-child {
-    color: var(--secondary);
+    color: var(--text-primary);
 }
 
 .navbar-nav .nav-link {
@@ -195,10 +199,10 @@ a:hover {
 .navbar-nav .nav-link:hover,
 .navbar-nav .nav-link.active {
     color: var(--text-primary) !important;
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Buttons - Professional Figma Style */
+/* Buttons - All Text Whitish */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -216,10 +220,11 @@ a:hover {
     user-select: none;
     position: relative;
     overflow: hidden;
+    color: var(--text-primary);
 }
 
 .btn:focus {
-    outline: 2px solid var(--secondary);
+    outline: 2px solid var(--text-primary);
     outline-offset: 2px;
 }
 
@@ -232,12 +237,11 @@ a:hover {
 /* Primary Button */
 .btn-primary {
     background-color: var(--secondary);
-    color: white;
     box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background-color: #2563eb;
+    background-color: #60a5fa;
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -250,12 +254,11 @@ a:hover {
 /* Secondary Button */
 .btn-secondary {
     background-color: transparent;
-    color: var(--secondary);
-    border: 1px solid var(--secondary);
+    border: 1px solid var(--text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-1px);
 }
 
@@ -263,11 +266,11 @@ a:hover {
 .btn-outline {
     background-color: transparent;
     color: var(--text-primary);
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--border);
 }
 
 .btn-outline:hover:not(:disabled) {
-    background-color: var(--surface-light);
+    background-color: var(--surface-alt);
     border-color: var(--text-secondary);
 }
 
@@ -299,7 +302,7 @@ a:hover {
     color: var(--text-primary);
 }
 
-/* Cards - Figma Style */
+/* Cards - All Text Whitish */
 .card {
     background-color: var(--surface);
     border-radius: var(--radius-lg);
@@ -307,11 +310,12 @@ a:hover {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-normal);
+    color: var(--text-primary);
 }
 
 .card:hover {
     box-shadow: var(--shadow-md);
-    border-color: var(--border-light);
+    border-color: var(--border-alt);
 }
 
 .card-header {
@@ -335,6 +339,7 @@ a:hover {
 
 .card-body {
     padding: var(--space-md) 0;
+    color: var(--text-secondary);
 }
 
 .card-footer {
@@ -343,7 +348,7 @@ a:hover {
     border-top: 1px solid var(--border);
 }
 
-/* Forms - Professional Design */
+/* Forms - All Text Whitish */
 .form-group {
     margin-bottom: var(--space-lg);
 }
@@ -359,7 +364,7 @@ a:hover {
 .form-control {
     width: 100%;
     padding: var(--space-sm) var(--space-md);
-    background-color: var(--surface-light);
+    background-color: var(--surface-alt);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -370,19 +375,19 @@ a:hover {
 
 .form-control:focus {
     outline: none;
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    border-color: var(--text-secondary);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
     background-color: var(--surface);
 }
 
 .form-control::placeholder {
-    color: var(--text-tertiary);
+    color: var(--text-muted);
 }
 
 .form-select {
     width: 100%;
     padding: var(--space-sm) var(--space-md);
-    background-color: var(--surface-light);
+    background-color: var(--surface-alt);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -390,7 +395,7 @@ a:hover {
     font-size: var(--font-size-base);
     transition: all var(--transition-fast);
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
     background-repeat: no-repeat;
     background-size: 1.5em 1.5em;
@@ -399,12 +404,12 @@ a:hover {
 
 .form-select:focus {
     outline: none;
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    border-color: var(--text-secondary);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
     background-color: var(--surface);
 }
 
-/* Alerts - Figma Style */
+/* Alerts - All Text Whitish */
 .alert {
     padding: var(--space-md);
     border-radius: var(--radius-md);
@@ -412,6 +417,7 @@ a:hover {
     display: flex;
     align-items: flex-start;
     gap: var(--space-md);
+    color: var(--text-primary);
 }
 
 .alert-icon {
@@ -426,6 +432,7 @@ a:hover {
 .alert-title {
     font-weight: var(--font-weight-semibold);
     margin: 0 0 var(--space-xs);
+    color: var(--text-primary);
 }
 
 .alert-description {
@@ -436,28 +443,28 @@ a:hover {
 .alert-success {
     background-color: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
-    color: var(--success);
+    color: var(--text-primary);
 }
 
 .alert-error {
     background-color: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.2);
-    color: var(--error);
+    color: var(--text-primary);
 }
 
 .alert-warning {
     background-color: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.2);
-    color: var(--warning);
+    color: var(--text-primary);
 }
 
 .alert-info {
     background-color: rgba(14, 165, 233, 0.1);
     border: 1px solid rgba(14, 165, 233, 0.2);
-    color: var(--info);
+    color: var(--text-primary);
 }
 
-/* Badges - Figma Style */
+/* Badges - All Text Whitish */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -467,6 +474,7 @@ a:hover {
     font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.025em;
+    color: var(--text-primary);
 }
 
 .badge-primary {
@@ -490,11 +498,11 @@ a:hover {
 }
 
 .badge-secondary {
-    background-color: var(--surface-light);
+    background-color: var(--surface-alt);
     color: var(--text-primary);
 }
 
-/* Tables - Professional Design */
+/* Tables - All Text Whitish */
 .table-container {
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -511,12 +519,12 @@ a:hover {
 }
 
 .table th {
-    background-color: var(--surface-light);
+    background-color: var(--surface-alt);
     padding: var(--space-md);
     text-align: left;
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.025em;
 }
@@ -524,13 +532,14 @@ a:hover {
 .table td {
     padding: var(--space-md);
     border-top: 1px solid var(--border);
+    color: var(--text-secondary);
 }
 
 .table tbody tr:hover {
-    background-color: rgba(59, 130, 246, 0.05);
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Utility Classes */
+/* Utility Classes - All Text Whitish */
 .text-center {
     text-align: center;
 }
@@ -547,20 +556,24 @@ a:hover {
     color: var(--text-tertiary) !important;
 }
 
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
 .text-success {
-    color: var(--success) !important;
+    color: var(--text-primary) !important;
 }
 
 .text-warning {
-    color: var(--warning) !important;
+    color: var(--text-primary) !important;
 }
 
 .text-error {
-    color: var(--error) !important;
+    color: var(--text-primary) !important;
 }
 
 .text-info {
-    color: var(--info) !important;
+    color: var(--text-primary) !important;
 }
 
 .bg-primary {
@@ -571,8 +584,12 @@ a:hover {
     background-color: var(--surface) !important;
 }
 
-.bg-surface-light {
-    background-color: var(--surface-light) !important;
+.bg-surface-alt {
+    background-color: var(--surface-alt) !important;
+}
+
+.bg-background {
+    background-color: var(--background) !important;
 }
 
 .mt-1 { margin-top: var(--space-xs); }
@@ -646,6 +663,7 @@ main {
     border-top: 1px solid var(--border);
     padding: var(--space-xl) 0;
     margin-top: var(--space-2xl);
+    color: var(--text-secondary);
 }
 
 /* Responsive Design */

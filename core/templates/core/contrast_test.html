@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}Contrast Test - CapitalX{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-6">
+        <h1>Professional Contrast Test</h1>
+        <p class="text-secondary fs-5">Testing proper text/background contrast ratios</p>
+    </div>
+
+    <!-- Test Card with Light Text on Dark Background -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Dark Theme Contrast</h2>
+            <p class="card-subtitle">Light text on dark backgrounds</p>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 grid-cols-2-md gap-4">
+                <div>
+                    <h3 class="text-primary">Primary Text</h3>
+                    <p class="text-primary">This is primary text with proper contrast on dark background</p>
+                    
+                    <h3 class="text-secondary">Secondary Text</h3>
+                    <p class="text-secondary">This is secondary text with proper contrast on dark background</p>
+                    
+                    <h3 class="text-tertiary">Tertiary Text</h3>
+                    <p class="text-tertiary">This is tertiary text with proper contrast on dark background</p>
+                </div>
+                <div>
+                    <h3 class="text-success">Success Text</h3>
+                    <p class="text-success">This is success text with proper contrast on dark background</p>
+                    
+                    <h3 class="text-warning">Warning Text</h3>
+                    <p class="text-warning">This is warning text with proper contrast on dark background</p>
+                    
+                    <h3 class="text-error">Error Text</h3>
+                    <p class="text-error">This is error text with proper contrast on dark background</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Card with Dark Text on Light Background -->
+    <div class="card bg-surface-alt mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Light Theme Contrast</h2>
+            <p class="card-subtitle">Dark text on light backgrounds</p>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 grid-cols-2-md gap-4">
+                <div>
+                    <h3 class="text-primary">Primary Text</h3>
+                    <p class="text-primary">This is primary text with proper contrast on light background</p>
+                    
+                    <h3 class="text-secondary">Secondary Text</h3>
+                    <p class="text-secondary">This is secondary text with proper contrast on light background</p>
+                    
+                    <h3 class="text-tertiary">Tertiary Text</h3>
+                    <p class="text-tertiary">This is tertiary text with proper contrast on light background</p>
+                </div>
+                <div>
+                    <h3 class="text-success">Success Text</h3>
+                    <p class="text-success">This is success text with proper contrast on light background</p>
+                    
+                    <h3 class="text-warning">Warning Text</h3>
+                    <p class="text-warning">This is warning text with proper contrast on light background</p>
+                    
+                    <h3 class="text-error">Error Text</h3>
+                    <p class="text-error">This is error text with proper contrast on light background</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Elements Test -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Form Elements</h2>
+            <p class="card-subtitle">Form elements with proper contrast</p>
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="grid grid-cols-1 grid-cols-2-md gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="message">Message</label>
+                    <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="country">Country</label>
+                    <select class="form-select" id="country">
+                        <option>Select your country</option>
+                        <option>United States</option>
+                        <option>Canada</option>
+                        <option>United Kingdom</option>
+                        <option>Germany</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alerts Test -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Alerts</h2>
+            <p class="card-subtitle">Alerts with proper text/background contrast</p>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-success">
+                <div class="alert-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Success Alert</h5>
+                    <p class="alert-description">This is a success alert with proper text/background contrast.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-error">
+                <div class="alert-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Error Alert</h5>
+                    <p class="alert-description">This is an error alert with proper text/background contrast.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning">
+                <div class="alert-icon">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Warning Alert</h5>
+                    <p class="alert-description">This is a warning alert with proper text/background contrast.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <div class="alert-icon">
+                    <i class="bi bi-info-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-title">Info Alert</h5>
+                    <p class="alert-description">This is an info alert with proper text/background contrast.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badges Test -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Badges</h2>
+            <p class="card-subtitle">Badges with proper text/background contrast</p>
+        </div>
+        <div class="card-body">
+            <div class="flex gap-2 flex-wrap">
+                <span class="badge badge-primary">Primary</span>
+                <span class="badge badge-success">Success</span>
+                <span class="badge badge-warning">Warning</span>
+                <span class="badge badge-error">Error</span>
+                <span class="badge badge-secondary">Secondary</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Test -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h2 class="card-title">Tables</h2>
+            <p class="card-subtitle">Tables with proper text/background contrast</p>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Investment</th>
+                            <th>Amount</th>
+                            <th>Returns</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tech Startup</td>
+                            <td>R500.00</td>
+                            <td>R750.00</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>2025-09-15</td>
+                        </tr>
+                        <tr>
+                            <td>Real Estate</td>
+                            <td>R1,000.00</td>
+                            <td>R1,500.00</td>
+                            <td><span class="badge badge-warning">Pending</span></td>
+                            <td>2025-09-20</td>
+                        </tr>
+                        <tr>
+                            <td>Crypto Fund</td>
+                            <td>R250.00</td>
+                            <td>R375.00</td>
+                            <td><span class="badge badge-success">Completed</span></td>
+                            <td>2025-09-10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add theme toggle functionality for testing
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create a floating theme toggle button for easy testing
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'contrast-test-toggle';
+        toggleButton.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        toggleButton.style.position = 'fixed';
+        toggleButton.style.bottom = '20px';
+        toggleButton.style.right = '20px';
+        toggleButton.style.zIndex = '1000';
+        toggleButton.style.padding = '10px';
+        toggleButton.style.borderRadius = '50%';
+        toggleButton.style.border = 'none';
+        toggleButton.style.background = 'var(--secondary)';
+        toggleButton.style.color = 'white';
+        toggleButton.style.cursor = 'pointer';
+        toggleButton.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+        
+        document.body.appendChild(toggleButton);
+        
+        toggleButton.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            this.querySelector('i').className = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        });
+    });
+</script>
+{% endblock %}
