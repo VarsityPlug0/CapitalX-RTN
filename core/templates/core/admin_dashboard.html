@@ -195,26 +195,22 @@
                             <thead>
                                 <tr>
                                     <th>Company Name</th>
-                                    <th>Amount</th>
+                                    <th>Share Price</th>
                                     <th>Total Investments</th>
                                     <th>Total Invested</th>
                                     <th>Total Returns</th>
                                     <th>Active Investments</th>
-                                    <th>Completed Investments</th>
-                                    <th>Unique Investors</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for stat in tier_stats %}
                                 <tr>
-                                    <td>{{ stat.company.name }}</td>
-                                    <td>R{{ stat.company.amount }}</td>
+                                    <td>{{ stat.tier.name }}</td>
+                                    <td>R{{ stat.tier.share_price }}</td>
                                     <td>{{ stat.total_investments }}</td>
                                     <td>R{{ stat.total_invested }}</td>
                                     <td>R{{ stat.total_returns }}</td>
                                     <td>{{ stat.active_investments }}</td>
-                                    <td>{{ stat.completed_investments }}</td>
-                                    <td>{{ stat.unique_investors }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -225,4 +221,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

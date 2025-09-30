@@ -1106,47 +1106,36 @@ def tutorial_view(request):
 @staff_member_required
 def admin_dashboard_view(request):
     # Get all tiers
-    tiers = Company.objects.all().order_by('amount')
+    tiers = Company.objects.all().order_by('share_price')
     
     # Get investment statistics for each tier
     tier_stats = []
     for tier in tiers:
         # Get total number of investments for this tier
-        total_investments = Investment.objects.filter(tier=tier).count()
+        total_investments = Investment.objects.filter(company=tier).count()
         
         # Get total amount invested in this tier
-        total_invested = Investment.objects.filter(tier=tier).aggregate(
+        total_invested = Investment.objects.filter(company=tier).aggregate(
             total=Sum('amount')
         )['total'] or 0
         
         # Get total returns for this tier
-        total_returns = Investment.objects.filter(tier=tier).aggregate(
+        total_returns = Investment.objects.filter(company=tier).aggregate(
             total=Sum('return_amount')
         )['total'] or 0
         
         # Get active investments count
         active_investments = Investment.objects.filter(
-            tier=tier,
+            company=tier,
             is_active=True
         ).count()
-        
-        # Get completed investments count
-        completed_investments = Investment.objects.filter(
-            tier=tier,
-            is_active=False
-        ).count()
-        
-        # Get unique investors count for this tier
-        unique_investors = Investment.objects.filter(tier=tier).values('user').distinct().count()
         
         tier_stats.append({
             'tier': tier,
             'total_investments': total_investments,
             'total_invested': total_invested,
             'total_returns': total_returns,
-            'active_investments': active_investments,
-            'completed_investments': completed_investments,
-            'unique_investors': unique_investors,
+            'active_investments': active_investments
         })
     
     # Get overall statistics
@@ -1154,10 +1143,7 @@ def admin_dashboard_view(request):
         total=Sum('amount')
     )['total'] or 0
     
-    total_investments = Investment.objects.aggregate(
-        total=Sum('amount')
-    )['total'] or 0
-    
+    total_investments = Investment.objects.count()
     total_returns = Investment.objects.filter(is_active=False).aggregate(
         total=Sum('return_amount')
     )['total'] or 0
