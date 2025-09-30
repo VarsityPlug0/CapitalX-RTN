@@ -1227,27 +1227,27 @@ def portfolio_view(request):
     active_investments = Investment.objects.filter(
         user=user,
         is_active=True
-    ).select_related('tier').order_by('-created_at')
+    ).select_related('company').order_by('-created_at')
     
     # Get user's completed investments
     completed_investments = Investment.objects.filter(
         user=user,
         is_active=False
-    ).select_related('tier').order_by('-end_date')
+    ).select_related('company').order_by('-end_date')
     
     # Calculate total portfolio value
     total_invested = sum(inv.amount for inv in active_investments)
     total_expected_return = sum(inv.return_amount for inv in active_investments)
     total_earned = sum(inv.return_amount for inv in completed_investments)
     
-    # Get investment distribution by tier
-    tier_distribution = {}
+    # Get investment distribution by company
+    company_distribution = {}
     for investment in active_investments:
-        tier_name = investment.tier.name
-        if tier_name in tier_distribution:
-            tier_distribution[tier_name] += investment.amount
+        company_name = investment.company.name
+        if company_name in company_distribution:
+            company_distribution[company_name] += investment.amount
         else:
-            tier_distribution[tier_name] = investment.amount
+            company_distribution[company_name] = investment.amount
     
     context = {
         'active_investments': active_investments,
@@ -1255,7 +1255,7 @@ def portfolio_view(request):
         'total_invested': total_invested,
         'total_expected_return': total_expected_return,
         'total_earned': total_earned,
-        'tier_distribution': tier_distribution,
+        'company_distribution': company_distribution,
     }
     
     return render(request, 'core/portfolio.html', context)

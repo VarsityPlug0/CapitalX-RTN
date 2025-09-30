@@ -166,7 +166,7 @@
                                 <tr>
                                     <td>{{ detail.user.email }}</td>
                                     <td>{{ detail.user.level }}</td>
-                                    <td>R{{ detail.wallet.balance }}</td>
+                                    <td>R{{ detail.wallet.balance|default:"0.00" }}</td>
                                     <td>R{{ detail.total_deposited }}</td>
                                     <td>R{{ detail.total_invested }}</td>
                                     <td>R{{ detail.total_returns }}</td>
