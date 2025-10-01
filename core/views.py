@@ -19,7 +19,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.views.decorators.http import require_POST
-from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email
+from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email, send_admin_deposit_notification
 from .decorators import client_only
 
 # Home view
@@ -801,17 +801,17 @@ def voucher_deposit_view(request):
         voucher_image = request.FILES.get('voucher_image')
         
         # Validate required fields
-        if not amount_str:
+        if not amount_str or amount_str.strip() == '':
             messages.error(request, 'Voucher amount is required.')
             return redirect('voucher_deposit')
             
-        if not voucher_code:
+        if not voucher_code or voucher_code.strip() == '':
             messages.error(request, 'Voucher code is required.')
             return redirect('voucher_deposit')
         
         try:
-            amount = Decimal(amount_str)
-        except (ValueError, TypeError):
+            amount = Decimal(amount_str.strip())
+        except (ValueError, TypeError, AttributeError):
             messages.error(request, 'Invalid amount. Please enter a valid number.')
             return redirect('voucher_deposit')
         
