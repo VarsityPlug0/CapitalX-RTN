@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Portfolio - CryptoVault{% endblock %}
+{% block title %}My Portfolio{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -12,97 +12,136 @@
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="border rounded p-3">
-                        <p class="text-muted small mb-1">Total Invested</p>
-                        <h3 class="h5 mb-0">${{ total_invested|floatformat:2 }}</h3>
+                        <p class="text-muted small mb-1">Total Invested (Active)</p>
+                        <h3 class="h5 mb-0">R{{ total_invested|floatformat:2 }}</h3>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-3">
-                        <p class="text-muted small mb-1">Current Value</p>
-                        <h3 class="h5 mb-0">${{ current_value|floatformat:2 }}</h3>
+                        <p class="text-muted small mb-1">Expected Return (Active)</p>
+                        <h3 class="h5 mb-0">R{{ total_expected_return|floatformat:2 }}</h3>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-3">
-                        <p class="text-muted small mb-1">Total Profit/Loss</p>
-                        <h3 class="h5 mb-0 {% if total_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
-                            ${{ total_profit|floatformat:2 }}
-                        </h3>
+                        <p class="text-muted small mb-1">Total Earned (Completed)</p>
+                        <h3 class="h5 mb-0 text-success">R{{ total_earned|floatformat:2 }}</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Investment Distribution -->
+    <!-- Active Investments -->
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="h4 mb-4">Investment Distribution</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <canvas id="distributionChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Asset</th>
-                                    <th>Amount</th>
-                                    <th>Value</th>
-                                    <th>% of Portfolio</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for asset in assets %}
-                                <tr>
-                                    <td>{{ asset.name }}</td>
-                                    <td>{{ asset.amount }}</td>
-                                    <td>${{ asset.value|floatformat:2 }}</td>
-                                    <td>{{ asset.percentage|floatformat:1 }}%</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Transactions -->
-    <div class="card">
-        <div class="card-body">
-            <h2 class="h4 mb-4">Recent Transactions</h2>
+            <h2 class="h4 mb-4">Active Investments</h2>
+            {% if active_investments %}
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Asset</th>
+                            <th>Company</th>
                             <th>Amount</th>
-                            <th>Price</th>
-                            <th>Total</th>
+                            <th>Expected Return</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for transaction in transactions %}
+                        {% for investment in active_investments %}
                         <tr>
-                            <td>{{ transaction.date|date:"Y-m-d" }}</td>
+                            <td>{{ investment.company.name }}</td>
+                            <td>R{{ investment.amount|floatformat:2 }}</td>
+                            <td>R{{ investment.return_amount|floatformat:2 }}</td>
+                            <td>{{ investment.start_date|date:"M d, Y" }}</td>
+                            <td>{{ investment.end_date|date:"M d, Y" }}</td>
+                            <td><span class="badge bg-warning">Active</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No active investments.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Completed Investments -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4 mb-4">Completed Investments</h2>
+            {% if completed_investments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Amount</th>
+                            <th>Return</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for investment in completed_investments %}
+                        <tr>
+                            <td>{{ investment.company.name }}</td>
+                            <td>R{{ investment.amount|floatformat:2 }}</td>
+                            <td>R{{ investment.return_amount|floatformat:2 }}</td>
+                            <td>{{ investment.start_date|date:"M d, Y" }}</td>
+                            <td>{{ investment.end_date|date:"M d, Y" }}</td>
                             <td>
-                                <span class="badge {% if transaction.type == 'buy' %}bg-success{% else %}bg-danger{% endif %}">
-                                    {{ transaction.type|title }}
-                                </span>
+                                {% if investment.funds_claimed %}
+                                    <span class="badge bg-success">Claimed</span>
+                                {% else %}
+                                    <span class="badge bg-info">Completed</span>
+                                {% endif %}
                             </td>
-                            <td>{{ transaction.asset }}</td>
-                            <td>{{ transaction.amount }}</td>
-                            <td>${{ transaction.price|floatformat:2 }}</td>
-                            <td>${{ transaction.total|floatformat:2 }}</td>
                             <td>
-                                <span class="badge bg-success">Completed</span>
+                                {% if investment.funds_claimed %}
+                                    <button class="btn btn-sm btn-secondary" disabled>Funds Claimed</button>
+                                {% else %}
+                                    <a href="{% url 'claim_investment_funds' investment.id %}" 
+                                       class="btn btn-sm btn-success"
+                                       onclick="return confirm('Are you sure you want to claim R{{ investment.amount|add:investment.return_amount|floatformat:2 }} from this investment?')">
+                                        Claim Funds
+                                    </a>
+                                {% endif %}
                             </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No completed investments.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Investment Distribution -->
+    {% if company_distribution %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4 mb-4">Investment Distribution</h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for company_name, amount in company_distribution.items %}
+                        <tr>
+                            <td>{{ company_name }}</td>
+                            <td>R{{ amount|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -110,40 +149,6 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    // Investment Distribution Chart
-    const ctx = document.getElementById('distributionChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: {{ asset_names|safe }},
-            datasets: [{
-                data: {{ asset_values|safe }},
-                backgroundColor: [
-                    '#0d6efd',
-                    '#198754',
-                    '#ffc107',
-                    '#dc3545',
-                    '#6c757d',
-                    '#0dcaf0',
-                    '#6610f2',
-                    '#fd7e14'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-</script>
-{% endblock %} 

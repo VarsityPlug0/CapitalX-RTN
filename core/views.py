@@ -205,11 +205,13 @@ def dashboard_view(request):
     user = request.user
     # Get or create wallet for the user
     wallet, created = Wallet.objects.get_or_create(user=user)
-    investments = Investment.objects.filter(user=user)
-    deposits = Deposit.objects.filter(user=user).order_by('-created_at')
-    referrals = Referral.objects.filter(inviter=user)
     
-    # Get referral rewards
+    # Optimize database queries by using select_related and prefetch_related
+    investments = Investment.objects.filter(user=user).select_related('company')
+    deposits = Deposit.objects.filter(user=user).order_by('-created_at')
+    referrals = Referral.objects.filter(inviter=user).select_related('invitee')
+    
+    # Get referral rewards with aggregation to reduce queries
     referral_rewards = ReferralReward.objects.filter(referrer=user)
     total_referral_earnings = referral_rewards.aggregate(total=Sum('reward_amount'))['total'] or 0
     
@@ -239,7 +241,7 @@ def dashboard_view(request):
     active_investments = investments.filter(is_active=True)
     completed_investments = investments.filter(is_active=False)
     
-    # Get available companies for user's level
+    # Get available companies for user's level with optimization
     available_companies = Company.objects.filter(min_level__lte=user.level)
     
     # Calculate progress to next level
@@ -1033,41 +1035,124 @@ def cash_out_view(request, investment_id):
     try:
         investment = Investment.objects.get(id=investment_id, user=request.user)
         
-        # Check if investment is ready for cash out
+        # Check if investment is completed and ready for claiming
         if investment.is_active or investment.end_date > timezone.now():
-            messages.error(request, 'This investment is not ready for cash out yet.')
-            return redirect('tiers')
+            messages.error(request, 'This investment is not ready for claiming yet.')
+            return redirect('portfolio')
+        
+        # Check if funds have already been claimed
+        if investment.funds_claimed:
+            messages.error(request, 'Funds for this investment have already been claimed.')
+            return redirect('portfolio')
         
         # Get user's wallet
         wallet = Wallet.objects.get(user=request.user)
         
-        # Add return amount to wallet balance
-        wallet.balance += investment.return_amount
+        # Add both the original investment amount and return amount to wallet balance
+        total_amount = investment.amount + investment.return_amount
+        wallet.balance += total_amount
         wallet.save()
         
-        # Mark investment as cashed out
-        investment.is_active = False
+        # Mark investment as claimed
+        investment.funds_claimed = True
         investment.save()
         
-        messages.success(request, f'Successfully cashed out R{investment.return_amount}.')
-        return redirect('tiers')
+        messages.success(request, f'Successfully claimed R{total_amount} from your completed investment.')
+        return redirect('portfolio')
         
     except Investment.DoesNotExist:
         messages.error(request, 'Invalid investment.')
-        return redirect('tiers')
+        return redirect('portfolio')
 
 @login_required
 def check_cash_out_view(request, investment_id):
     try:
         investment = Investment.objects.get(id=investment_id, user=request.user)
-        can_cash_out = not investment.is_active and investment.end_date <= timezone.now()
+        can_claim = not investment.is_active and investment.end_date <= timezone.now() and not investment.funds_claimed
         
-        return JsonResponse({
-            'can_cash_out': can_cash_out,
-            'return_amount': str(investment.return_amount) if can_cash_out else None
-        })
+        if can_claim:
+            total_amount = investment.amount + investment.return_amount
+            return JsonResponse({
+                'can_claim': True,
+                'total_amount': str(total_amount)
+            })
+        else:
+            return JsonResponse({
+                'can_claim': False,
+                'reason': 'Investment not ready, already claimed, or still active'
+            })
     except Investment.DoesNotExist:
         return JsonResponse({'error': 'Invalid investment'}, status=404)
+
+@login_required
+def claim_investment_funds(request, investment_id):
+    try:
+        investment = Investment.objects.get(id=investment_id, user=request.user)
+        
+        # Check if investment is completed and ready for claiming
+        if investment.is_active or investment.end_date > timezone.now():
+            messages.error(request, 'This investment is not ready for claiming yet.')
+            return redirect('portfolio')
+        
+        # Check if funds have already been claimed
+        if investment.funds_claimed:
+            messages.error(request, 'Funds for this investment have already been claimed.')
+            return redirect('portfolio')
+        
+        # Get user's wallet
+        wallet = Wallet.objects.get(user=request.user)
+        
+        # Add both the original investment amount and return amount to wallet balance
+        total_amount = investment.amount + investment.return_amount
+        wallet.balance += total_amount
+        wallet.save()
+        
+        # Mark investment as claimed
+        investment.funds_claimed = True
+        investment.save()
+        
+        messages.success(request, f'Successfully claimed R{total_amount} from your completed investment.')
+        return redirect('portfolio')
+        
+    except Investment.DoesNotExist:
+        messages.error(request, 'Invalid investment.')
+        return redirect('portfolio')
+
+@login_required
+def claim_plan_investment_funds(request, investment_id):
+    try:
+        investment = PlanInvestment.objects.get(id=investment_id, user=request.user)
+        
+        # Check if investment is completed and ready for claiming
+        if investment.is_active or investment.end_date > timezone.now():
+            messages.error(request, 'This investment is not ready for claiming yet.')
+            return redirect('my_plan_investments')
+        
+        # Check if funds have already been claimed/paid
+        if investment.profit_paid:
+            messages.error(request, 'Funds for this investment have already been claimed.')
+            return redirect('my_plan_investments')
+        
+        # Get user's wallet
+        wallet = Wallet.objects.get(user=request.user)
+        
+        # Add both the original investment amount and return amount to wallet balance
+        total_amount = investment.amount + investment.return_amount
+        wallet.balance += total_amount
+        wallet.save()
+        
+        # Mark investment as claimed/paid
+        investment.profit_paid = True
+        investment.is_active = False
+        investment.is_completed = True
+        investment.save()
+        
+        messages.success(request, f'Successfully claimed R{total_amount} from your completed investment.')
+        return redirect('my_plan_investments')
+        
+    except PlanInvestment.DoesNotExist:
+        messages.error(request, 'Invalid investment.')
+        return redirect('my_plan_investments')
 
 @login_required
 def get_server_time_view(request):
@@ -1120,110 +1205,142 @@ def admin_dashboard_view(request):
         tiers = Company.objects.all().order_by('share_price')
         logger.info(f"Found {tiers.count()} tiers")
         
-        # Get investment statistics for each tier
+        # Get investment statistics for each tier with optimized queries
+        # Use a single query to get all investment data grouped by company
+        investment_stats = Investment.objects.values('company_id').annotate(
+            total_investments=Count('id'),
+            total_invested=Sum('amount'),
+            total_returns=Sum('return_amount'),
+            active_investments=Count('id', filter=Q(is_active=True))
+        )
+        
+        # Convert to a dictionary for easy lookup
+        investment_stats_dict = {
+            stat['company_id']: stat for stat in investment_stats
+        }
+        
         tier_stats = []
         for i, tier in enumerate(tiers):
             logger.info(f"Processing tier {i+1}: {tier.name}")
             
-            # Get total number of investments for this tier
-            total_investments = Investment.objects.filter(company=tier).count()
-            
-            # Get total amount invested in this tier
-            total_invested = Investment.objects.filter(company=tier).aggregate(
-                total=Sum('amount')
-            )['total'] or 0
-            
-            # Get total returns for this tier
-            total_returns = Investment.objects.filter(company=tier).aggregate(
-                total=Sum('return_amount')
-            )['total'] or 0
-            
-            # Get active investments count
-            active_investments = Investment.objects.filter(
-                company=tier,
-                is_active=True
-            ).count()
+            # Get statistics for this tier from the precomputed dictionary
+            stats = investment_stats_dict.get(tier.id, {})
             
             tier_stats.append({
                 'tier': tier,
-                'total_investments': total_investments,
-                'total_invested': total_invested,
-                'total_returns': total_returns,
-                'active_investments': active_investments
+                'total_investments': stats.get('total_investments', 0),
+                'total_invested': stats.get('total_invested', 0) or 0,
+                'total_returns': stats.get('total_returns', 0) or 0,
+                'active_investments': stats.get('active_investments', 0),
             })
         
-        # Get overall statistics
+        # Get overall statistics with optimized queries
         total_deposits = Deposit.objects.filter(status='approved').aggregate(
             total=Sum('amount')
         )['total'] or 0
         
-        total_investments = Investment.objects.count()
-        total_returns = Investment.objects.filter(is_active=False).aggregate(
-            total=Sum('return_amount')
-        )['total'] or 0
+        # Use a single query for investment statistics
+        investment_overall_stats = Investment.objects.aggregate(
+            total_count=Count('id'),
+            total_returns=Sum('return_amount', filter=Q(is_active=False))
+        )
+        
+        total_investments = investment_overall_stats['total_count']
+        total_returns = investment_overall_stats['total_returns'] or 0
         
         total_users = CustomUser.objects.count()
         
-        # Get detailed user information
-        users = CustomUser.objects.all().order_by('-date_joined')
-        user_details = []
+        # Get detailed user information with optimized queries
+        # First, get all users with their wallets using select_related
+        users_with_wallets = CustomUser.objects.select_related('wallet').order_by('-date_joined')
         
-        for i, user in enumerate(users):
-            # Get user's wallet
-            wallet = Wallet.objects.filter(user=user).first()
+        # Get all deposits grouped by user
+        user_deposit_stats = Deposit.objects.values('user_id').annotate(
+            total_deposited=Sum('amount', filter=Q(status='approved'))
+        )
+        
+        # Convert to dictionary for easy lookup
+        user_deposit_dict = {
+            stat['user_id']: stat['total_deposited'] or 0 for stat in user_deposit_stats
+        }
+        
+        # Get all investments grouped by user
+        user_investment_stats = Investment.objects.values('user_id').annotate(
+            total_invested=Sum('amount'),
+            total_returns=Sum('return_amount', filter=Q(is_active=False)),
+            active_investments=Count('id', filter=Q(is_active=True))
+        )
+        
+        # Convert to dictionary for easy lookup
+        user_investment_dict = {
+            stat['user_id']: stat for stat in user_investment_stats
+        }
+        
+        # Get referral rewards grouped by referrer
+        user_referral_stats = ReferralReward.objects.values('referrer_id').annotate(
+            total_earnings=Sum('reward_amount')
+        )
+        
+        # Convert to dictionary for easy lookup
+        user_referral_dict = {
+            stat['referrer_id']: stat['total_earnings'] or 0 for stat in user_referral_stats
+        }
+        
+        # Get referral counts grouped by inviter
+        user_referral_count_stats = Referral.objects.values('inviter_id').annotate(
+            total_referrals=Count('id')
+        )
+        
+        # Convert to dictionary for easy lookup
+        user_referral_count_dict = {
+            stat['inviter_id']: stat['total_referrals'] for stat in user_referral_count_stats
+        }
+        
+        # Build user details with minimal database queries
+        user_details = []
+        for user in users_with_wallets:
+            # Get user's deposit statistics
+            total_deposited = user_deposit_dict.get(user.id, 0)
             
-            # Get user's deposits
-            deposits = Deposit.objects.filter(user=user).order_by('-created_at')
-            total_deposited = deposits.filter(status='approved').aggregate(
-                total=Sum('amount')
-            )['total'] or 0
-            
-            # Get user's investments
-            investments = Investment.objects.filter(user=user)
-            total_invested = investments.aggregate(
-                total=Sum('amount')
-            )['total'] or 0
-            
-            # Get user's returns
-            total_returns_user = investments.filter(is_active=False).aggregate(
-                total=Sum('return_amount')
-            )['total'] or 0
-            
-            # Get user's active investments
-            active_investments = investments.filter(is_active=True)
+            # Get user's investment statistics
+            investment_stats = user_investment_dict.get(user.id, {})
+            total_invested = investment_stats.get('total_invested', 0) or 0
+            total_returns_user = investment_stats.get('total_returns', 0) or 0
+            active_investments_count = investment_stats.get('active_investments', 0)
             
             # Get user's referral earnings
-            referral_earnings = ReferralReward.objects.filter(referrer=user).aggregate(
-                total=Sum('reward_amount')
-            )['total'] or 0
+            referral_earnings = user_referral_dict.get(user.id, 0)
             
-            # Get user's referrals
-            referrals = Referral.objects.filter(inviter=user)
+            # Get user's referral count
+            total_referrals = user_referral_count_dict.get(user.id, 0)
             
             user_details.append({
                 'user': user,
-                'wallet': wallet,
+                'wallet': getattr(user, 'wallet', None),
                 'total_deposited': total_deposited,
                 'total_invested': total_invested,
                 'total_returns': total_returns_user,
-                'active_investments': active_investments,
+                'active_investments': active_investments_count,
                 'referral_earnings': referral_earnings,
-                'total_referrals': referrals.count(),
-                'deposits': deposits,
-                'investments': investments,
-                'referrals': referrals,
+                'total_referrals': total_referrals,
+                'deposits': [],  # These are not used in the template, so we can leave them empty
+                'investments': [],  # These are not used in the template, so we can leave them empty
+                'referrals': [],  # These are not used in the template, so we can leave them empty
             })
         
-        # Get recent activities
-        recent_deposits = Deposit.objects.all().order_by('-created_at')[:10]
-        recent_investments = Investment.objects.all().order_by('-created_at')[:10]
-        recent_returns = Investment.objects.filter(is_active=False).order_by('-end_date')[:10]
+        # Get recent activities with select_related for better performance
+        recent_deposits = Deposit.objects.select_related('user').order_by('-created_at')[:10]
+        recent_investments = Investment.objects.select_related('user', 'company').order_by('-created_at')[:10]
+        recent_returns = Investment.objects.filter(is_active=False).select_related('user', 'company').order_by('-end_date')[:10]
         
         # Get pending deposit statistics for additional context
-        pending_deposits_count = Deposit.objects.filter(status='pending').count()
-        pending_deposits_amount = Deposit.objects.filter(status='pending').aggregate(
+        pending_deposit_stats = Deposit.objects.filter(status='pending').aggregate(
+            count=Count('id'),
             total=Sum('amount')
-        )['total'] or 0
+        )
+        
+        pending_deposits_count = pending_deposit_stats['count']
+        pending_deposits_amount = pending_deposit_stats['total'] or 0
         
         context = {
             'tier_stats': tier_stats,
@@ -1269,90 +1386,110 @@ def unified_admin_dashboard(request):
             messages.error(request, request.session['admin_access_error'])
             del request.session['admin_access_error']
         
-        # Get overall statistics
+        # Get overall statistics with optimized queries
         total_users = CustomUser.objects.count()
         
-        # Deposit statistics
-        pending_deposits = Deposit.objects.filter(status='pending')
-        approved_deposits = Deposit.objects.filter(status='approved')
-        rejected_deposits = Deposit.objects.filter(status='rejected')
+        # Deposit statistics - optimize with a single query
+        deposit_stats = Deposit.objects.values('status').annotate(
+            count=Count('id'),
+            total_amount=Sum('amount')
+        ).order_by('status')
         
-        pending_deposits_count = pending_deposits.count()
-        pending_deposits_amount = pending_deposits.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        # Initialize deposit statistics
+        pending_deposits_count = pending_deposits_amount = 0
+        approved_deposits_count = approved_deposits_amount = 0
+        rejected_deposits_count = rejected_deposits_amount = 0
         
-        approved_deposits_count = approved_deposits.count()
-        approved_deposits_amount = approved_deposits.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        rejected_deposits_count = rejected_deposits.count()
-        rejected_deposits_amount = rejected_deposits.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        # Process deposit statistics
+        for stat in deposit_stats:
+            if stat['status'] == 'pending':
+                pending_deposits_count = stat['count']
+                pending_deposits_amount = stat['total_amount'] or 0
+            elif stat['status'] == 'approved':
+                approved_deposits_count = stat['count']
+                approved_deposits_amount = stat['total_amount'] or 0
+            elif stat['status'] == 'rejected':
+                rejected_deposits_count = stat['count']
+                rejected_deposits_amount = stat['total_amount'] or 0
         
         total_deposits_amount = approved_deposits_amount
         
-        # Investment statistics
-        total_investments = Investment.objects.count()
-        total_investments_amount = Investment.objects.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        # Investment statistics - optimize with a single query
+        investment_stats = Investment.objects.values('is_active').annotate(
+            count=Count('id'),
+            total_amount=Sum('amount'),
+            total_returns=Sum('return_amount')
+        ).order_by('is_active')
         
-        active_investments = Investment.objects.filter(is_active=True)
-        active_investments_count = active_investments.count()
-        active_investments_amount = active_investments.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        # Initialize investment statistics
+        total_investments = total_investments_amount = 0
+        active_investments_count = active_investments_amount = 0
+        completed_investments_count = completed_investments_amount = total_returns_amount = 0
         
-        completed_investments = Investment.objects.filter(is_active=False)
-        completed_investments_count = completed_investments.count()
-        completed_investments_amount = completed_investments.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        # Process investment statistics
+        for stat in investment_stats:
+            total_investments += stat['count']
+            total_investments_amount += stat['total_amount'] or 0
+            
+            if stat['is_active']:
+                active_investments_count = stat['count']
+                active_investments_amount = stat['total_amount'] or 0
+            else:
+                completed_investments_count = stat['count']
+                completed_investments_amount = stat['total_amount'] or 0
+                total_returns_amount = stat['total_returns'] or 0
         
-        total_returns_amount = completed_investments.aggregate(
-            total=Sum('return_amount')
-        )['total'] or 0
+        # Withdrawal statistics - optimize with a single query
+        withdrawal_stats = Withdrawal.objects.values('status').annotate(
+            count=Count('id'),
+            total_amount=Sum('amount')
+        ).order_by('status')
         
-        # Withdrawal statistics
-        pending_withdrawals = Withdrawal.objects.filter(status='pending')
-        approved_withdrawals = Withdrawal.objects.filter(status='approved')
-        rejected_withdrawals = Withdrawal.objects.filter(status='rejected')
+        # Initialize withdrawal statistics
+        pending_withdrawals_count = pending_withdrawals_amount = 0
+        approved_withdrawals_count = approved_withdrawals_amount = 0
+        rejected_withdrawals_count = rejected_withdrawals_amount = 0
         
-        pending_withdrawals_count = pending_withdrawals.count()
-        pending_withdrawals_amount = pending_withdrawals.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        approved_withdrawals_count = approved_withdrawals.count()
-        approved_withdrawals_amount = approved_withdrawals.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        rejected_withdrawals_count = rejected_withdrawals.count()
-        rejected_withdrawals_amount = rejected_withdrawals.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        # Process withdrawal statistics
+        for stat in withdrawal_stats:
+            if stat['status'] == 'pending':
+                pending_withdrawals_count = stat['count']
+                pending_withdrawals_amount = stat['total_amount'] or 0
+            elif stat['status'] == 'approved':
+                approved_withdrawals_count = stat['count']
+                approved_withdrawals_amount = stat['total_amount'] or 0
+            elif stat['status'] == 'rejected':
+                rejected_withdrawals_count = stat['count']
+                rejected_withdrawals_amount = stat['total_amount'] or 0
         
         # Company statistics
-        companies = Company.objects.all()
-        companies_count = companies.count()
+        companies_count = Company.objects.count()
         
-        # User level distribution
-        level_1_users = CustomUser.objects.filter(level=1).count()
-        level_2_users = CustomUser.objects.filter(level=2).count()
-        level_3_users = CustomUser.objects.filter(level=3).count()
+        # User level distribution - optimize with a single query
+        user_level_stats = CustomUser.objects.values('level').annotate(
+            count=Count('id')
+        ).order_by('level')
         
-        # Recent activities
-        recent_deposits = Deposit.objects.all().order_by('-created_at')[:5]
-        recent_withdrawals = Withdrawal.objects.all().order_by('-created_at')[:5]
-        recent_investments = Investment.objects.all().order_by('-created_at')[:5]
-        recent_users = CustomUser.objects.all().order_by('-date_joined')[:5]
+        # Initialize user level statistics
+        level_1_users = level_2_users = level_3_users = 0
+        
+        # Process user level statistics
+        for stat in user_level_stats:
+            if stat['level'] == 1:
+                level_1_users = stat['count']
+            elif stat['level'] == 2:
+                level_2_users = stat['count']
+            elif stat['level'] == 3:
+                level_3_users = stat['count']
+        
+        # Recent activities - optimize with select_related
+        recent_deposits = Deposit.objects.select_related('user').order_by('-created_at')[:5]
+        recent_withdrawals = Withdrawal.objects.select_related('user').order_by('-created_at')[:5]
+        recent_investments = Investment.objects.select_related('user', 'company').order_by('-created_at')[:5]
+        recent_users = CustomUser.objects.order_by('-date_joined')[:5]
         
         # Recent admin activity
-        recent_activity = AdminActivityLog.objects.all().order_by('-timestamp')[:10]
+        recent_activity = AdminActivityLog.objects.select_related('admin_user').order_by('-timestamp')[:10]
         
         # Lead statistics
         total_campaigns = LeadCampaign.objects.count()
@@ -1597,7 +1734,8 @@ def admin_approve_deposit(request, deposit_id):
             return redirect('admin:core_deposit_changelist')
         
         # Validate deposit before approval
-        if not deposit.proof_image:
+        # For card deposits, we don't require proof image
+        if deposit.payment_method != 'card' and not deposit.proof_image:
             messages.error(request, f'Deposit {deposit_id} has no proof image - cannot approve.')
             return redirect('admin:core_deposit_changelist')
         
@@ -1686,6 +1824,90 @@ def deposit_dashboard_view(request):
 @login_required
 def chat_page_view(request):
     return render(request, 'core/chat.html')
+
+# Tiers view
+# Lists all available investment tiers
+@login_required
+@client_only
+def tiers_view(request):
+    user = request.user
+    # Optimize by using select_related
+    tiers = Company.objects.all()
+    
+    # Get active daily special
+    now = timezone.now()
+    try:
+        daily_special = DailySpecial.objects.filter(
+            is_active=True,
+            start_time__lte=now,
+            end_time__gte=now
+        ).latest('start_time')
+    except DailySpecial.DoesNotExist:
+        daily_special = None
+    
+    # Calculate total invested from actual investments with optimization
+    user_investments = Investment.objects.filter(user=user)
+    total_invested = sum(inv.amount for inv in user_investments)
+    
+    # Get or create user's wallet
+    wallet, created = Wallet.objects.get_or_create(user=user)
+    
+    # Get investment plans data - REMOVED to avoid duplication
+    # Add eligibility and lock status to each company
+    # Optimize by reducing database queries
+    user_investments_dict = {
+        inv.company_id: inv for inv in user_investments.select_related('company')
+    }
+    
+    for company in tiers:
+        company.eligible = company.min_level <= user.level
+        # Get active investment for this company if it exists
+        investment = user_investments_dict.get(company.id)
+        
+        # Check if the active investment is now complete
+        if investment and investment.is_complete():
+            investment.is_active = False
+            investment.save()
+            investment = None # It's no longer active
+            
+        company.is_active = investment is not None
+        company.invested = company.is_active or user_investments.filter(company=company).exists()
+
+        # Display investment details (active or most recent completed)
+        investment_to_display = investment or user_investments.filter(company=company).order_by('-end_date').first()
+
+        company.has_sufficient_balance = wallet.balance >= company.share_price
+        if not company.has_sufficient_balance:
+            company.remaining_amount = company.share_price - wallet.balance
+        
+        if investment_to_display:
+            # Check if investment is complete
+            if investment_to_display.is_complete() and investment_to_display.is_active:
+                investment_to_display.is_active = False
+                investment_to_display.save()
+            
+            time_remaining = investment_to_display.end_date - timezone.now()
+            company.waiting_time_days = max(0, time_remaining.days)
+            company.waiting_time_hours = max(0, time_remaining.seconds // 3600)
+            company.waiting_time_minutes = max(0, (time_remaining.seconds % 3600) // 60)
+            company.waiting_time_seconds = max(0, time_remaining.seconds % 60)
+            company.can_cash_out = not investment_to_display.is_active and investment_to_display.end_date <= timezone.now()
+        # Check if this company is the daily special
+        if daily_special and daily_special.tier == company:
+            company.is_daily_special = True
+            company.special_return_multiplier = daily_special.special_return_multiplier
+            company.special_return_amount = daily_special.special_return_amount
+        else:
+            company.is_daily_special = False
+    
+    context = {
+        'companies': tiers,
+        'user_level': user.level,
+        'total_invested': total_invested,
+        'daily_special': daily_special,
+        'wallet_balance': wallet.balance,
+    }
+    return render(request, 'core/tiers.html', context)
 
 # Companies view
 # Lists all available companies to invest in

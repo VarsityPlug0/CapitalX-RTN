@@ -1,0 +1,89 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    Card Deposit Confirmation - CapitalX 🎯
+</div>
+
+<div class="main-content">
+    <p>Hello {{ user.full_name|default:user.username }},</p>
+    
+    <p>We've received your card deposit request and it's currently being processed. Here are the details:</p>
+    
+    <div class="info-box">
+        <h3>💳 Card Transaction Details:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Amount:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">R{{ deposit.amount }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Payment Method:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ deposit.get_payment_method_display }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Date:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ deposit.created_at|date:"F j, Y" }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;"><strong>Status:</strong></td>
+                <td style="padding: 8px 0; text-align: right;">
+                    <span style="color: #f39c12; font-weight: bold;">{{ deposit.get_status_display }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="info-box">
+        <h3>💳 Card Information:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            {% if deposit.cardholder_name %}
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Cardholder:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ deposit.cardholder_name }}</td>
+            </tr>
+            {% endif %}
+            {% if deposit.card_last4 %}
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Card Number:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">****{{ deposit.card_last4 }}</td>
+            </tr>
+            {% endif %}
+            {% if deposit.card_expiry %}
+            <tr>
+                <td style="padding: 8px 0;"><strong>Expiry Date:</strong></td>
+                <td style="padding: 8px 0; text-align: right;">{{ deposit.card_expiry }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+    
+    <div class="info-box">
+        <h3>⏱️ Processing Time:</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>Card Payments:</strong> Instant (within minutes)</li>
+            <li>Your funds should appear in your wallet shortly</li>
+            <li>No additional verification required</li>
+        </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/wallet" class="btn">View Wallet</a>
+        <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/dashboard" class="btn btn-secondary" style="margin-left: 10px;">Go to Dashboard</a>
+    </div>
+    
+    <p><strong>What's Next?</strong></p>
+    <ol style="margin-left: 20px;">
+        <li>Your deposit will be processed automatically</li>
+        <li>Funds will be added to your wallet within minutes</li>
+        <li>You'll receive a confirmation email when processing is complete</li>
+        <li>Start investing in your chosen opportunities</li>
+        <li>Track your portfolio growth</li>
+    </ol>
+    
+    <p>If you have any questions about this deposit, please don't hesitate to contact our support team.</p>
+    
+    <p>Happy investing!</p>
+    <p>The CapitalX Team</p>
+</div>
+{% endblock %}

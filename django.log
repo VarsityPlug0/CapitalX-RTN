@@ -72,3 +72,814 @@ Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"GET /admin/unified-dashboard/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 200 4222
+"GET /static/admin/css/base.css HTTP/1.1" 200 21544
+"GET /static/admin/css/login.css HTTP/1.1" 200 958
+"GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+"GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2682
+"GET /static/admin/css/responsive.css HTTP/1.1" 200 17905
+"GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+"GET /static/admin/js/theme.js HTTP/1.1" 200 1943
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 16766
+"POST /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 200 4391
+"POST /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 200 4391
+"POST /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 302 0
+Starting unified admin dashboard view processing
+Rendering unified admin dashboard template
+Unified admin dashboard view completed successfully
+"GET /admin/unified-dashboard/ HTTP/1.1" 200 29164
+"GET /static/css/reset.css HTTP/1.1" 200 693
+"GET /static/css/main.css HTTP/1.1" 200 21701
+"GET /static/js/theme.js HTTP/1.1" 200 2296
+"GET /static/images/logo.png HTTP/1.1" 200 1577484
+"GET /admin/deposit-dashboard/ HTTP/1.1" 200 8807
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 28224
+"GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+"GET /static/admin/css/changelists.css HTTP/1.1" 200 6811
+"GET /static/admin/js/core.js HTTP/1.1" 200 6208
+"GET /static/admin/js/actions.js HTTP/1.1" 200 8067
+"GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+"GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 9042
+"GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+"GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+"GET /static/admin/img/search.svg HTTP/1.1" 200 458
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /static/admin/js/filters.js HTTP/1.1" 200 978
+"GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+"GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+"GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+"GET /static/admin/img/sorting-icons.svg HTTP/1.1" 200 1097
+"GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+"GET / HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 200 10727
+"POST /login/ HTTP/1.1" 200 10727
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"POST /login/ HTTP/1.1" 200 13555
+"GET /send-verification-otp/ HTTP/1.1" 200 10874
+"POST /send-verification-otp/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 10750
+"POST /login/ HTTP/1.1" 200 10727
+"GET /password_reset/ HTTP/1.1" 200 4670
+"POST /password_reset/ HTTP/1.1" 302 0
+"GET /password_reset/done/ HTTP/1.1" 200 4143
+"GET /reset/MTk/cx03ja-0bb40a9b4d11bb63f06fb90501504261/ HTTP/1.1" 302 0
+"GET /reset/MTk/set-password/ HTTP/1.1" 200 5112
+"GET /static/css/reset.css HTTP/1.1" 200 693
+"GET /static/css/main.css HTTP/1.1" 200 21701
+"GET /static/js/theme.js HTTP/1.1" 200 2296
+"GET /static/images/logo.png HTTP/1.1" 200 1577484
+"POST /reset/MTk/set-password/ HTTP/1.1" 302 0
+"GET /reset/done/ HTTP/1.1" 200 3977
+"GET / HTTP/1.1" 200 14768
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 14344
+"GET /deposit/ HTTP/1.1" 200 49160
+Email sent successfully to mkhabeleenterprise@gmail.com
+Email sent successfully to moneybman0@gmail.com
+"POST /deposit/ HTTP/1.1" 302 0
+"GET /wallet/ HTTP/1.1" 200 14522
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3765
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3934
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3934
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3934
+"GET /admin/unified-dashboard/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 200 3757
+"POST /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 200 3926
+"POST /capitalx_admin/login/?next=/admin/unified-dashboard/ HTTP/1.1" 200 3926
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3934
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29205
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /admin/deposit/11/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29356
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /static/admin/img/icon-no.svg HTTP/1.1" 200 560
+"GET /admin/deposit/11/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29356
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+Watching for file changes with StatReloader
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29205
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /admin/deposit/11/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29078
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+"GET /wallet/ HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 14877
+"GET /deposit/ HTTP/1.1" 200 49160
+Email sent successfully to mkhabeleenterprise@gmail.com
+Email sent successfully to moneybman0@gmail.com
+"POST /deposit/ HTTP/1.1" 302 0
+"GET /wallet/ HTTP/1.1" 200 15183
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3765
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29854
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /admin/deposit/12/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 29727
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /wallet/ HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 15402
+"GET /investment-plans/ HTTP/1.1" 200 55852
+"GET /invest-plan/13/ HTTP/1.1" 200 16497
+"POST /invest-plan/13/ HTTP/1.1" 302 0
+"GET /investment-plans/ HTTP/1.1" 200 56653
+"GET /investment-plans/ HTTP/1.1" 200 56269
+"GET /wallet/ HTTP/1.1" 200 13244
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /investment-plans/ HTTP/1.1" 200 56269
+"GET /my-plan-investments/ HTTP/1.1" 200 29154
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+"GET /my-plan-investments/ HTTP/1.1" 200 29154
+Internal Server Error: /dashboard/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 329, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: core_investment.funds_claimed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\decorators.py", line 24, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py", line 217, in dashboard_view
+    total_investment_earnings = sum(inv.return_amount - inv.amount for inv in investments if not inv.is_active)
+                                                                              ^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 400, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 329, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: core_investment.funds_claimed
+"GET /dashboard/ HTTP/1.1" 500 154454
+"GET / HTTP/1.1" 200 17528
+Error in wallet_view for user moneybman0@gmail.com: no such column: core_investment.funds_claimed
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 329, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: core_investment.funds_claimed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py", line 509, in wallet_view
+    for investment in investments:
+                      ^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 400, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 329, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: core_investment.funds_claimed
+Internal Server Error: /wallet/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 329, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: core_investment.funds_claimed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\decorators.py", line 24, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py", line 509, in wallet_view
+    for investment in investments:
+                      ^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 400, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 329, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: core_investment.funds_claimed
+"GET /wallet/ HTTP/1.1" 500 158083
+Watching for file changes with StatReloader
+"GET /wallet/ HTTP/1.1" 200 13244
+"GET /wallet/ HTTP/1.1" 200 13244
+"GET /wallet/ HTTP/1.1" 200 13244
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /investment-plans/ HTTP/1.1" 200 56269
+"GET /my-plan-investments/ HTTP/1.1" 200 29154
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"GET /my-plan-investments/ HTTP/1.1" 200 29154
+"GET /investment-plans/ HTTP/1.1" 200 56269
+"GET / HTTP/1.1" 200 17528
+"GET / HTTP/1.1" 200 17528
+"GET / HTTP/1.1" 200 17528
+"GET / HTTP/1.1" 200 17528
+"GET / HTTP/1.1" 200 17528
+"GET /wallet/ HTTP/1.1" 200 13244
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /investment-plans/ HTTP/1.1" 200 56269
+"GET /my-plan-investments/ HTTP/1.1" 200 29154
+"GET / HTTP/1.1" 200 17528
+"GET / HTTP/1.1" 200 17528
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /investment-plans/ HTTP/1.1" 200 56269
+"GET /my-plan-investments/ HTTP/1.1" 200 29154
+"GET /wallet/ HTTP/1.1" 200 13244
+Watching for file changes with StatReloader
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /wallet/ HTTP/1.1" 200 13245
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /investment-plans/ HTTP/1.1" 200 55680
+"GET /my-plan-investments/ HTTP/1.1" 200 28522
+"GET /wallet/ HTTP/1.1" 200 13245
+"GET /feed/ HTTP/1.1" 200 23740
+"GET /feed/ HTTP/1.1" 200 23741
+"GET /referral/ HTTP/1.1" 200 10942
+"GET /wallet/ HTTP/1.1" 200 13245
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /wallet/ HTTP/1.1" 200 13245
+"GET /withdraw/ HTTP/1.1" 200 15293
+Email sent successfully to moneybman0@gmail.com
+"POST /withdraw/ HTTP/1.1" 302 0
+"GET /wallet/ HTTP/1.1" 200 14288
+"GET /capitalx_admin/core/withdrawal/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/capitalx_admin/core/withdrawal/ HTTP/1.1" 200 3771
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/withdrawal/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/withdrawal/ HTTP/1.1" 200 13715
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /capitalx_admin/core/withdrawal/2/change/ HTTP/1.1" 200 21496
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /static/admin/css/forms.css HTTP/1.1" 200 9090
+"GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+"GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+"GET /static/admin/css/widgets.css HTTP/1.1" 200 11800
+"GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+"POST /capitalx_admin/core/withdrawal/2/change/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/withdrawal/ HTTP/1.1" 200 13968
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /wallet/ HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 15402
+"GET /wallet/ HTTP/1.1" 200 13923
+"GET /tutorial/ HTTP/1.1" 200 10285
+"GET /static/images/tutorial/companies.png HTTP/1.1" 404 1846
+"GET /static/images/tutorial/register.png HTTP/1.1" 404 1843
+"GET /static/images/tutorial/dashboard.png HTTP/1.1" 404 1846
+"GET /static/images/tutorial/deposit.png HTTP/1.1" 404 1840
+"GET /feed/ HTTP/1.1" 200 23741
+"GET /feed/ HTTP/1.1" 200 23740
+"GET /referral/ HTTP/1.1" 200 10942
+"GET /wallet/ HTTP/1.1" 200 13923
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /wallet/ HTTP/1.1" 200 13923
+"GET /tiers/ HTTP/1.1" 200 13300
+"GET /investment-plans/ HTTP/1.1" 200 55975
+"GET /invest-plan/12/ HTTP/1.1" 200 16499
+"POST /invest-plan/12/ HTTP/1.1" 302 0
+"GET /investment-plans/ HTTP/1.1" 200 56485
+"GET /my-plan-investments/ HTTP/1.1" 200 31917
+"GET /dashboard/ HTTP/1.1" 200 15402
+"GET /investment-plans/ HTTP/1.1" 200 56098
+"GET /invest-plan/10/ HTTP/1.1" 200 16506
+"POST /invest-plan/10/ HTTP/1.1" 302 0
+"GET /investment-plans/ HTTP/1.1" 200 56610
+"GET /invest-plan/11/ HTTP/1.1" 200 16486
+"POST /invest-plan/11/ HTTP/1.1" 302 0
+"GET /investment-plans/ HTTP/1.1" 200 56731
+"GET /invest-plan/4/ HTTP/1.1" 200 16508
+"POST /invest-plan/4/ HTTP/1.1" 302 0
+"GET /investment-plans/ HTTP/1.1" 200 56851
+"GET /my-plan-investments/ HTTP/1.1" 200 42109
+"GET /tutorial/ HTTP/1.1" 200 10285
+"GET /static/images/tutorial/register.png HTTP/1.1" 404 1843
+"GET /static/images/tutorial/deposit.png HTTP/1.1" 404 1840
+"GET /static/images/tutorial/dashboard.png HTTP/1.1" 404 1846
+"GET /static/images/tutorial/companies.png HTTP/1.1" 404 1846
+"GET /feed/ HTTP/1.1" 200 23739
+"GET /feed/ HTTP/1.1" 200 23740
+"GET /referral/ HTTP/1.1" 200 10942
+"GET /wallet/ HTTP/1.1" 200 13922
+"GET /wallet/ HTTP/1.1" 200 13922
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /investment-plans/ HTTP/1.1" 200 56467
+"GET /dashboard/ HTTP/1.1" 200 15401
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"GET /capitalx_admin/core/withdrawal/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/capitalx_admin/core/withdrawal/ HTTP/1.1" 200 3771
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/withdrawal/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/withdrawal/ HTTP/1.1" 200 13717
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET / HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 15401
+"GET /investment-plans/ HTTP/1.1" 200 56467
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /wallet/ HTTP/1.1" 200 13922
+"GET /referral/ HTTP/1.1" 200 10942
+"GET /feed/ HTTP/1.1" 200 23741
+"GET /feed/ HTTP/1.1" 200 23741
+"GET /tutorial/ HTTP/1.1" 200 10285
+"GET /static/images/tutorial/dashboard.png HTTP/1.1" 404 1846
+"GET /static/images/tutorial/companies.png HTTP/1.1" 404 1846
+"GET /static/images/tutorial/register.png HTTP/1.1" 404 1843
+"GET /static/images/tutorial/deposit.png HTTP/1.1" 404 1840
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /investment-plans/ HTTP/1.1" 200 56467
+"GET /dashboard/ HTTP/1.1" 200 15401
+"GET /tiers/ HTTP/1.1" 200 13299
+"GET /invest/7/ HTTP/1.1" 302 0
+"GET /tiers/ HTTP/1.1" 200 13653
+"GET /invest/8/ HTTP/1.1" 302 0
+"GET /tiers/ HTTP/1.1" 200 13646
+"GET /invest/9/ HTTP/1.1" 302 0
+"GET /tiers/ HTTP/1.1" 200 13646
+"GET /deposit/ HTTP/1.1" 200 49160
+Email sent successfully to mkhabeleenterprise@gmail.com
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3765
+Email sent successfully to moneybman0@gmail.com
+"POST /deposit/ HTTP/1.1" 302 0
+"GET /wallet/ HTTP/1.1" 200 16541
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 30535
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 30535
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+Internal Server Error: /capitalx_admin/core/deposit/13/change/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 479, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\urls\resolvers.py", line 851, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'deposit-approve' not found. 'deposit-approve' is not a valid view function or pattern name.
+"GET /capitalx_admin/core/deposit/13/change/ HTTP/1.1" 500 368104
+Watching for file changes with StatReloader
+"GET /capitalx_admin/core/deposit/13/change/ HTTP/1.1" 200 33616
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /static/admin/js/collapse.js HTTP/1.1" 200 1803
+"GET /admin/deposit/13/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 30408
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"GET /deposit/ HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /register/ HTTP/1.1" 200 12831
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 15934
+"GET /deposit/ HTTP/1.1" 200 49160
+Email sent successfully to mkhabeleenterprise@gmail.com
+Email sent successfully to moneybman0@gmail.com
+Email sent successfully to moneybman0@gmail.com
+"POST /deposit/ HTTP/1.1" 302 0
+"GET /wallet/ HTTP/1.1" 200 17202
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 200 3765
+"POST /capitalx_admin/login/?next=/capitalx_admin/core/deposit/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 31184
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /capitalx_admin/core/deposit/14/change/ HTTP/1.1" 200 34004
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /media/deposit_proofs/IMG_3961.jpeg HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 14768
+"GET /media/deposit_proofs/IMG_3961.jpeg HTTP/1.1" 200 4340122
+"GET /admin/deposit/14/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/login/?next=/admin/deposit/14/approve/ HTTP/1.1" 200 4224
+"POST /capitalx_admin/login/?next=/admin/deposit/14/approve/ HTTP/1.1" 302 0
+Email sent successfully to moneybman0@gmail.com
+"GET /admin/deposit/14/approve/ HTTP/1.1" 302 0
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 31057
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\email_utils.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
