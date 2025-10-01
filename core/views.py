@@ -1105,119 +1105,208 @@ def tutorial_view(request):
 
 @staff_member_required
 def admin_dashboard_view(request):
-    # Get all tiers
-    tiers = Company.objects.all().order_by('share_price')
-    
-    # Get investment statistics for each tier
-    tier_stats = []
-    for tier in tiers:
-        # Get total number of investments for this tier
-        total_investments = Investment.objects.filter(company=tier).count()
+    try:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("Starting admin dashboard view processing")
         
-        # Get total amount invested in this tier
-        total_invested = Investment.objects.filter(company=tier).aggregate(
+        # Get all tiers
+        tiers = Company.objects.all().order_by('share_price')
+        logger.info(f"Found {tiers.count()} tiers")
+        
+        # Get investment statistics for each tier
+        tier_stats = []
+        for i, tier in enumerate(tiers):
+            logger.info(f"Processing tier {i+1}: {tier.name}")
+            
+            # Get total number of investments for this tier
+            total_investments = Investment.objects.filter(company=tier).count()
+            
+            # Get total amount invested in this tier
+            total_invested = Investment.objects.filter(company=tier).aggregate(
+                total=Sum('amount')
+            )['total'] or 0
+            
+            # Get total returns for this tier
+            total_returns = Investment.objects.filter(company=tier).aggregate(
+                total=Sum('return_amount')
+            )['total'] or 0
+            
+            # Get active investments count
+            active_investments = Investment.objects.filter(
+                company=tier,
+                is_active=True
+            ).count()
+            
+            tier_stats.append({
+                'tier': tier,
+                'total_investments': total_investments,
+                'total_invested': total_invested,
+                'total_returns': total_returns,
+                'active_investments': active_investments
+            })
+        
+        # Get overall statistics
+        total_deposits = Deposit.objects.filter(status='approved').aggregate(
             total=Sum('amount')
         )['total'] or 0
         
-        # Get total returns for this tier
-        total_returns = Investment.objects.filter(company=tier).aggregate(
+        total_investments = Investment.objects.count()
+        total_returns = Investment.objects.filter(is_active=False).aggregate(
             total=Sum('return_amount')
         )['total'] or 0
         
-        # Get active investments count
-        active_investments = Investment.objects.filter(
-            company=tier,
-            is_active=True
-        ).count()
+        total_users = CustomUser.objects.count()
         
-        tier_stats.append({
-            'tier': tier,
+        # Get detailed user information
+        users = CustomUser.objects.all().order_by('-date_joined')
+        user_details = []
+        
+        for i, user in enumerate(users):
+            # Get user's wallet
+            wallet = Wallet.objects.filter(user=user).first()
+            
+            # Get user's deposits
+            deposits = Deposit.objects.filter(user=user).order_by('-created_at')
+            total_deposited = deposits.filter(status='approved').aggregate(
+                total=Sum('amount')
+            )['total'] or 0
+            
+            # Get user's investments
+            investments = Investment.objects.filter(user=user)
+            total_invested = investments.aggregate(
+                total=Sum('amount')
+            )['total'] or 0
+            
+            # Get user's returns
+            total_returns_user = investments.filter(is_active=False).aggregate(
+                total=Sum('return_amount')
+            )['total'] or 0
+            
+            # Get user's active investments
+            active_investments = investments.filter(is_active=True)
+            
+            # Get user's referral earnings
+            referral_earnings = ReferralReward.objects.filter(referrer=user).aggregate(
+                total=Sum('reward_amount')
+            )['total'] or 0
+            
+            # Get user's referrals
+            referrals = Referral.objects.filter(inviter=user)
+            
+            user_details.append({
+                'user': user,
+                'wallet': wallet,
+                'total_deposited': total_deposited,
+                'total_invested': total_invested,
+                'total_returns': total_returns_user,
+                'active_investments': active_investments,
+                'referral_earnings': referral_earnings,
+                'total_referrals': referrals.count(),
+                'deposits': deposits,
+                'investments': investments,
+                'referrals': referrals,
+            })
+        
+        # Get recent activities
+        recent_deposits = Deposit.objects.all().order_by('-created_at')[:10]
+        recent_investments = Investment.objects.all().order_by('-created_at')[:10]
+        recent_returns = Investment.objects.filter(is_active=False).order_by('-end_date')[:10]
+        
+        context = {
+            'tier_stats': tier_stats,
+            'total_deposits': total_deposits,
             'total_investments': total_investments,
-            'total_invested': total_invested,
             'total_returns': total_returns,
-            'active_investments': active_investments
-        })
-    
-    # Get overall statistics
-    total_deposits = Deposit.objects.filter(status='approved').aggregate(
-        total=Sum('amount')
-    )['total'] or 0
-    
-    total_investments = Investment.objects.count()
-    total_returns = Investment.objects.filter(is_active=False).aggregate(
-        total=Sum('return_amount')
-    )['total'] or 0
-    
-    total_users = CustomUser.objects.count()
-    
-    # Get detailed user information
-    users = CustomUser.objects.all().order_by('-date_joined')
-    user_details = []
-    
-    for user in users:
-        # Get user's wallet
-        wallet = Wallet.objects.filter(user=user).first()
+            'total_users': total_users,
+            'user_details': user_details,
+            'recent_deposits': recent_deposits,
+            'recent_investments': recent_investments,
+            'recent_returns': recent_returns,
+        }
         
-        # Get user's deposits
-        deposits = Deposit.objects.filter(user=user).order_by('-created_at')
-        total_deposited = deposits.filter(status='approved').aggregate(
+        logger.info("Rendering admin dashboard template")
+        response = render(request, 'core/admin_dashboard.html', context)
+        logger.info("Admin dashboard view completed successfully")
+        return response
+    except Exception as e:
+        # Log the error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in admin_dashboard_view: {str(e)}", exc_info=True)
+        
+        # Return a simple error response for debugging
+        from django.http import HttpResponse
+        return HttpResponse(f"Error in admin dashboard view: {str(e)}", status=500)
+
+def simple_test_view(request):
+    """
+    Very simple test view
+    """
+    try:
+        from core.models import CustomUser, Deposit
+        from django.db.models import Sum
+        
+        users = CustomUser.objects.all()
+        total_deposits = Deposit.objects.filter(status='approved').aggregate(
             total=Sum('amount')
         )['total'] or 0
         
-        # Get user's investments
-        investments = Investment.objects.filter(user=user)
-        total_invested = investments.aggregate(
+        context = {
+            'users': users,
+            'total_users': users.count(),
+            'total_deposits': total_deposits,
+        }
+        
+        return render(request, 'core/simple_test.html', context)
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
+
+def test_admin_dashboard_view(request):
+    """
+    Simple test view to debug admin dashboard issues
+    """
+    try:
+        # Test basic data retrieval
+        users = CustomUser.objects.all()
+        total_deposits = Deposit.objects.filter(status='approved').aggregate(
             total=Sum('amount')
         )['total'] or 0
         
-        # Get user's returns
-        total_returns = investments.filter(is_active=False).aggregate(
-            total=Sum('return_amount')
-        )['total'] or 0
+        # Create minimal user details
+        user_details = []
+        for user in users:
+            wallet = Wallet.objects.filter(user=user).first()
+            user_details.append({
+                'user': user,
+                'wallet': wallet,
+            })
         
-        # Get user's active investments
-        active_investments = investments.filter(is_active=True)
+        # Test context data creation
+        context = {
+            'users': users,
+            'companies': [],
+            'total_users': users.count(),
+            'total_deposits': total_deposits,
+            'user_details': user_details,
+            'test_message': 'Admin dashboard test view working correctly'
+        }
         
-        # Get user's referral earnings
-        referral_earnings = ReferralReward.objects.filter(referrer=user).aggregate(
-            total=Sum('reward_amount')
-        )['total'] or 0
+        return render(request, 'core/minimal_admin.html', context)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in test_admin_dashboard_view: {str(e)}", exc_info=True)
         
-        # Get user's referrals
-        referrals = Referral.objects.filter(inviter=user)
+        from django.http import HttpResponse
+        return HttpResponse(f"Error in test view: {str(e)}", status=500)
+
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in test_admin_dashboard_view: {str(e)}", exc_info=True)
         
-        user_details.append({
-            'user': user,
-            'wallet': wallet,
-            'total_deposited': total_deposited,
-            'total_invested': total_invested,
-            'total_returns': total_returns,
-            'active_investments': active_investments,
-            'referral_earnings': referral_earnings,
-            'total_referrals': referrals.count(),
-            'deposits': deposits,
-            'investments': investments,
-            'referrals': referrals,
-        })
-    
-    # Get recent activities
-    recent_deposits = Deposit.objects.all().order_by('-created_at')[:10]
-    recent_investments = Investment.objects.all().order_by('-created_at')[:10]
-    recent_returns = Investment.objects.filter(is_active=False).order_by('-end_date')[:10]
-    
-    context = {
-        'tier_stats': tier_stats,
-        'total_deposits': total_deposits,
-        'total_investments': total_investments,
-        'total_returns': total_returns,
-        'total_users': total_users,
-        'user_details': user_details,
-        'recent_deposits': recent_deposits,
-        'recent_investments': recent_investments,
-        'recent_returns': recent_returns,
-    }
-    
-    return render(request, 'core/admin_dashboard.html', context)
+        from django.http import HttpResponse
+        return HttpResponse(f"Error in test view: {str(e)}", status=500)
 
 @login_required
 def portfolio_view(request):
