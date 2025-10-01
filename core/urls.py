@@ -53,6 +53,12 @@ urlpatterns = [
     path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='admin_approve_deposit'),
     path('admin/deposit/<int:deposit_id>/reject/', views.admin_reject_deposit, name='admin_reject_deposit'),
     path('admin/deposit-dashboard/', views.deposit_dashboard_view, name='deposit_dashboard'),
+    
+    # Unified Admin Dashboard
+    path('admin/unified-dashboard/', views.unified_admin_dashboard, name='unified_admin_dashboard'),
+    path('admin/manage-users/', views.manage_users_view, name='manage_users'),
+    path('admin/manage-companies/', views.manage_companies_view, name='manage_companies'),
+    path('admin/manage-investment-plans/', views.manage_investment_plans_view, name='manage_investment_plans'),
 
     # Email Lead System URLs
     path('admin/leads/', lead_views.lead_dashboard, name='lead_dashboard'),

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Companies{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Manage Investment Companies</h1>
+            <p class="text-muted">View and manage all investment companies</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Companies Overview</h5>
+                        <div>
+                            <a href="{% url 'admin:core_company_add' %}" class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i> Add New Company
+                            </a>
+                            <a href="{% url 'admin:core_company_changelist' %}" class="btn btn-primary ms-2">
+                                <i class="bi bi-gear"></i> Advanced Management
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Companies Table -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Company Name</th>
+                                    <th>Share Price</th>
+                                    <th>Expected Return</th>
+                                    <th>Duration (Days)</th>
+                                    <th>Min Level</th>
+                                    <th>Investments</th>
+                                    <th>Total Invested</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for company in companies %}
+                                <tr>
+                                    <td>
+                                        {% if company.logo %}
+                                            <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="img-fluid" style="max-height: 30px;">
+                                        {% endif %}
+                                        {{ company.name }}
+                                    </td>
+                                    <td>R{{ company.share_price }}</td>
+                                    <td>R{{ company.expected_return }}</td>
+                                    <td>{{ company.duration_days }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if company.min_level == 1 %}secondary{% elif company.min_level == 2 %}warning{% else %}success{% endif %}">
+                                            Level {{ company.min_level }}
+                                        </span>
+                                    </td>
+                                    <td>{{ company.investment_set.count }}</td>
+                                    <td>
+                                        R{{ company.investment_set.aggregate(total=models.Sum('amount')).total|default:"0.00" }}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'admin:core_company_change' company.id %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit Company">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'admin:core_investment_changelist' %}?company__id__exact={{ company.id }}" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="View Investments">
+                                                <i class="bi bi-graph-up"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No companies found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
