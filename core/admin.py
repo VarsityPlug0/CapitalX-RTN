@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.admin.decorators import register
 from .models import (
-    CustomUser, Investment, Deposit, Withdrawal, Wallet, Referral, ReferralReward, IPAddress, DailySpecial, Backup, AdminActivityLog, Voucher, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead, EmailValidation, EmailSent
+    CustomUser, Investment, Deposit, Withdrawal, Wallet, Referral, ReferralReward, IPAddress, DailySpecial, Backup, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead, EmailValidation, EmailSent
 )
 from django.urls import path, reverse
 from django.shortcuts import redirect, get_object_or_404
@@ -197,23 +197,6 @@ def payout_investments(modeladmin, request, queryset):
 class InvestmentAdmin(admin.ModelAdmin):
     actions = [payout_investments]
 
-class VoucherAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'status', 'created_at', 'voucher_image_preview')
-    readonly_fields = ('voucher_image_preview',)
-    list_filter = ('status', 'created_at')
-    search_fields = ('user__email', 'user__username')
-    ordering = ['-created_at']
-    
-    def voucher_image_preview(self, obj):
-        """Display a preview of the voucher image in the admin"""
-        if obj.voucher_image:
-            return format_html(
-                '<img src="{}" style="max-height: 100px; max-width: 150px;" />',
-                obj.voucher_image.url
-            )
-        return "No Image"
-    voucher_image_preview.short_description = "Voucher Image Preview"
-
 # Register CustomUser with the custom admin including Wallet inline
 admin_site.register(CustomUser, CustomUserAdmin)
 # admin_site.register(Company)  # Removed because Company is not defined
@@ -225,7 +208,6 @@ admin_site.register(IPAddress)
 admin_site.register(DailySpecial)
 admin_site.register(Backup)
 admin_site.register(AdminActivityLog)
-admin_site.register(Voucher, VoucherAdmin)  # Register with custom admin class
 admin_site.register(ChatUsage)
 
 # EmailOTP Admin
