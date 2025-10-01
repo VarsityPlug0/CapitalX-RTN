@@ -240,3 +240,33 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # In production, ensure email credentials are set via environment variables
 if not DEBUG and not EMAIL_HOST_PASSWORD:
     print("WARNING: EMAIL_HOST_PASSWORD not set in production environment")
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'django.log',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

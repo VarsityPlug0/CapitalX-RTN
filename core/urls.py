@@ -38,8 +38,7 @@ urlpatterns = [
     path('figma-showcase/', views.figma_design_showcase, name='figma_showcase'),
     path('contrast-test/', views.contrast_test_view, name='contrast_test'),
     path('whitish-text/', views.whitish_text_test_view, name='whitish_text_test'),
-
-
+    path('test/simple/', views.simple_test_view, name='simple_test'),
     # OTP Email Verification URLs
     path('send-verification-otp/', views.send_verification_otp, name='send_verification_otp'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
@@ -85,6 +84,7 @@ urlpatterns = [
     # Admin test URLs for debugging
     path('debug/admin-status/', admin_test_views.debug_admin_status, name='debug_admin_status'),
     path('test/lead-manager/', admin_test_views.simple_lead_manager, name='simple_lead_manager'),
+    path('test/admin-dashboard/', views.test_admin_dashboard_view, name='test_admin_dashboard'),
     
     # Health check URLs for deployment debugging
     path('health/', health_views.health_check, name='health_check'),
