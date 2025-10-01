@@ -1110,6 +1110,12 @@ def admin_dashboard_view(request):
         logger = logging.getLogger(__name__)
         logger.info("Starting admin dashboard view processing")
         
+        # Check for any session messages from middleware
+        if 'admin_access_error' in request.session:
+            from django.contrib import messages
+            messages.error(request, request.session['admin_access_error'])
+            del request.session['admin_access_error']
+        
         # Get all tiers
         tiers = Company.objects.all().order_by('share_price')
         logger.info(f"Found {tiers.count()} tiers")
