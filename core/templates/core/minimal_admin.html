@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <h1>Minimal Admin Dashboard</h1>
+    <p>Total Users: {{ total_users }}</p>
+    <p>Total Deposits: R{{ total_deposits }}</p>
+    
+    <h2>User Details</h2>
+    <ul>
+    {% for detail in user_details %}
+        <li>{{ detail.user.email }} - Wallet: R{{ detail.wallet.balance|default:"0.00" }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}
