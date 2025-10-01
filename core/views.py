@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment
+from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead
 from django.contrib import messages
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
 from datetime import timedelta, datetime
 from decimal import Decimal
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.http import JsonResponse
 from django.urls import reverse
 import random
@@ -1436,29 +1436,6 @@ def unified_admin_dashboard(request):
         from django.http import HttpResponse
         return HttpResponse(f"Error in unified admin dashboard: {str(e)}", status=500)
 
-def simple_test_view(request):
-    """
-    Very simple test view
-    """
-    try:
-        from core.models import CustomUser, Deposit
-        from django.db.models import Sum
-        
-        users = CustomUser.objects.all()
-        total_deposits = Deposit.objects.filter(status='approved').aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        context = {
-            'users': users,
-            'total_users': users.count(),
-            'total_deposits': total_deposits,
-        }
-        
-        return render(request, 'core/simple_test.html', context)
-    except Exception as e:
-        return HttpResponse(f"Error: {str(e)}", status=500)
-
 def test_admin_dashboard_view(request):
     """
     Simple test view to debug admin dashboard issues
@@ -1491,13 +1468,6 @@ def test_admin_dashboard_view(request):
         
         return render(request, 'core/minimal_admin.html', context)
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in test_admin_dashboard_view: {str(e)}", exc_info=True)
-        
-        from django.http import HttpResponse
-        return HttpResponse(f"Error in test view: {str(e)}", status=500)
-
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Error in test_admin_dashboard_view: {str(e)}", exc_info=True)
@@ -1602,9 +1572,6 @@ def voucher_deposit(request):
 def support_view(request):
     pass
 
-def simple_test_view(request):
-    """Simple test view for styling verification"""
-    return render(request, 'core/simple_test.html')
 
 def figma_design_showcase(request):
     """Showcase page for Figma-like design system"""
@@ -1799,8 +1766,8 @@ def manage_users_view(request):
     search_query = request.GET.get('search')
     if search_query:
         users = users.filter(
-            models.Q(email__icontains=search_query) | 
-            models.Q(username__icontains=search_query)
+            Q(email__icontains=search_query) | 
+            Q(username__icontains=search_query)
         )
     
     # Pagination
