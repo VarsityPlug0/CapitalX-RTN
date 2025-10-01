@@ -15,10 +15,9 @@ def client_only(view_func):
     def wrapper(request, *args, **kwargs):
         # Check if user is authenticated and is admin
         if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
-            # Log out the admin user
-            logout(request)
+            # Instead of logging out, redirect admin users to the admin panel
             messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
-            return redirect('home')
+            return redirect('/capitalx_admin/')
         
         # Continue with normal view execution
         return view_func(request, *args, **kwargs)

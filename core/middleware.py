@@ -89,7 +89,7 @@ class AdminClientSeparationMiddleware:
         # Block admin users from accessing client-side URLs
         if any(current_path.startswith(client_url) for client_url in self.client_urls):
             # Instead of logging out, redirect to admin panel
-            from django.shortcuts import redirect
+            messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
             return redirect('/capitalx_admin/')
         
         return None
@@ -116,7 +116,7 @@ class ClientAdminAccessMiddleware:
             not request.path.startswith('/admin/')):  # Allow all admin URLs
             
             # Instead of logging out, redirect to admin panel
-            from django.shortcuts import redirect
+            messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
             return redirect('/capitalx_admin/')
         
         response = self.get_response(request)
