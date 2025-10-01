@@ -188,6 +188,10 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Ensure media URL ends with a slash
+if not MEDIA_URL.endswith('/'):
+    MEDIA_URL = MEDIA_URL + '/'
+
 # Whitenoise settings for serving static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
@@ -196,6 +200,21 @@ WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
+
+# Additional Whitenoise settings for better media file serving
+WHITENOISE_ALLOW_ALL_ORIGINS = True
+WHITENOISE_IMMUTABLE_FILE_TEST = lambda name, url: True
+
+# Ensure Whitenoise serves media files correctly
+WHITENOISE_STATIC_PREFIX = '/static/'
+WHITENOISE_MEDIA_PREFIX = '/media/'
+
+# Additional settings for media file serving in production
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# Ensure proper handling of media files
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

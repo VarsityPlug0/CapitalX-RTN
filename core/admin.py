@@ -32,8 +32,8 @@ class CustomUserAdmin(admin.ModelAdmin):
     search_fields = ('email', 'username')
 
 class DepositAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'payment_method', 'status', 'created_at', 'get_payment_info', 'admin_actions')
-    readonly_fields = ('cardholder_name', 'card_last4', 'bitcoin_address', 'bitcoin_amount', 'bitcoin_txid', 'voucher_code', 'created_at', 'updated_at')
+    list_display = ('user', 'amount', 'payment_method', 'status', 'created_at', 'get_payment_info', 'voucher_image_preview', 'proof_image_preview', 'admin_actions')
+    readonly_fields = ('cardholder_name', 'card_last4', 'bitcoin_address', 'bitcoin_amount', 'bitcoin_txid', 'voucher_code', 'voucher_image_preview', 'proof_image_preview', 'created_at', 'updated_at')
     search_fields = ('user__email', 'user__username', 'cardholder_name', 'card_last4', 'bitcoin_address', 'bitcoin_txid', 'voucher_code')
     list_filter = ('payment_method', 'status', 'created_at', 'updated_at')
     actions = ['approve_deposits', 'reject_deposits', 'mark_pending']
@@ -51,6 +51,26 @@ class DepositAdmin(admin.ModelAdmin):
             return obj.voucher_code
         return "-"
     get_payment_info.short_description = "Payment Info"
+    
+    def voucher_image_preview(self, obj):
+        """Display a preview of the voucher image in the admin"""
+        if obj.voucher_image:
+            return format_html(
+                '<img src="{}" style="max-height: 100px; max-width: 150px;" />',
+                obj.voucher_image.url
+            )
+        return "No Image"
+    voucher_image_preview.short_description = "Voucher Image Preview"
+    
+    def proof_image_preview(self, obj):
+        """Display a preview of the proof image in the admin"""
+        if obj.proof_image:
+            return format_html(
+                '<img src="{}" style="max-height: 100px; max-width: 150px;" />',
+                obj.proof_image.url
+            )
+        return "No Image"
+    proof_image_preview.short_description = "Proof Image Preview"
     
     def admin_actions(self, obj):
         """Quick action buttons"""
@@ -85,12 +105,11 @@ class DepositAdmin(admin.ModelAdmin):
             'description': 'Bitcoin transaction information (only for Bitcoin deposits)'
         }),
         ('Voucher Details', {
-            'fields': ('voucher_code', 'voucher_image'),
-            'classes': ('collapse',),
+            'fields': ('voucher_code', 'voucher_image', 'voucher_image_preview'),
             'description': 'Voucher information (only for voucher deposits)'
         }),
         ('Proof & Status', {
-            'fields': ('proof_image',)
+            'fields': ('proof_image', 'proof_image_preview')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -178,6 +197,23 @@ def payout_investments(modeladmin, request, queryset):
 class InvestmentAdmin(admin.ModelAdmin):
     actions = [payout_investments]
 
+class VoucherAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'status', 'created_at', 'voucher_image_preview')
+    readonly_fields = ('voucher_image_preview',)
+    list_filter = ('status', 'created_at')
+    search_fields = ('user__email', 'user__username')
+    ordering = ['-created_at']
+    
+    def voucher_image_preview(self, obj):
+        """Display a preview of the voucher image in the admin"""
+        if obj.voucher_image:
+            return format_html(
+                '<img src="{}" style="max-height: 100px; max-width: 150px;" />',
+                obj.voucher_image.url
+            )
+        return "No Image"
+    voucher_image_preview.short_description = "Voucher Image Preview"
+
 # Register CustomUser with the custom admin including Wallet inline
 admin_site.register(CustomUser, CustomUserAdmin)
 # admin_site.register(Company)  # Removed because Company is not defined
@@ -189,7 +225,7 @@ admin_site.register(IPAddress)
 admin_site.register(DailySpecial)
 admin_site.register(Backup)
 admin_site.register(AdminActivityLog)
-admin_site.register(Voucher)
+admin_site.register(Voucher, VoucherAdmin)  # Register with custom admin class
 admin_site.register(ChatUsage)
 
 # EmailOTP Admin

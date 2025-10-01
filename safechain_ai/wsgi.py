@@ -16,10 +16,18 @@ from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'safechain_ai.settings')
 
-application = get_wsgi_application()
+# Get the Django application
+django_application = get_wsgi_application()
+
 # Serve both static and media files with Whitenoise
-application = WhiteNoise(application, root=settings.STATIC_ROOT)
-# Add media files support
+application = WhiteNoise(django_application)
+# Add static files support
+application.add_files(settings.STATIC_ROOT, prefix=settings.STATIC_URL.strip('/'))
+# Add media files support with correct prefix
 application.add_files(settings.MEDIA_ROOT, prefix=settings.MEDIA_URL.strip('/'))
-# Allow all HTTP methods for static/media files
+# Additional Whitenoise configuration
 application.allow_all_origins = True
+application.autorefresh = True
+
+# Ensure media files are served with proper headers
+application.charset = 'utf-8'
