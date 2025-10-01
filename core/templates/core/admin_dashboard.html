@@ -21,8 +21,11 @@
                         <div class="col-md-3">
                             <div class="card bg-success text-white">
                                 <div class="card-body">
-                                    <h5>Total Deposits</h5>
+                                    <h5>Approved Deposits</h5>
                                     <h3>R{{ total_deposits }}</h3>
+                                    {% if pending_deposits_count > 0 %}
+                                    <small class="text-warning">{{ pending_deposits_count }} pending (R{{ pending_deposits_amount }})</small>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -69,12 +72,25 @@
                                 <tr>
                                     <td>{{ deposit.user.email }}</td>
                                     <td>R{{ deposit.amount }}</td>
-                                    <td>{{ deposit.status }}</td>
+                                    <td>
+                                        {% if deposit.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif deposit.status == 'approved' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ deposit.created_at|date:"Y-m-d H:i" }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'deposit_dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-cog"></i> Manage Deposits
+                        </a>
                     </div>
                 </div>
             </div>

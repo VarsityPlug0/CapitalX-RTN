@@ -1219,6 +1219,12 @@ def admin_dashboard_view(request):
         recent_investments = Investment.objects.all().order_by('-created_at')[:10]
         recent_returns = Investment.objects.filter(is_active=False).order_by('-end_date')[:10]
         
+        # Get pending deposit statistics for additional context
+        pending_deposits_count = Deposit.objects.filter(status='pending').count()
+        pending_deposits_amount = Deposit.objects.filter(status='pending').aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
         context = {
             'tier_stats': tier_stats,
             'total_deposits': total_deposits,
@@ -1229,6 +1235,8 @@ def admin_dashboard_view(request):
             'recent_deposits': recent_deposits,
             'recent_investments': recent_investments,
             'recent_returns': recent_returns,
+            'pending_deposits_count': pending_deposits_count,
+            'pending_deposits_amount': pending_deposits_amount,
         }
         
         logger.info("Rendering admin dashboard template")
