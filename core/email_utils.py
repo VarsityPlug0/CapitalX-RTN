@@ -32,7 +32,7 @@ class EmailService:
         self.use_tls = getattr(settings, 'EMAIL_USE_TLS', True)
         self.default_from = getattr(settings, 'DEFAULT_FROM_EMAIL', self.username)
     
-    def send_email(self, to_email, subject, html_content, text_content=None, attachments=None):
+    def send_email(self, to_email, subject, html_content, text_content=None, attachments=None, inline_images=None):
         """
         Send email using Django's built-in email backend
         
@@ -42,13 +42,14 @@ class EmailService:
             html_content (str): HTML email content
             text_content (str, optional): Plain text version
             attachments (list, optional): List of file paths to attach
+            inline_images (dict, optional): Dict of {cid: file_path} for inline images
         """
         try:
             if text_content is None:
                 text_content = strip_tags(html_content)
             
-            if attachments:
-                # Use EmailMultiAlternatives for attachments
+            if attachments or inline_images:
+                # Use EmailMultiAlternatives for attachments and inline images
                 email = EmailMultiAlternatives(
                     subject=subject,
                     body=text_content,
@@ -58,10 +59,20 @@ class EmailService:
                 email.attach_alternative(html_content, "text/html")
                 
                 # Add attachments
-                for attachment_path in attachments:
+                for attachment_path in attachments or []:
                     if os.path.exists(attachment_path):
                         with open(attachment_path, 'rb') as f:
                             email.attach_file(attachment_path)
+                
+                # Add inline images
+                for cid, image_path in (inline_images or {}).items():
+                    if os.path.exists(image_path):
+                        with open(image_path, 'rb') as f:
+                            image_data = f.read()
+                            image = MIMEImage(image_data)
+                            image.add_header('Content-ID', f'<{cid}>')
+                            image.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
+                            email.attach(image)
                 
                 email.send()
             else:
@@ -236,14 +247,16 @@ class EmailService:
             html_content=html_content
         )
     
-    def send_custom_email(self, to_email, subject, template_name, context):
+    def send_custom_email(self, to_email, subject, template_name, context, attachments=None, inline_images=None):
         """Send custom email using a specific template"""
         try:
             html_content = render_to_string(template_name, context)
             return self.send_email(
                 to_email=to_email,
                 subject=subject,
-                html_content=html_content
+                html_content=html_content,
+                attachments=attachments,
+                inline_images=inline_images
             )
         except Exception as e:
             logger.error(f"Failed to send custom email: {str(e)}")
@@ -288,10 +301,6 @@ def send_security_alert(user, alert_type, details):
 def send_otp_email(user, otp_code, purpose='email_verification', expiry_minutes=10):
     """Send OTP verification email"""
     return email_service.send_otp_email(user, otp_code, purpose, expiry_minutes)
-
-def send_custom_email(to_email, subject, template_name, context):
-    """Send custom email using a specific template"""
-    return email_service.send_custom_email(to_email, subject, template_name, context)
 
 def send_deposit_status_email(user, deposit, old_status, new_status):
     """Send deposit status change notification email"""
@@ -368,7 +377,7 @@ def send_referral_bonus_email(referrer, referred_user, reward_amount, deposit_am
         'site_url': get_site_url(),
     }
     
-    return send_custom_email(
+    return email_service.send_custom_email(
         to_email=referrer.email,
         subject=subject,
         template_name=template,
@@ -413,12 +422,24 @@ def send_admin_deposit_notification(deposit):
     }
     
     try:
+        # Prepare attachments for voucher images
+        attachments = []
+        inline_images = {}
+        
+        if deposit.payment_method == 'voucher' and deposit.voucher_image:
+            # Get the full path to the voucher image
+            voucher_image_path = deposit.voucher_image.path
+            if os.path.exists(voucher_image_path):
+                attachments.append(voucher_image_path)
+        
         # Send email to admin
-        admin_result = send_custom_email(
+        admin_result = email_service.send_custom_email(
             to_email=admin_email,
             subject=subject,
             template_name=template,
-            context=context
+            context=context,
+            attachments=attachments,
+            inline_images=inline_images
         )
         
         # Also send a specialized confirmation email to the client based on payment method
@@ -427,7 +448,7 @@ def send_admin_deposit_notification(deposit):
         
         # Try to send specialized client email, fallback to generic one if not exists
         try:
-            client_result = send_custom_email(
+            client_result = email_service.send_custom_email(
                 to_email=client_email,
                 subject=client_subject,
                 template_name=client_template,

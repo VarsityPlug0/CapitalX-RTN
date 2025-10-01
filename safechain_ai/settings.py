@@ -60,6 +60,11 @@ else:
     csrf_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
     if csrf_origins_env:
         CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_env.split(',')])
+    
+    # Ensure we have the correct domain for Render
+    render_domain = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+    if render_domain and f"https://{render_domain}" not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(f"https://{render_domain}")
 
 # CSRF settings that adapt to environment
 CSRF_COOKIE_HTTPONLY = not DEBUG  # Allow JavaScript access only in development
@@ -206,6 +211,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
 SESSION_SAVE_EVERY_REQUEST = True  # Refresh session on every request
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookies
 SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_COOKIE_SECURE = not DEBUG  # Secure cookies in production (match CSRF settings)
 
 # Security Settings for Production (when DEBUG is False)
 if not DEBUG:

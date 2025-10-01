@@ -19,7 +19,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.views.decorators.http import require_POST
-from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email
+from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email, send_admin_deposit_notification
 from .decorators import client_only
 
 # Home view
@@ -728,14 +728,32 @@ def deposit_view(request):
 @login_required
 def bitcoin_deposit_view(request):
     if request.method == 'POST':
-        amount = Decimal(request.POST.get('amount'))
+        amount_str = request.POST.get('amount')
         bitcoin_address = request.POST.get('bitcoin_address')
         bitcoin_amount = request.POST.get('bitcoin_amount')
         bitcoin_txid = request.POST.get('bitcoin_txid')
         
         # Validate required fields
-        if not all([amount, bitcoin_address, bitcoin_amount, bitcoin_txid]):
-            messages.error(request, 'All fields are required for Bitcoin deposits.')
+        if not amount_str:
+            messages.error(request, 'Amount is required for Bitcoin deposits.')
+            return redirect('bitcoin_deposit')
+            
+        if not bitcoin_address:
+            messages.error(request, 'Bitcoin address is required.')
+            return redirect('bitcoin_deposit')
+            
+        if not bitcoin_amount:
+            messages.error(request, 'Bitcoin amount is required.')
+            return redirect('bitcoin_deposit')
+            
+        if not bitcoin_txid:
+            messages.error(request, 'Bitcoin transaction ID is required.')
+            return redirect('bitcoin_deposit')
+        
+        try:
+            amount = Decimal(amount_str)
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid amount. Please enter a valid number.')
             return redirect('bitcoin_deposit')
         
         # Validate minimum amount
@@ -778,13 +796,23 @@ def bitcoin_deposit_view(request):
 @login_required
 def voucher_deposit_view(request):
     if request.method == 'POST':
-        amount = Decimal(request.POST.get('amount'))
+        amount_str = request.POST.get('amount')
         voucher_code = request.POST.get('voucher_code')
         voucher_image = request.FILES.get('voucher_image')
         
         # Validate required fields
-        if not all([amount, voucher_code]):
-            messages.error(request, 'Voucher amount and code are required.')
+        if not amount_str or amount_str.strip() == '':
+            messages.error(request, 'Voucher amount is required.')
+            return redirect('voucher_deposit')
+            
+        if not voucher_code or voucher_code.strip() == '':
+            messages.error(request, 'Voucher code is required.')
+            return redirect('voucher_deposit')
+        
+        try:
+            amount = Decimal(amount_str.strip())
+        except (ValueError, TypeError, AttributeError):
+            messages.error(request, 'Invalid amount. Please enter a valid number.')
             return redirect('voucher_deposit')
         
         # Validate minimum amount
@@ -798,16 +826,14 @@ def voucher_deposit_view(request):
             amount=amount,
             payment_method='voucher',
             voucher_code=voucher_code,
+            voucher_image=voucher_image,  # Include voucher_image in create call
         )
-        
-        # Add voucher image if provided
-        if voucher_image:
-            deposit.voucher_image = voucher_image
-            deposit.save()
         
         # Send deposit confirmation email
         try:
             send_deposit_confirmation(request.user, deposit)
+            # Also send admin notification
+            send_admin_deposit_notification(deposit)
         except Exception as e:
             print(f"Failed to send deposit confirmation email: {e}")
             # Don't fail deposit if email fails
@@ -820,8 +846,18 @@ def voucher_deposit_view(request):
 @login_required
 def withdrawal_view(request):
     if request.method == 'POST':
-        amount = Decimal(request.POST.get('amount'))
+        amount_str = request.POST.get('amount')
         payment_method = request.POST.get('payment_method')
+        
+        if not amount_str:
+            messages.error(request, 'Amount is required.')
+            return redirect('withdrawal')
+            
+        try:
+            amount = Decimal(amount_str)
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid amount. Please enter a valid number.')
+            return redirect('withdrawal')
         
         if amount < 50:
             messages.error(request, 'Minimum withdrawal amount is R50.')
@@ -1731,13 +1767,23 @@ def admin_approve_deposit(request, deposit_id):
         
         if deposit.status != 'pending':
             messages.error(request, f'Deposit {deposit_id} is not pending approval.')
-            return redirect('admin:core_deposit_changelist')
+            return redirect('/capitalx_admin/core/deposit/')
         
         # Validate deposit before approval
         # For card deposits, we don't require proof image
-        if deposit.payment_method != 'card' and not deposit.proof_image:
-            messages.error(request, f'Deposit {deposit_id} has no proof image - cannot approve.')
-            return redirect('admin:core_deposit_changelist')
+        # For voucher deposits, check voucher_image instead of proof_image
+        # For other deposits, check proof_image
+        if deposit.payment_method != 'card':
+            if deposit.payment_method == 'voucher':
+                # For voucher deposits, check if voucher_image exists
+                if not deposit.voucher_image and not deposit.voucher_code:
+                    messages.error(request, f'Deposit {deposit_id} has no voucher image or code - cannot approve.')
+                    return redirect('/capitalx_admin/core/deposit/')
+            else:
+                # For other deposits (EFT, etc.), check proof_image
+                if not deposit.proof_image:
+                    messages.error(request, f'Deposit {deposit_id} has no proof image - cannot approve.')
+                    return redirect('/capitalx_admin/core/deposit/')
         
         # Approve the deposit
         deposit.status = 'approved'
@@ -1760,7 +1806,7 @@ def admin_approve_deposit(request, deposit_id):
     except Exception as e:
         messages.error(request, f'Error approving deposit: {str(e)}')
     
-    return redirect('admin:core_deposit_changelist')
+    return redirect('/capitalx_admin/core/deposit/')
 
 @staff_member_required
 def admin_reject_deposit(request, deposit_id):
@@ -1770,7 +1816,7 @@ def admin_reject_deposit(request, deposit_id):
         
         if deposit.status != 'pending':
             messages.error(request, f'Deposit {deposit_id} is not pending approval.')
-            return redirect('admin:core_deposit_changelist')
+            return redirect('/capitalx_admin/core/deposit/')
         
         # Reject the deposit
         deposit.status = 'rejected'
@@ -1793,7 +1839,7 @@ def admin_reject_deposit(request, deposit_id):
     except Exception as e:
         messages.error(request, f'Error rejecting deposit: {str(e)}')
     
-    return redirect('admin:core_deposit_changelist')
+    return redirect('/capitalx_admin/core/deposit/')
 
 @staff_member_required
 def deposit_dashboard_view(request):
@@ -2289,3 +2335,23 @@ def my_plan_investments_view(request):
 def simple_test_view(request):
     """Simple test view for styling verification"""
     return render(request, 'core/simple_test.html')
+
+def csrf_test_view(request):
+    """CSRF test view for debugging form submissions"""
+    from django.middleware.csrf import get_token
+    
+    if request.method == 'POST':
+        # Process the form submission
+        test_field = request.POST.get('test_field', '')
+        messages.success(request, f'Form submitted successfully! Value: {test_field}')
+        return redirect('csrf_test')
+    
+    # For GET requests, prepare the context
+    context = {
+        'csrf_token': get_token(request),
+        'has_csrf_cookie': 'csrftoken' in request.COOKIES,
+        'cookies': list(request.COOKIES.keys()) if hasattr(request, 'COOKIES') else [],
+    }
+    
+    return render(request, 'core/test_csrf_form.html', context)
+

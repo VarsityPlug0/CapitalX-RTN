@@ -19,12 +19,11 @@ class AdminClientSeparationMiddleware:
         self.admin_urls = [
             '/capitalx_admin/',
             '/admin/',
-            '/admin_dashboard/',  # Add admin dashboard to admin URLs
+            '/admin_dashboard/',
         ]
         
         # Client-side URLs that admins should never access
         self.client_urls = [
-            '/',
             '/dashboard/',
             '/wallet/',
             '/deposit/',
@@ -68,8 +67,10 @@ class AdminClientSeparationMiddleware:
         if any(current_path.startswith(admin_url) for admin_url in self.admin_urls):
             return None
         
-        # Allow logout and authentication-related URLs
-        allowed_paths = [
+        # Allow specific admin-related URLs that might be accessed after actions
+        allowed_admin_paths = [
+            '/admin/',
+            '/capitalx_admin/',
             '/logout/',
             '/login/',
             '/register/',
@@ -78,21 +79,18 @@ class AdminClientSeparationMiddleware:
             '/resend-otp/',
         ]
         
-        if any(current_path.startswith(path) for path in allowed_paths):
+        if any(current_path.startswith(path) for path in allowed_admin_paths):
+            return None
+            
+        # Special case: Allow the root URL for admins (they'll be redirected to admin panel)
+        if current_path == '/':
             return None
         
         # Block admin users from accessing client-side URLs
         if any(current_path.startswith(client_url) for client_url in self.client_urls):
-            # Log the admin user out
-            from django.contrib.auth import logout
-            logout(request)
-            
-            # Redirect to home page
+            # Instead of logging out, redirect to admin panel
             from django.shortcuts import redirect
-            # Instead of using messages (which may not be available), we'll pass the message via session
-            request.session['admin_access_error'] = 'Admin accounts are restricted to the admin panel only. You have been logged out for security.'
-            
-            return redirect('home')
+            return redirect('/capitalx_admin/')
         
         return None
 
@@ -114,15 +112,12 @@ class ClientAdminAccessMiddleware:
             not request.path.startswith('/logout/') and
             not request.path.startswith('/login/') and
             request.path != '/' and
-            request.path != '/admin_dashboard/'):  # Allow admin dashboard access
+            request.path != '/admin_dashboard/' and
+            not request.path.startswith('/admin/')):  # Allow all admin URLs
             
-            # Force logout and redirect
-            from django.contrib.auth import logout
+            # Instead of logging out, redirect to admin panel
             from django.shortcuts import redirect
-            logout(request)
-            # Instead of using messages (which may not be available), we'll pass the message via session
-            request.session['admin_access_error'] = 'Access denied: Admin accounts cannot access client application.'
-            return redirect('home')
+            return redirect('/capitalx_admin/')
         
         response = self.get_response(request)
         return response

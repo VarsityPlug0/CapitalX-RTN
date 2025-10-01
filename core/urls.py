@@ -5,6 +5,7 @@ from . import lead_manager_views
 from . import admin_test_views
 from . import health_views
 from . import simple_lead_views
+from . import views_debug  # Add this import
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -99,6 +100,10 @@ urlpatterns = [
     path('debug/imports/', health_views.debug_imports, name='debug_imports'),
     path('test/', health_views.simple_test_page, name='simple_test_page'),
     path('test/lead-imports/', simple_lead_views.test_lead_imports, name='test_lead_imports'),
+    
+    # CSRF Debug URL
+    path('debug/csrf/', views_debug.csrf_debug_view, name='csrf_debug'),
+    path('test/csrf/', views.csrf_test_view, name='csrf_test'),  # Add this line
 
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
