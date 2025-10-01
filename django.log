@@ -1528,3 +1528,115 @@ Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+"GET /capitalx_admin/core/deposit/16/change/ HTTP/1.1" 200 34017
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /media/vouchers/Screenshot_2025-10-01_193517_H3KhX8e.png HTTP/1.1" 304 0
+"GET /capitalx_admin/core/deposit/16/change/ HTTP/1.1" 200 34017
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /capitalx_admin/core/deposit/16/change/ HTTP/1.1" 200 34017
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET /capitalx_admin/core/deposit/ HTTP/1.1" 200 32280
+"GET /capitalx_admin/jsi18n/ HTTP/1.1" 200 3342
+"GET / HTTP/1.1" 200 18069
+"GET /static/css/reset.css HTTP/1.1" 200 693
+"GET /static/css/main.css HTTP/1.1" 200 21701
+"GET /static/js/theme.js HTTP/1.1" 200 2296
+"GET /static/images/logo.png HTTP/1.1" 200 1577484
+"GET /logout/ HTTP/1.1" 302 0
+"GET / HTTP/1.1" 200 15105
+"GET /register/ HTTP/1.1" 200 12831
+"GET /login/ HTTP/1.1" 200 10404
+"POST /login/ HTTP/1.1" 200 10727
+"POST /login/ HTTP/1.1" 200 10727
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 17518
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\core\views.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+C:\Users\money\HustleProjects\BevanTheDev\capital x update\safechain_ai\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
