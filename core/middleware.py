@@ -19,6 +19,7 @@ class AdminClientSeparationMiddleware:
         self.admin_urls = [
             '/capitalx_admin/',
             '/admin/',
+            '/admin_dashboard/',  # Add admin dashboard to admin URLs
         ]
         
         # Client-side URLs that admins should never access
@@ -86,11 +87,11 @@ class AdminClientSeparationMiddleware:
             from django.contrib.auth import logout
             logout(request)
             
-            # Create a response with error message
-            messages.error(request, 'Admin accounts are restricted to the admin panel only. You have been logged out for security.')
-            
             # Redirect to home page
             from django.shortcuts import redirect
+            # Instead of using messages (which may not be available), we'll pass the message via session
+            request.session['admin_access_error'] = 'Admin accounts are restricted to the admin panel only. You have been logged out for security.'
+            
             return redirect('home')
         
         return None
@@ -112,13 +113,15 @@ class ClientAdminAccessMiddleware:
             not request.path.startswith('/admin/') and
             not request.path.startswith('/logout/') and
             not request.path.startswith('/login/') and
-            request.path != '/'):
+            request.path != '/' and
+            request.path != '/admin_dashboard/'):  # Allow admin dashboard access
             
             # Force logout and redirect
             from django.contrib.auth import logout
             from django.shortcuts import redirect
             logout(request)
-            messages.error(request, 'Access denied: Admin accounts cannot access client application.')
+            # Instead of using messages (which may not be available), we'll pass the message via session
+            request.session['admin_access_error'] = 'Access denied: Admin accounts cannot access client application.'
             return redirect('home')
         
         response = self.get_response(request)
