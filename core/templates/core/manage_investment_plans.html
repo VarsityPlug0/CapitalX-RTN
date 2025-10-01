@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Investment Plans{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Manage Investment Plans</h1>
+            <p class="text-muted">View and manage all investment plans</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Investment Plans Overview</h5>
+                        <div>
+                            <a href="{% url 'admin:core_investmentplan_add' %}" class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i> Add New Plan
+                            </a>
+                            <a href="{% url 'admin:core_investmentplan_changelist' %}" class="btn btn-primary ms-2">
+                                <i class="bi bi-gear"></i> Advanced Management
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plans by Phase -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Phase</th>
+                                    <th>Min Amount</th>
+                                    <th>Max Amount</th>
+                                    <th>Return Amount</th>
+                                    <th>Duration</th>
+                                    <th>ROI %</th>
+                                    <th>Status</th>
+                                    <th>Investments</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for plan in plans %}
+                                <tr>
+                                    <td>
+                                        <span class="me-2">{{ plan.emoji }}</span>
+                                        {{ plan.name }}
+                                    </td>
+                                    <td>{{ plan.phase }}</td>
+                                    <td>R{{ plan.min_amount }}</td>
+                                    <td>R{{ plan.max_amount }}</td>
+                                    <td>R{{ plan.return_amount }}</td>
+                                    <td>{{ plan.get_duration_display }}</td>
+                                    <td>{{ plan.get_roi_percentage|floatformat:2 }}%</td>
+                                    <td>
+                                        {% if plan.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ plan.planinvestment_set.count }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'admin:core_investmentplan_change' plan.id %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit Plan">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'admin:core_planinvestment_changelist' %}?plan__id__exact={{ plan.id }}" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="View Investments">
+                                                <i class="bi bi-graph-up"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center">No investment plans found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1253,6 +1253,189 @@ def admin_dashboard_view(request):
         from django.http import HttpResponse
         return HttpResponse(f"Error in admin dashboard view: {str(e)}", status=500)
 
+@staff_member_required
+def unified_admin_dashboard(request):
+    """
+    Unified admin dashboard with all management features
+    """
+    try:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("Starting unified admin dashboard view processing")
+        
+        # Check for any session messages from middleware
+        if 'admin_access_error' in request.session:
+            from django.contrib import messages
+            messages.error(request, request.session['admin_access_error'])
+            del request.session['admin_access_error']
+        
+        # Get overall statistics
+        total_users = CustomUser.objects.count()
+        
+        # Deposit statistics
+        pending_deposits = Deposit.objects.filter(status='pending')
+        approved_deposits = Deposit.objects.filter(status='approved')
+        rejected_deposits = Deposit.objects.filter(status='rejected')
+        
+        pending_deposits_count = pending_deposits.count()
+        pending_deposits_amount = pending_deposits.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        approved_deposits_count = approved_deposits.count()
+        approved_deposits_amount = approved_deposits.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        rejected_deposits_count = rejected_deposits.count()
+        rejected_deposits_amount = rejected_deposits.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        total_deposits_amount = approved_deposits_amount
+        
+        # Investment statistics
+        total_investments = Investment.objects.count()
+        total_investments_amount = Investment.objects.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        active_investments = Investment.objects.filter(is_active=True)
+        active_investments_count = active_investments.count()
+        active_investments_amount = active_investments.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        completed_investments = Investment.objects.filter(is_active=False)
+        completed_investments_count = completed_investments.count()
+        completed_investments_amount = completed_investments.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        total_returns_amount = completed_investments.aggregate(
+            total=Sum('return_amount')
+        )['total'] or 0
+        
+        # Withdrawal statistics
+        pending_withdrawals = Withdrawal.objects.filter(status='pending')
+        approved_withdrawals = Withdrawal.objects.filter(status='approved')
+        rejected_withdrawals = Withdrawal.objects.filter(status='rejected')
+        
+        pending_withdrawals_count = pending_withdrawals.count()
+        pending_withdrawals_amount = pending_withdrawals.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        approved_withdrawals_count = approved_withdrawals.count()
+        approved_withdrawals_amount = approved_withdrawals.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        rejected_withdrawals_count = rejected_withdrawals.count()
+        rejected_withdrawals_amount = rejected_withdrawals.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        # Company statistics
+        companies = Company.objects.all()
+        companies_count = companies.count()
+        
+        # User level distribution
+        level_1_users = CustomUser.objects.filter(level=1).count()
+        level_2_users = CustomUser.objects.filter(level=2).count()
+        level_3_users = CustomUser.objects.filter(level=3).count()
+        
+        # Recent activities
+        recent_deposits = Deposit.objects.all().order_by('-created_at')[:5]
+        recent_withdrawals = Withdrawal.objects.all().order_by('-created_at')[:5]
+        recent_investments = Investment.objects.all().order_by('-created_at')[:5]
+        recent_users = CustomUser.objects.all().order_by('-date_joined')[:5]
+        
+        # Recent admin activity
+        recent_activity = AdminActivityLog.objects.all().order_by('-timestamp')[:10]
+        
+        # Lead statistics
+        total_campaigns = LeadCampaign.objects.count()
+        total_leads = Lead.objects.count()
+        pending_leads = Lead.objects.filter(status='pending').count()
+        processed_leads = Lead.objects.exclude(status='pending').count()
+        
+        # Additional statistics
+        investment_plans_count = InvestmentPlan.objects.count()
+        active_users_count = CustomUser.objects.filter(is_active=True).count()
+        pending_referrals_count = Referral.objects.filter(status='pending').count()
+        total_referral_rewards = ReferralReward.objects.aggregate(
+            total=Sum('reward_amount')
+        )['total'] or 0
+        
+        context = {
+            # Overall statistics
+            'total_users': total_users,
+            'companies_count': companies_count,
+            'total_campaigns': total_campaigns,
+            'total_leads': total_leads,
+            'investment_plans_count': investment_plans_count,
+            'active_users_count': active_users_count,
+            'pending_referrals_count': pending_referrals_count,
+            'total_referral_rewards': total_referral_rewards,
+            
+            # Deposit statistics
+            'pending_deposits_count': pending_deposits_count,
+            'pending_deposits_amount': pending_deposits_amount,
+            'approved_deposits_count': approved_deposits_count,
+            'approved_deposits_amount': approved_deposits_amount,
+            'rejected_deposits_count': rejected_deposits_count,
+            'rejected_deposits_amount': rejected_deposits_amount,
+            'total_deposits_amount': total_deposits_amount,
+            
+            # Investment statistics
+            'total_investments': total_investments,
+            'total_investments_amount': total_investments_amount,
+            'active_investments_count': active_investments_count,
+            'active_investments_amount': active_investments_amount,
+            'completed_investments_count': completed_investments_count,
+            'completed_investments_amount': completed_investments_amount,
+            'total_returns_amount': total_returns_amount,
+            
+            # Withdrawal statistics
+            'pending_withdrawals_count': pending_withdrawals_count,
+            'pending_withdrawals_amount': pending_withdrawals_amount,
+            'approved_withdrawals_count': approved_withdrawals_count,
+            'approved_withdrawals_amount': approved_withdrawals_amount,
+            'rejected_withdrawals_count': rejected_withdrawals_count,
+            'rejected_withdrawals_amount': rejected_withdrawals_amount,
+            
+            # User statistics
+            'level_1_users': level_1_users,
+            'level_2_users': level_2_users,
+            'level_3_users': level_3_users,
+            
+            # Lead statistics
+            'pending_leads': pending_leads,
+            'processed_leads': processed_leads,
+            
+            # Recent activities
+            'recent_deposits': recent_deposits,
+            'recent_withdrawals': recent_withdrawals,
+            'recent_investments': recent_investments,
+            'recent_users': recent_users,
+            'recent_activity': recent_activity,
+        }
+        
+        logger.info("Rendering unified admin dashboard template")
+        response = render(request, 'core/unified_admin_dashboard.html', context)
+        logger.info("Unified admin dashboard view completed successfully")
+        return response
+    except Exception as e:
+        # Log the error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in unified_admin_dashboard: {str(e)}", exc_info=True)
+        
+        # Return a simple error response for debugging
+        from django.http import HttpResponse
+        return HttpResponse(f"Error in unified admin dashboard: {str(e)}", status=500)
+
 def simple_test_view(request):
     """
     Very simple test view
@@ -1597,7 +1780,68 @@ def companies_view(request):
         'daily_special': daily_special,
         'wallet_balance': wallet.balance,
     }
-    return render(request, 'core/tiers.html', context)
+    
+    return render(request, 'core/companies.html', context)
+
+@staff_member_required
+def manage_users_view(request):
+    """
+    View for managing users
+    """
+    users = CustomUser.objects.all().order_by('-date_joined')
+    
+    # Filter by level if specified
+    level_filter = request.GET.get('level')
+    if level_filter:
+        users = users.filter(level=level_filter)
+    
+    # Search by email or username
+    search_query = request.GET.get('search')
+    if search_query:
+        users = users.filter(
+            models.Q(email__icontains=search_query) | 
+            models.Q(username__icontains=search_query)
+        )
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(users, 20)  # Show 20 users per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'users': page_obj,
+        'level_filter': level_filter,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'core/manage_users.html', context)
+
+@staff_member_required
+def manage_companies_view(request):
+    """
+    View for managing investment companies
+    """
+    companies = Company.objects.all().order_by('min_level', 'share_price')
+    
+    context = {
+        'companies': companies,
+    }
+    
+    return render(request, 'core/manage_companies.html', context)
+
+@staff_member_required
+def manage_investment_plans_view(request):
+    """
+    View for managing investment plans
+    """
+    plans = InvestmentPlan.objects.all().order_by('phase_order', 'plan_order')
+    
+    context = {
+        'plans': plans,
+    }
+    
+    return render(request, 'core/manage_investment_plans.html', context)
 
 # OTP Email Verification Views
 def send_verification_otp(request):
