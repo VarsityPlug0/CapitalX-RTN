@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, Voucher, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead
+from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead
 from django.contrib import messages
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
@@ -13,7 +13,7 @@ from django.urls import reverse
 import random
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
-from .forms import VoucherForm
+from .forms import VoucherDepositForm
 import logging
 # import openai  # Removed OpenAI import
 from django.views.decorators.csrf import csrf_exempt
@@ -1731,15 +1731,17 @@ def delete_account(request):
 @login_required
 def voucher_deposit(request):
     if request.method == 'POST':
-        form = VoucherForm(request.POST, request.FILES)
+        form = VoucherDepositForm(request.POST, request.FILES)
         if form.is_valid():
-            voucher = form.save(commit=False)
-            voucher.user = request.user
-            voucher.save()
-            messages.success(request, 'Your voucher has been submitted and is pending approval.')
-            return redirect('dashboard')
+            deposit = form.save(commit=False)
+            deposit.user = request.user
+            deposit.payment_method = 'voucher'
+            deposit.status = 'pending'
+            deposit.save()
+            messages.success(request, 'Your voucher deposit has been submitted and is pending approval.')
+            return redirect('wallet')
     else:
-        form = VoucherForm()
+        form = VoucherDepositForm()
     return render(request, 'core/voucher_deposit.html', {'form': form})
 
 def support_view(request):
