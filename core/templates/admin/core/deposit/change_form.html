@@ -274,7 +274,7 @@
 <script>
 function quickApprove() {
     if (confirm('Are you sure you want to approve this deposit?')) {
-        window.location.href = "{% url 'admin:deposit-approve' original.id %}";
+        window.location.href = "{% url 'admin_approve_deposit' original.id %}";
     }
 }
 

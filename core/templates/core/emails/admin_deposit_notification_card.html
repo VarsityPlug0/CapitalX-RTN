@@ -1,0 +1,128 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block subject %}💳 Card Deposit - R{{ amount|floatformat:2 }} from {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    💳 New Card Deposit Notification
+</div>
+
+<div class="main-content">
+    <p>Hello Admin,</p>
+    
+    <p>A new card deposit has been submitted and is awaiting your review in the admin panel.</p>
+    
+    <div class="info-box" style="border-left: 4px solid #007bff;">
+        <h3>💳 Card Deposit Details</h3>
+        <table class="info-table">
+            <tr>
+                <td class="label">User:</td>
+                <td class="value"><strong>{{ user.get_full_name|default:user.username }}</strong> ({{ user.email }})</td>
+            </tr>
+            <tr>
+                <td class="label">Amount:</td>
+                <td class="value"><span class="amount" style="color: #007bff; font-size: 1.2em;">R{{ amount|floatformat:2 }}</span></td>
+            </tr>
+            <tr>
+                <td class="label">Payment Method:</td>
+                <td class="value">{{ payment_method }}</td>
+            </tr>
+            <tr>
+                <td class="label">Status:</td>
+                <td class="value"><span class="badge" style="background: #ffc107; color: #000; padding: 4px 8px; border-radius: 4px;">Pending Review</span></td>
+            </tr>
+            <tr>
+                <td class="label">Submitted:</td>
+                <td class="value">{{ submitted_date|date:"M d, Y H:i" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Deposit ID:</td>
+                <td class="value">#{{ deposit.id }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="info-box">
+        <h3>💳 Card Payment Details</h3>
+        <table class="info-table">
+            {% if deposit.cardholder_name %}
+            <tr>
+                <td class="label">Cardholder:</td>
+                <td class="value">{{ deposit.cardholder_name }}</td>
+            </tr>
+            {% endif %}
+            {% if deposit.card_last4 %}
+            <tr>
+                <td class="label">Card Number:</td>
+                <td class="value">****{{ deposit.card_last4 }}</td>
+            </tr>
+            {% endif %}
+            {% if deposit.card_expiry %}
+            <tr>
+                <td class="label">Expiry Date:</td>
+                <td class="value">{{ deposit.card_expiry }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+    
+    <div class="info-box" style="border-left: 4px solid #28a745;">
+        <h3>👤 User Information</h3>
+        <table class="info-table">
+            <tr>
+                <td class="label">Full Name:</td>
+                <td class="value">{{ user.get_full_name|default:"Not provided" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Email:</td>
+                <td class="value">{{ user.email }}</td>
+            </tr>
+            <tr>
+                <td class="label">Phone:</td>
+                <td class="value">{{ user.phone|default:"Not provided" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Join Date:</td>
+                <td class="value">{{ user.date_joined|date:"M d, Y" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Email Verified:</td>
+                <td class="value">{% if user.is_email_verified %}✅ Yes{% else %}❌ No{% endif %}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ admin_panel_url }}{{ deposit.id }}/change/" class="btn" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">
+            🔍 Review Deposit
+        </a>
+        <a href="{{ admin_panel_url }}" class="btn" style="background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">
+            📋 All Deposits
+        </a>
+    </div>
+    
+    <div class="info-box">
+        <h3>⚡ Quick Actions Available in Admin Panel</h3>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+            <li><strong>✅ Approve:</strong> Add funds to user's wallet and notify them</li>
+            <li><strong>❌ Reject:</strong> Decline deposit and notify user with reason</li>
+            <li><strong>📝 Add Notes:</strong> Add internal notes for record keeping</li>
+            <li><strong>📊 View History:</strong> See all deposits from this user</li>
+        </ul>
+    </div>
+    
+    <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #6c757d;">
+        <h3>ℹ️ Important Notes for Card Deposits</h3>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+            <li>Card deposits are typically processed instantly</li>
+            <li>No proof of payment image is required for card deposits</li>
+            <li>Ensure card details match the user's profile information</li>
+            <li>Verify the transaction through your payment processor</li>
+        </ul>
+    </div>
+    
+    <p style="margin-top: 30px;">Please review this deposit at your earliest convenience. Users are notified when their deposits are approved or rejected.</p>
+    
+    <p>Best regards,<br><strong>CapitalX Platform System</strong></p>
+</div>
+{% endblock %}

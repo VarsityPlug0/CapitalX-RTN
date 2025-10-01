@@ -174,6 +174,7 @@ class Investment(models.Model):
     expires_at = models.DateTimeField(default=timezone.now)  # Added default value
     is_active = models.BooleanField(default=True)
     profit_paid = models.BooleanField(default=False)  # Track if profit has been paid to wallet
+    funds_claimed = models.BooleanField(default=False)  # Track if funds have been claimed by user
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -191,14 +192,9 @@ class Investment(models.Model):
             self.end_date = self.start_date + timezone.timedelta(days=self.company.duration_days)
             self.user.total_invested += self.amount
             self.user.update_level()
-        # Check if investment period is complete and profit hasn't been paid yet
-        if (self.end_date and self.is_active and timezone.now() >= self.end_date and not self.profit_paid):
+        # Check if investment period is complete
+        if (self.end_date and self.is_active and timezone.now() >= self.end_date):
             self.is_active = False
-            # Automatically add profit and stake to wallet
-            wallet, created = Wallet.objects.get_or_create(user=self.user)
-            wallet.balance += self.amount + self.return_amount
-            wallet.save()
-            self.profit_paid = True
         super().save(*args, **kwargs)
 
     def __str__(self):

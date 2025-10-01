@@ -343,11 +343,13 @@ def send_deposit_status_email(user, deposit, old_status, new_status):
             'site_url': get_site_url(),
         }
     
+    # Render the template
+    html_content = render_to_string(template, context)
+    
     return email_service.send_email(
         to_email=user.email,
         subject=subject,
-        template=template,
-        context=context
+        html_content=html_content
     )
 
 def send_referral_bonus_email(referrer, referred_user, reward_amount, deposit_amount):
@@ -377,9 +379,28 @@ def send_admin_deposit_notification(deposit):
     """Send email notification to admin when a user makes a deposit"""
     from django.utils import timezone
     
-    admin_email = 'mkhabeleenterprise@gmail.com'
-    subject = f"🏦 New Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
-    template = 'core/emails/admin_deposit_notification.html'
+    admin_email = 'mkhabeleenterprise@gmail.com'  # Reverted to original admin email
+    client_email = deposit.user.email  # Client's registered email
+    
+    # Determine email subject and template based on payment method
+    if deposit.payment_method == 'card':
+        subject = f"💳 Card Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
+        template = 'core/emails/admin_deposit_notification_card.html'
+    elif deposit.payment_method == 'eft':
+        subject = f"🏛️ EFT Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
+        template = 'core/emails/admin_deposit_notification_eft.html'
+    elif deposit.payment_method == 'bitcoin':
+        subject = f"₿ Bitcoin Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
+        template = 'core/emails/admin_deposit_notification_bitcoin.html'
+    elif deposit.payment_method == 'voucher':
+        subject = f"🎫 Voucher Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
+        template = 'core/emails/admin_deposit_notification_voucher.html'
+    elif deposit.payment_method == 'cash':
+        subject = f"💵 Cash Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
+        template = 'core/emails/admin_deposit_notification_cash.html'
+    else:
+        subject = f"🏦 New Deposit Submitted - R{deposit.amount} from {deposit.user.username}"
+        template = 'core/emails/admin_deposit_notification.html'
     
     context = {
         'deposit': deposit,
@@ -392,12 +413,31 @@ def send_admin_deposit_notification(deposit):
     }
     
     try:
-        return send_custom_email(
+        # Send email to admin
+        admin_result = send_custom_email(
             to_email=admin_email,
             subject=subject,
             template_name=template,
             context=context
         )
+        
+        # Also send a specialized confirmation email to the client based on payment method
+        client_subject = f"CapitalX - Deposit Confirmation ({deposit.get_payment_method_display()}) - R{deposit.amount}"
+        client_template = f'core/emails/client_deposit_confirmation_{deposit.payment_method}.html'
+        
+        # Try to send specialized client email, fallback to generic one if not exists
+        try:
+            client_result = send_custom_email(
+                to_email=client_email,
+                subject=client_subject,
+                template_name=client_template,
+                context=context
+            )
+        except:
+            # Fallback to generic deposit confirmation
+            client_result = send_deposit_confirmation(deposit.user, deposit)
+        
+        return admin_result and client_result
     except Exception as e:
         print(f"Failed to send admin deposit notification: {e}")
         return False
