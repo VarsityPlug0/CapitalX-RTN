@@ -233,8 +233,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'standardbankingconfirmation@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'dbhr uguo hkqk llos')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'capitalxinvestmentsrsa@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'lymb vqsi tqgs lbss')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # In production, ensure email credentials are set via environment variables
