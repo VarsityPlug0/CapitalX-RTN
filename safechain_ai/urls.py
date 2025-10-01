@@ -32,6 +32,6 @@ urlpatterns = [
     path('admin_dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files in development and production
+# Note: This is not recommended for high-traffic production applications
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
