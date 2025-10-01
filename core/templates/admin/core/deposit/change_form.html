@@ -235,15 +235,25 @@
     </div>
     
     <!-- Proof of Payment -->
-    {% if original.proof_image %}
+    {% if original.proof_image or original.voucher_image %}
     <div class="user-info">
         <h3>Proof of Payment</h3>
         <div class="proof-preview">
-            <img src="{{ original.proof_image.url }}" alt="Proof of Payment" />
+            {% if original.proof_image %}
+                <img src="{{ original.proof_image.url }}" alt="Proof of Payment" />
+            {% elif original.voucher_image %}
+                <img src="{{ original.voucher_image.url }}" alt="Voucher Image" />
+            {% endif %}
             <br><br>
-            <a href="{{ original.proof_image.url }}" target="_blank" class="quick-action-btn approve-btn">
-                🔍 View Full Size
-            </a>
+            {% if original.proof_image %}
+                <a href="{{ original.proof_image.url }}" target="_blank" class="quick-action-btn approve-btn">
+                    🔍 View Full Size
+                </a>
+            {% elif original.voucher_image %}
+                <a href="{{ original.voucher_image.url }}" target="_blank" class="quick-action-btn approve-btn">
+                    🔍 View Full Size
+                </a>
+            {% endif %}
         </div>
     </div>
     {% else %}

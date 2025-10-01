@@ -47,9 +47,22 @@
         {% if deposit.voucher_code %}
         <p><strong>Voucher Code:</strong> <code>{{ deposit.voucher_code }}</code></p>
         {% endif %}
+        
         {% if deposit.voucher_image %}
-        <p><strong>Voucher image uploaded:</strong> ✅</p>
-        <p><a href="{{ site_url }}{{ deposit.voucher_image.url }}" target="_blank">View Voucher Image</a></p>
+        <p><strong>Voucher image:</strong></p>
+        <div style="margin: 15px 0; text-align: center;">
+            <img src="{{ site_url }}{{ deposit.voucher_image.url }}" alt="Voucher Image" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <p style="margin-top: 10px;">
+                <a href="{{ site_url }}{{ deposit.voucher_image.url }}" target="_blank" style="color: #007bff; text-decoration: none;">
+                    🔍 View Full Size Image
+                </a>
+            </p>
+        </div>
+        <div style="background-color: #e9f7ef; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <p style="margin: 0; font-weight: bold; color: #155724;">
+                📎 The voucher image is also attached to this email for your convenience.
+            </p>
+        </div>
         {% else %}
         <p><strong style="color: #dc3545;">⚠️ No voucher image uploaded!</strong></p>
         {% endif %}
