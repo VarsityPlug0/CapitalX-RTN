@@ -455,14 +455,13 @@ def invest_view(request, company_id):
 def wallet_view(request):
     try:
         user = request.user
-        # Get or create wallet for the user
         wallet, created = Wallet.objects.get_or_create(user=user)
         
         # Get all transactions
         deposits = Deposit.objects.filter(user=user).order_by('-created_at')
         withdrawals = Withdrawal.objects.filter(user=user).order_by('-created_at')
         investments = Investment.objects.filter(user=user).order_by('-created_at')
-        vouchers = Voucher.objects.filter(user=user).order_by('-created_at')
+        voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
         
         # Separate pending deposits for special display
         pending_deposits = deposits.filter(status='pending')
@@ -498,7 +497,7 @@ def wallet_view(request):
             })
         
         # Add voucher deposits
-        for voucher in vouchers:
+        for voucher in voucher_deposits:
             transactions.append({
                 'created_at': voucher.created_at,
                 'transaction_type': 'Voucher Deposit',
