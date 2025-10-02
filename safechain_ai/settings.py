@@ -189,9 +189,34 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Ensure media directory exists
+import os
+if not os.path.exists(MEDIA_ROOT):
+    try:
+        os.makedirs(MEDIA_ROOT, exist_ok=True)
+    except Exception as e:
+        print(f"Warning: Could not create MEDIA_ROOT directory: {e}")
+
+# Ensure subdirectories exist
+media_subdirs = ['vouchers', 'deposit_proofs']
+for subdir in media_subdirs:
+    subdir_path = os.path.join(MEDIA_ROOT, subdir)
+    if not os.path.exists(subdir_path):
+        try:
+            os.makedirs(subdir_path, exist_ok=True)
+        except Exception as e:
+            print(f"Warning: Could not create media subdirectory {subdir}: {e}")
+
 # Ensure media URL ends with a slash
 if not MEDIA_URL.endswith('/'):
     MEDIA_URL = MEDIA_URL + '/'
+
+# Render-specific configuration for media files
+# Check if we're running on Render
+if 'RENDER' in os.environ:
+    # On Render, we might need to use a different approach for media files
+    # For now, keep the same configuration but be aware we're on Render
+    pass
 
 # Whitenoise settings for serving static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
