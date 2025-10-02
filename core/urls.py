@@ -7,6 +7,7 @@ from . import health_views
 from . import simple_lead_views
 from . import views_debug  # Add this import
 from . import test_views
+from . import bot_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -114,6 +115,11 @@ urlpatterns = [
     path('test-media/', views.test_media_serving, name='test_media_serving'),
     path('api/test/', views.test_api_view, name='test_api'),
     path('api/simple-test/', test_views.simple_test_view, name='simple_test_api'),
+    
+    # Bot authentication URLs
+    path('api/generate-bot-secret/', bot_views.generate_bot_secret, name='generate_bot_secret'),
+    path('api/validate-bot-secret/', bot_views.validate_bot_secret, name='validate_bot_secret'),
+    path('api/bot/financial-info/', bot_views.bot_get_financial_info, name='bot_financial_info'),
     
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),

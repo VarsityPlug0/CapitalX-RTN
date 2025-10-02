@@ -37,6 +37,8 @@ class CustomUser(AbstractUser):
     level = models.IntegerField(default=1)
     last_ip = models.GenericIPAddressField(null=True, blank=True)  # Last known IP address
     has_claimed_bonus = models.BooleanField(default=False)
+    # Bot authentication fields
+    bot_secret = models.CharField(max_length=100, blank=True, null=True)  # Secret phrase for bot authentication
     # Email verification fields
     is_email_verified = models.BooleanField(default=False)
     email_verification_token = models.CharField(max_length=100, blank=True, null=True)

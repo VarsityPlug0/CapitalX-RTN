@@ -1191,6 +1191,7 @@ def cash_out_view(request, investment_id):
 
 # API view to generate authentication token
 from rest_framework.authtoken.models import Token
+import secrets
 
 @login_required
 def generate_api_token(request):
@@ -1206,6 +1207,58 @@ def generate_api_token(request):
             'email': request.user.email
         }
     })
+
+@login_required
+def generate_bot_secret(request):
+    """
+    Generate a secret phrase for bot authentication
+    """
+    # Generate a random secret phrase
+    secret = secrets.token_urlsafe(32)
+    
+    # Save it to the user's profile
+    request.user.bot_secret = secret
+    request.user.save()
+    
+    return JsonResponse({
+        'success': True,
+        'secret': secret,
+        'message': 'Bot secret generated successfully. Keep this secret safe!'
+    })
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def validate_bot_secret(request):
+    """
+    Validate a bot secret phrase
+    """
+    secret = request.data.get('secret')
+    
+    if not secret:
+        return Response({
+            'success': False,
+            'error': 'No secret provided'
+        }, status=400)
+    
+    try:
+        # Look for a user with this secret
+        user = CustomUser.objects.get(bot_secret=secret)
+        return Response({
+            'success': True,
+            'valid': True,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        })
+    except CustomUser.DoesNotExist:
+        return Response({
+            'success': True,
+            'valid': False,
+            'error': 'Invalid secret'
+        })
 
 
 @login_required
@@ -1771,18 +1824,18 @@ def portfolio_view(request):
         is_active=False
     ).select_related('company').order_by('-end_date')
     
+    # Add any other portfolio view logic here
+    
+    return render(request, 'core/portfolio.html', {
+        'active_investments': active_investments,
+        'completed_investments': completed_investments,
+    })
+
 # API view for user financial information
 # Returns balance, active investments, withdrawals, etc. (non-personal info)
 @login_required
 def user_financial_info_api(request):
-    """
-    API endpoint that returns user's financial information:
-    - Wallet balance
-    - Active investments
-    - Recent deposits
-    - Recent withdrawals
-    - Investment plans
-    """
+    """API endpoint that returns user's financial information."""
     try:
         user = request.user
         
