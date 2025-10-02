@@ -18,11 +18,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'safechain_ai.settings')
 # Get the Django application
 django_application = get_wsgi_application()
 
-# Serve both static and media files with Whitenoise
+# Serve only static files with Whitenoise, not media files
 application = WhiteNoise(django_application)
 # Add static files support
 application.add_files(settings.STATIC_ROOT, prefix=settings.STATIC_URL.strip('/'))
-# Add media files support with correct prefix
-application.add_files(settings.MEDIA_ROOT, prefix=settings.MEDIA_URL.strip('/'))
-# Configure Whitenoise to allow all origins
-application.allow_all_origins = True
+# Do not add media files here - let our custom middleware handle them

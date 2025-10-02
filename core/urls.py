@@ -105,6 +105,9 @@ urlpatterns = [
     path('debug/csrf/', views_debug.csrf_debug_view, name='csrf_debug'),
     path('test/csrf/', views.csrf_test_view, name='csrf_test'),  # Add this line
 
+    # Test media file serving
+    path('test-media/', views.test_media_serving, name='test_media_serving'),
+    
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='core/password_reset_done.html'), name='password_reset_done'),

@@ -75,6 +75,31 @@ def home_view(request):
     
     return render(request, 'core/home.html', context)
 
+
+def test_media_serving(request):
+    """
+    Test view to verify media file serving is working
+    """
+    from django.conf import settings
+    import os
+    
+    # Test if we can access a known media file
+    test_file_path = os.path.join(settings.MEDIA_ROOT, 'vouchers', 'Screenshot_2025-10-01_193517.png')
+    if os.path.exists(test_file_path):
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Media file found',
+            'file_path': test_file_path,
+            'file_exists': True
+        })
+    else:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Media file not found',
+            'file_path': test_file_path,
+            'file_exists': False
+        })
+
 # Registration view
 # Handles user registration
 def register_view(request):
