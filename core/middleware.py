@@ -103,34 +103,7 @@ class AdminClientSeparationMiddleware:
         return None
 
 
-class ClientAdminAccessMiddleware:
-    """
-    Additional middleware to block any admin access to client views
-    """
-    
-    def __init__(self, get_response):
-        self.get_response = get_response
-    
-    def __call__(self, request):
-        # Check if authenticated user is admin trying to access client area
-        if (request.user.is_authenticated and 
-            (request.user.is_staff or request.user.is_superuser) and 
-            not request.path.startswith('/capitalx_admin/') and 
-            not request.path.startswith('/admin/') and
-            not request.path.startswith('/logout/') and
-            not request.path.startswith('/login/') and
-            request.path != '/' and
-            request.path != '/admin_dashboard/' and
-            not request.path.startswith('/admin/')):  # Allow all admin URLs
-            
-            # Instead of logging out, redirect to admin panel
-            # Check if messages framework is available before using it
-            if hasattr(request, 'session') and '_messages' in request.session.__dict__:
-                messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
-            return redirect('/capitalx_admin/')
-        
-        response = self.get_response(request)
-        return response
+# Removed ClientAdminAccessMiddleware as it's redundant with AdminClientSeparationMiddleware
 
 
 # Add a middleware to serve media files in production
