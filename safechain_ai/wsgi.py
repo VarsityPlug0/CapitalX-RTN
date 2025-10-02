@@ -27,3 +27,7 @@ application.add_files(settings.MEDIA_ROOT, prefix=settings.MEDIA_URL.strip('/'))
 # Additional Whitenoise configuration
 application.allow_all_origins = True
 application.autorefresh = True
+
+# Configure Whitenoise to handle media files properly
+# This ensures that media files are served with the correct content types
+application.charset = 'utf-8'
