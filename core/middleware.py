@@ -148,6 +148,8 @@ class MediaFileMiddleware:
             full_path = os.path.join(settings.MEDIA_ROOT, file_path)
             
             logger.info(f"Looking for file at: {full_path}")
+            logger.info(f"File exists: {os.path.exists(full_path)}")
+            logger.info(f"Is file: {os.path.isfile(full_path)}")
             
             # Check if the file exists
             if os.path.exists(full_path) and os.path.isfile(full_path):
@@ -157,6 +159,8 @@ class MediaFileMiddleware:
                 if content_type is None:
                     content_type = 'application/octet-stream'
                 
+                logger.info(f"Content type: {content_type}")
+                
                 # Read and serve the file
                 try:
                     with open(full_path, 'rb') as f:
@@ -165,6 +169,7 @@ class MediaFileMiddleware:
                     # Create response
                     response = HttpResponse(content, content_type=content_type)
                     response['Content-Length'] = str(len(content))
+                    logger.info(f"Successfully served file, content length: {len(content)}")
                     return response
                 except Exception as e:
                     logger.error(f"Error reading file {full_path}: {e}")
