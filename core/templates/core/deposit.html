@@ -64,6 +64,17 @@
         position: relative;
         z-index: 2;
     }
+    
+    .deposit-header h1.display-5 {
+        font-size: 2.75rem;
+        font-weight: 700;
+    }
+    
+    .deposit-header p.lead {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        margin-bottom: 0;
+    }
 
     .deposit-header p {
         font-size: 1.1rem;
@@ -89,9 +100,9 @@
         border: none;
         border-radius: var(--border-radius);
         color: var(--dark-color);
-        font-weight: 500;
-        padding: 0.75rem 1rem;
-        margin: 0 0.25rem;
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        margin: 0 0.5rem;
         transition: var(--transition);
         position: relative;
         overflow: hidden;
@@ -103,20 +114,24 @@
         visibility: visible;
         opacity: 1;
         flex: 1 1 auto;
-        min-width: 150px;
+        min-width: 180px;
         background: #e9ecef;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .nav-link.flex-fill:hover {
-        background: rgba(0,123,255,0.1);
-        transform: translateY(-1px);
+        background: rgba(0,123,255,0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,123,255,0.2);
     }
 
     .nav-link.flex-fill.active {
         background: var(--primary-color);
         color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        font-weight: 600;
     }
 
     .nav-link.flex-fill::before {
@@ -380,6 +395,14 @@
             font-size: 2rem;
         }
         
+        .deposit-header h1.display-5 {
+            font-size: 2.25rem;
+        }
+        
+        .deposit-header p.lead {
+            font-size: 1.1rem;
+        }
+        
         .form-section {
             padding: 1rem;
         }
@@ -390,24 +413,37 @@
         }
 
         .nav-tabs .nav-link {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
         }
 
         .nav-tabs .nav-item {
             flex: 1 1 auto;
-            min-width: 120px;
+            min-width: 140px;
         }
         
         .nav-link.flex-fill {
-            min-width: 120px;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.9rem;
+            min-width: 140px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
     }
 
     @media (max-width: 576px) {
+        .deposit-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        .deposit-header h1.display-5 {
+            font-size: 2rem;
+        }
+        
+        .deposit-header p.lead {
+            font-size: 1rem;
+        }
+        
         .nav-tabs {
             flex-direction: column;
         }
@@ -415,7 +451,7 @@
         .nav-tabs .nav-item {
             flex: none;
             width: 100%;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .nav-tabs .nav-link {
@@ -425,11 +461,39 @@
         .nav-link.flex-fill {
             flex: none;
             width: 100%;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 1rem 1.25rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         .d-flex.flex-wrap {
             flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .gap-3 {
+            gap: 0.75rem !important;
+        }
+        
+        .p-4 {
+            padding: 1.5rem !important;
+        }
+    }
+    
+    @media (max-width: 400px) {
+        .nav-link.flex-fill {
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+        
+        .deposit-header h1.display-5 {
+            font-size: 1.75rem;
+        }
+        
+        .p-4 {
+            padding: 1.25rem !important;
         }
     }
 </style>
@@ -440,23 +504,23 @@
     <div class="container">
         <!-- Header Section -->
         <div class="deposit-header mb-4">
-            <h1><i class="bi bi-wallet2 me-3"></i>Fund Your Account</h1>
-            <p>Choose your preferred deposit method and start investing today</p>
+            <h1 class="display-5"><i class="bi bi-wallet2 me-3"></i>Fund Your Account</h1>
+            <p class="lead">Choose your preferred deposit method and start investing today</p>
         </div>
 
         <!-- Deposit Method Navigation -->
         <div class="row justify-content-center mb-4">
-            <div class="col-12 col-lg-10">
+            <div class="col-12 col-xl-11 col-lg-12">
                 <div class="deposit-card">
-                    <div class="p-3">
-                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                    <div class="p-4">
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
                             <button class="nav-link active flex-fill" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab">
                                 <i class="bi bi-credit-card me-2"></i>Bank Card
                             </button>
                             <button class="nav-link flex-fill" id="eft-tab" data-bs-toggle="tab" data-bs-target="#eft" type="button" role="tab">
                                 <i class="bi bi-bank me-2"></i>EFT Transfer
                             </button>
-                            <a href="{% url 'voucher_deposit' %}" class="nav-link flex-fill text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 12px; padding: 0.75rem 1rem; font-weight: 500; transition: all 0.3s ease;">
+                            <a href="{% url 'voucher_deposit' %}" class="nav-link flex-fill text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 12px; padding: 1rem 1.25rem; font-weight: 600; transition: all 0.3s ease; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(40,167,69,0.3);">
                                 <i class="bi bi-ticket-perforated me-2"></i>Redeem Voucher Instead
                             </a>
                         </div>
