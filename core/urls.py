@@ -6,7 +6,12 @@ from . import admin_test_views
 from . import health_views
 from . import simple_lead_views
 from . import views_debug  # Add this import
-from . import test_views
+try:
+    from . import test_views
+    TEST_VIEWS_AVAILABLE = True
+except ImportError:
+    TEST_VIEWS_AVAILABLE = False
+    test_views = None
 from . import bot_views
 from django.contrib.auth import views as auth_views
 
@@ -114,9 +119,14 @@ urlpatterns = [
     # Test media file serving
     path('test-media/', views.test_media_serving, name='test_media_serving'),
     path('api/test/', views.test_api_view, name='test_api'),
-    path('api/simple-test/', test_views.simple_test_view, name='simple_test_api'),
-    
-    # Bot authentication URLs
+]
+
+# Only add the test view URL if the module is available
+if TEST_VIEWS_AVAILABLE:
+    urlpatterns.append(path('api/simple-test/', test_views.simple_test_view, name='simple_test_api'))
+
+# Bot authentication URLs
+urlpatterns += [
     path('api/generate-bot-secret/', bot_views.generate_bot_secret, name='generate_bot_secret'),
     path('api/validate-bot-secret/', bot_views.validate_bot_secret, name='validate_bot_secret'),
     path('api/bot/financial-info/', bot_views.bot_get_financial_info, name='bot_financial_info'),
