@@ -15,6 +15,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
 from .forms import VoucherDepositForm
 import logging
+import re
 # import openai  # Removed OpenAI import
 from django.views.decorators.csrf import csrf_exempt
 import os
@@ -684,7 +685,7 @@ def deposit_view(request):
             return redirect('deposit')
         
         try:
-            amount = Decimal(amount_str)
+            amount = Decimal(amount_str.strip())
         except (ValueError, TypeError):
             messages.error(request, f'Invalid amount: {amount_str}')
             return redirect('deposit')
@@ -697,23 +698,50 @@ def deposit_view(request):
         # Get payment method
         payment_method = request.POST.get('payment_method', 'card')
         
+        # Validate payment method
+        if payment_method not in ['card', 'eft']:
+            messages.error(request, 'Invalid payment method.')
+            return redirect('deposit')
+        
         # Prepare deposit data
         deposit_data = {
             'user': request.user,
             'amount': amount,
             'payment_method': payment_method,
             'status': 'pending',
-            'admin_notes': f'Submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
         }
         
         # Add payment-specific details
         if payment_method == 'card':
             # Get card details from the form
-            card_number = request.POST.get('card_number')
-            expiry_date = request.POST.get('expiry_date')
-            cvv = request.POST.get('cvv')
-            cardholder_name = request.POST.get('cardholder_name')
-            card_last4 = card_number[-4:] if card_number else ''
+            card_number = request.POST.get('card_number', '').strip()
+            expiry_date = request.POST.get('expiry_date', '').strip()
+            cvv = request.POST.get('cvv', '').strip()
+            cardholder_name = request.POST.get('cardholder_name', '').strip()
+            
+            # Basic validation for card details
+            if not all([card_number, expiry_date, cvv, cardholder_name]):
+                messages.error(request, 'Please fill in all card details.')
+                return redirect('deposit')
+            
+            # Validate card number format (basic check)
+            card_number_clean = card_number.replace(' ', '')
+            if not card_number_clean.isdigit() or len(card_number_clean) < 13 or len(card_number_clean) > 19:
+                messages.error(request, 'Invalid card number format.')
+                return redirect('deposit')
+            
+            # Validate expiry date format
+            if not re.match(r'^(0[1-9]|1[0-2])\/([0-9]{2})$', expiry_date):
+                messages.error(request, 'Invalid expiry date format. Use MM/YY.')
+                return redirect('deposit')
+            
+            # Validate CVV format
+            if not cvv.isdigit() or len(cvv) not in [3, 4]:
+                messages.error(request, 'Invalid CVV format.')
+                return redirect('deposit')
+            
+            # Store only last 4 digits for security
+            card_last4 = card_number_clean[-4:] if card_number_clean else ''
             
             deposit_data.update({
                 'cardholder_name': cardholder_name,
@@ -721,29 +749,42 @@ def deposit_view(request):
                 'card_number': card_number,
                 'card_cvv': cvv,
                 'card_expiry': expiry_date,
+                'admin_notes': f'Card deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
             })
         
         elif payment_method == 'eft':
-            # Handle EFT specific fields if needed
-            eft_reference = request.POST.get('reference', '')
+            # Handle EFT specific fields
+            eft_reference = request.POST.get('reference', '').strip()
             proof_image = request.FILES.get('proof_image')
+            
+            # Basic validation for EFT details
+            if not eft_reference:
+                messages.error(request, 'Please provide a payment reference.')
+                return redirect('deposit')
+            
+            if not proof_image:
+                messages.error(request, 'Please upload proof of payment.')
+                return redirect('deposit')
+            
             deposit_data.update({
                 'admin_notes': f'EFT deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}. Reference: {eft_reference}',
                 'proof_image': proof_image,
             })
         
-        # Create the deposit (pending admin approval)
-        deposit = Deposit.objects.create(**deposit_data)
-        
-        # Send deposit confirmation email
         try:
+            # Create the deposit (pending admin approval)
+            deposit = Deposit.objects.create(**deposit_data)
+            
+            # Send deposit confirmation email
             send_deposit_confirmation(request.user, deposit)
+            
+            messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
+            return redirect('wallet')
         except Exception as e:
-            print(f"Failed to send deposit confirmation email: {e}")
-            # Don't fail deposit if email fails
-        
-        messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
-        return redirect('wallet')
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error creating deposit: {str(e)}", exc_info=True)
+            messages.error(request, 'An error occurred while processing your deposit. Please try again.')
+            return redirect('deposit')
     
     # Handle GET request - check for payment method parameter
     selected_method = request.GET.get('method', 'card')
@@ -838,6 +879,7 @@ def voucher_deposit_view(request):
             messages.error(request, 'Voucher code is required.')
             return redirect('voucher_deposit')
         
+        # Validate and parse amount
         try:
             amount = Decimal(amount_str.strip())
         except (ValueError, TypeError, AttributeError):
@@ -849,26 +891,38 @@ def voucher_deposit_view(request):
             messages.error(request, 'Minimum voucher amount is R50.')
             return redirect('voucher_deposit')
         
-        # Create the voucher deposit (pending approval)
-        deposit = Deposit.objects.create(
-            user=request.user,
-            amount=amount,
-            payment_method='voucher',
-            voucher_code=voucher_code,
-            voucher_image=voucher_image,  # Include voucher_image in create call
-        )
+        # Validate voucher code format (basic check)
+        if len(voucher_code.strip()) < 5:
+            messages.error(request, 'Invalid voucher code format.')
+            return redirect('voucher_deposit')
         
-        # Send deposit confirmation email
+        # Validate voucher image
+        if not voucher_image:
+            messages.error(request, 'Please upload a voucher image.')
+            return redirect('voucher_deposit')
+        
         try:
+            # Create the voucher deposit (pending approval)
+            deposit = Deposit.objects.create(
+                user=request.user,
+                amount=amount,
+                payment_method='voucher',
+                voucher_code=voucher_code.strip(),
+                voucher_image=voucher_image,
+            )
+            
+            # Send deposit confirmation email
             send_deposit_confirmation(request.user, deposit)
             # Also send admin notification
             send_admin_deposit_notification(deposit)
+            
+            messages.success(request, 'Voucher deposit submitted successfully! It will be reviewed and approved within 24 hours.')
+            return redirect('wallet')
         except Exception as e:
-            print(f"Failed to send deposit confirmation email: {e}")
-            # Don't fail deposit if email fails
-        
-        messages.success(request, 'Voucher deposit submitted successfully! It will be reviewed and approved within 24 hours.')
-        return redirect('wallet')
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error creating voucher deposit: {str(e)}", exc_info=True)
+            messages.error(request, 'An error occurred while processing your voucher deposit. Please try again.')
+            return redirect('voucher_deposit')
     
     return render(request, 'core/voucher_deposit.html')
 
