@@ -513,11 +513,11 @@
             <div class="col-12 col-xl-11 col-lg-12">
                 <div class="deposit-card">
                     <div class="p-4">
-                        <div class="d-flex flex-wrap justify-content-center gap-3">
-                            <button class="nav-link active flex-fill" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab">
+                        <div class="d-flex flex-wrap justify-content-center gap-3" id="depositTabs">
+                            <button class="nav-link active flex-fill" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab" aria-controls="card" aria-selected="true">
                                 <i class="bi bi-credit-card me-2"></i>Bank Card
                             </button>
-                            <button class="nav-link flex-fill" id="eft-tab" data-bs-toggle="tab" data-bs-target="#eft" type="button" role="tab">
+                            <button class="nav-link flex-fill" id="eft-tab" data-bs-toggle="tab" data-bs-target="#eft" type="button" role="tab" aria-controls="eft" aria-selected="false">
                                 <i class="bi bi-bank me-2"></i>EFT Transfer
                             </button>
                             <a href="{% url 'voucher_deposit' %}" class="nav-link flex-fill text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 12px; padding: 1rem 1.25rem; font-weight: 600; transition: all 0.3s ease; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(40,167,69,0.3);">
@@ -541,7 +541,7 @@
 
         <div class="tab-content" id="depositTabContent">
             <!-- Bank Card Tab -->
-            <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab">
+            <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab" tabindex="0">
                 <div class="row justify-content-center">
                     <!-- Deposit Form -->
                     <div class="col-lg-7">
@@ -676,7 +676,7 @@
             </div>
 
             <!-- EFT Transfer Tab -->
-            <div class="tab-pane fade" id="eft" role="tabpanel" aria-labelledby="eft-tab">
+            <div class="tab-pane fade" id="eft" role="tabpanel" aria-labelledby="eft-tab" tabindex="0">
                 <div class="row justify-content-center">
                     <div class="col-lg-7">
                         <div class="deposit-card">
@@ -803,7 +803,7 @@
         }
 
         // Initialize Bootstrap tabs
-        const triggerTabList = document.querySelectorAll('#depositTabs button[data-bs-toggle="tab"]');
+        const triggerTabList = document.querySelectorAll('button[data-bs-toggle="tab"]');
         triggerTabList.forEach(triggerEl => {
             const tabTrigger = new bootstrap.Tab(triggerEl);
             triggerEl.addEventListener('click', event => {
