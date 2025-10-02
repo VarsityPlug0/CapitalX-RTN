@@ -109,7 +109,8 @@ class DepositAdmin(admin.ModelAdmin):
             'description': 'Voucher information (only for voucher deposits)'
         }),
         ('Proof & Status', {
-            'fields': ('proof_image', 'proof_image_preview')
+            'fields': ('proof_image', 'proof_image_preview'),
+            'description': 'Proof of payment (not applicable for voucher deposits)'
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -117,6 +118,50 @@ class DepositAdmin(admin.ModelAdmin):
             'description': 'Automatically generated timestamps'
         }),
     )
+
+    def get_fieldsets(self, request, obj=None):
+        """Customize fieldsets based on payment method"""
+        # If this is a new object or we don't have an object yet, return default fieldsets
+        if obj is None:
+            return super().get_fieldsets(request, obj)
+            
+        # If this is an existing object, customize fieldsets based on payment method
+        if obj.payment_method == 'voucher':
+            # For voucher deposits, we want to show:
+            # 1. Basic Information
+            # 2. Voucher Details (voucher_code, voucher_image, voucher_image_preview)
+            # 3. Timestamps
+            # We exclude the Proof & Status section since it's not relevant for vouchers
+            return [
+                ('Basic Information', {
+                    'fields': ('user', 'amount', 'payment_method', 'status', 'admin_notes')
+                }),
+                ('Voucher Details', {
+                    'fields': ('voucher_code', 'voucher_image', 'voucher_image_preview'),
+                    'description': 'Voucher information (only for voucher deposits)'
+                }),
+                ('Timestamps', {
+                    'fields': ('created_at', 'updated_at'),
+                    'classes': ('collapse',),
+                    'description': 'Automatically generated timestamps'
+                }),
+            ]
+        else:
+            # For non-voucher deposits, show the standard fieldsets
+            return super().get_fieldsets(request, obj)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        """Customize form based on payment method"""
+        form = super().get_form(request, obj, change, **kwargs)
+        
+        # If we have an object and it's a voucher deposit, 
+        # we can add custom help text or validation
+        if obj and obj.payment_method == 'voucher':
+            # For voucher deposits, the proof_image field is not relevant
+            # We'll handle this in the template by hiding it with CSS
+            pass
+            
+        return form
 
     # Custom actions
     @admin.action(description='✓ Approve selected deposits')
