@@ -496,6 +496,11 @@
             padding: 1.25rem !important;
         }
     }
+    
+    /* Hidden form class */
+    .form-hidden {
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -514,13 +519,13 @@
                 <div class="deposit-card">
                     <div class="p-4">
                         <div class="d-flex flex-wrap justify-content-center gap-3" id="depositTabs">
-                            <button class="nav-link active flex-fill" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab" aria-controls="card" aria-selected="true">
+                            <a href="{% url 'deposit' %}?method=card" class="nav-link flex-fill text-center" id="card-tab">
                                 <i class="bi bi-credit-card me-2"></i>Bank Card
-                            </button>
-                            <button class="nav-link flex-fill" id="eft-tab" data-bs-toggle="tab" data-bs-target="#eft" type="button" role="tab" aria-controls="eft" aria-selected="false">
+                            </a>
+                            <a href="{% url 'deposit' %}?method=eft" class="nav-link flex-fill text-center" id="eft-tab">
                                 <i class="bi bi-bank me-2"></i>EFT Transfer
-                            </button>
-                            <a href="{% url 'voucher_deposit' %}" class="nav-link flex-fill text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 12px; padding: 1rem 1.25rem; font-weight: 600; transition: all 0.3s ease; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(40,167,69,0.3);">
+                            </a>
+                            <a href="{% url 'voucher_deposit' %}" class="nav-link flex-fill text-center" id="voucher-tab">
                                 <i class="bi bi-ticket-perforated me-2"></i>Redeem Voucher Instead
                             </a>
                         </div>
@@ -539,9 +544,10 @@
             {% endfor %}
         {% endif %}
 
-        <div class="tab-content" id="depositTabContent">
-            <!-- Bank Card Tab -->
-            <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab" tabindex="0">
+        <!-- Deposit Forms -->
+        <div id="depositForms">
+            <!-- Bank Card Form -->
+            <div id="card-form">
                 <div class="row justify-content-center">
                     <!-- Deposit Form -->
                     <div class="col-lg-7">
@@ -675,8 +681,8 @@
                 </div>
             </div>
 
-            <!-- EFT Transfer Tab -->
-            <div class="tab-pane fade" id="eft" role="tabpanel" aria-labelledby="eft-tab" tabindex="0">
+            <!-- EFT Transfer Form -->
+            <div id="eft-form">
                 <div class="row justify-content-center">
                     <div class="col-lg-7">
                         <div class="deposit-card">
@@ -797,20 +803,29 @@
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const amount = urlParams.get('amount');
+        const method = urlParams.get('method') || 'card';
         
         if (amount !== null && amount !== '0') {
             document.getElementById('amount').value = amount;
         }
 
-        // Initialize Bootstrap tabs
-        const triggerTabList = document.querySelectorAll('button[data-bs-toggle="tab"]');
-        triggerTabList.forEach(triggerEl => {
-            const tabTrigger = new bootstrap.Tab(triggerEl);
-            triggerEl.addEventListener('click', event => {
-                event.preventDefault();
-                tabTrigger.show();
-            });
-        });
+        // Hide all forms initially
+        document.getElementById('card-form').classList.add('form-hidden');
+        document.getElementById('eft-form').classList.add('form-hidden');
+        
+        // Show the appropriate form based on method parameter
+        if (method === 'card') {
+            document.getElementById('card-form').classList.remove('form-hidden');
+            document.getElementById('card-tab').classList.add('active');
+        } else if (method === 'eft') {
+            document.getElementById('eft-form').classList.remove('form-hidden');
+            document.getElementById('eft-tab').classList.add('active');
+        }
+        
+        // Add active class to voucher tab if we're on the voucher page
+        if (window.location.pathname === '{% url "voucher_deposit" %}') {
+            document.getElementById('voucher-tab').classList.add('active');
+        }
     });
     
     // Form submission handling

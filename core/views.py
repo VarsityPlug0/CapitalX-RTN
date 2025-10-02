@@ -745,7 +745,12 @@ def deposit_view(request):
         messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
         return redirect('wallet')
     
-    return render(request, 'core/deposit.html')
+    # Handle GET request - check for payment method parameter
+    selected_method = request.GET.get('method', 'card')
+    
+    return render(request, 'core/deposit.html', {
+        'selected_payment_method': selected_method
+    })
 
 # Bitcoin deposit view
 # Handles Bitcoin deposit submissions from users
