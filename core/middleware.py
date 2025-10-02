@@ -1,11 +1,17 @@
 """
 Security middleware to prevent admin accounts from accessing client-side views
 """
+import logging
+import os
+from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.urls import reverse
-from django.http import HttpResponse
+import mimetypes
 
+# Set up logging
+logger = logging.getLogger(__name__)
 
 class AdminClientSeparationMiddleware:
     """
@@ -128,29 +134,52 @@ class ClientAdminAccessMiddleware:
 
 
 # Add a middleware to serve media files in production
-import os
-from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotFound
-import mimetypes
-
 class MediaFileMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # Always log the request path to see if middleware is being called
+        logger.info(f"MediaFileMiddleware START processing request for: {request.path}")
+        
         # Check if the request is for a media file
         if request.path.startswith(settings.MEDIA_URL):
+            logger.info(f"MediaFileMiddleware handling media request for: {request.path}")
+            
+            # Security check: prevent directory traversal attacks
+            if '..' in request.path:
+                logger.warning(f"Directory traversal attempt blocked: {request.path}")
+                response = HttpResponse(b"Forbidden", status=403)
+                return response
+            
             # Remove the MEDIA_URL prefix to get the file path
-            file_path = request.path[len(settings.MEDIA_URL):]
+            # Handle both cases where MEDIA_URL ends with / or not
+            media_url = settings.MEDIA_URL
+            if media_url.endswith('/'):
+                file_path = request.path[len(media_url):]
+            else:
+                file_path = request.path[len(media_url)+1:]
+            
+            # Security check: ensure file_path doesn't start with /
+            if file_path.startswith('/'):
+                file_path = file_path[1:]
+            
             # Construct the full file path
             full_path = os.path.join(settings.MEDIA_ROOT, file_path)
             
-            # Check if the file exists
+            logger.info(f"Looking for file at: {full_path}")
+            logger.info(f"File exists: {os.path.exists(full_path)}")
+            logger.info(f"Is file: {os.path.isfile(full_path)}")
+            
+            # Check if the file exists and is actually a file (not a directory)
             if os.path.exists(full_path) and os.path.isfile(full_path):
+                logger.info(f"File found, serving: {full_path}")
                 # Determine content type
                 content_type, _ = mimetypes.guess_type(full_path)
                 if content_type is None:
                     content_type = 'application/octet-stream'
+                
+                logger.info(f"Content type: {content_type}")
                 
                 # Read and serve the file
                 try:
@@ -160,11 +189,28 @@ class MediaFileMiddleware:
                     # Create response
                     response = HttpResponse(content, content_type=content_type)
                     response['Content-Length'] = str(len(content))
+                    response['Cache-Control'] = 'public, max-age=31536000'  # Cache for 1 year
+                    logger.info(f"Successfully served file, content length: {len(content)}")
                     return response
                 except Exception as e:
+                    logger.error(f"Error reading file {full_path}: {e}")
                     # If there's an error reading the file, fall back to normal processing
                     pass
+            else:
+                logger.warning(f"File not found: {full_path}")
+                logger.warning(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+                logger.warning(f"MEDIA_URL: {settings.MEDIA_URL}")
+                logger.warning(f"Requested path: {request.path}")
+                logger.warning(f"File path extracted: {file_path}")
+                
+                # Even if file not found, we still handle this request to prevent 404 from Django
+                # This ensures our middleware is working
+                response = HttpResponse(b"File not found", status=404)
+                return response
+        else:
+            logger.info(f"MediaFileMiddleware - Not a media request: {request.path}")
         
         # For all other requests, use the normal Django processing
         response = self.get_response(request)
+        logger.info(f"MediaFileMiddleware END processing request for: {request.path}")
         return response

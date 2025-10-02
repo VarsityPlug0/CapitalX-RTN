@@ -24,7 +24,7 @@ from core import views
 from core.admin import admin_site  # Import our custom admin site
 
 def health_check(request):
-    return HttpResponse("OK")
+    return HttpResponse(b"OK")
 
 urlpatterns = [
     path('capitalx_admin/', admin_site.urls),  # Use our custom admin site at /capitalx_admin/
@@ -34,6 +34,5 @@ urlpatterns = [
 ]
 
 # Serve media files in both development and production
-# Note: This is not recommended for high-traffic production applications
-# but is necessary for this application to work correctly
+# This is necessary for this application to work correctly
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
