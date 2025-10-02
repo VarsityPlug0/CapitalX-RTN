@@ -485,6 +485,15 @@
             {% endfor %}
         {% endif %}
 
+        <!-- Voucher Redeem Button - Moved to prominent position -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-lg-10">
+                <a href="{% url 'voucher_deposit' %}" class="voucher-redeem-btn">
+                    <i class="bi bi-ticket-perforated"></i>Redeem Voucher Instead
+                </a>
+            </div>
+        </div>
+
         <div class="tab-content" id="depositTabContent">
             <!-- Bank Card Tab -->
             <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab">
@@ -556,11 +565,6 @@
                                         <i class="bi bi-check-circle me-2"></i>Submit Card Deposit
                                     </button>
                                 </form>
-                                
-                                <!-- Voucher Redeem Button -->
-                                <a href="{% url 'voucher_deposit' %}" class="voucher-redeem-btn">
-                                    <i class="bi bi-ticket-perforated"></i>Redeem Voucher Instead
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -688,11 +692,6 @@
                                         <i class="bi bi-check-circle me-2"></i>Submit EFT Deposit
                                     </button>
                                 </form>
-                                
-                                <!-- Voucher Redeem Button -->
-                                <a href="{% url 'voucher_deposit' %}" class="voucher-redeem-btn">
-                                    <i class="bi bi-ticket-perforated"></i>Redeem Voucher Instead
-                                </a>
                             </div>
                         </div>
                     </div>
