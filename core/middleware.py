@@ -203,9 +203,44 @@ class MediaFileMiddleware:
                 logger.warning(f"Requested path: {request.path}")
                 logger.warning(f"File path extracted: {file_path}")
                 
-                # Even if file not found, we still handle this request to prevent 404 from Django
-                # This ensures our middleware is working
-                response = HttpResponse(b"File not found", status=404)
+                # Check if this might be a Render-specific issue
+                # On Render, sometimes files might be in a different location
+                if 'RENDER' in os.environ:
+                    logger.warning("Running on Render - checking alternative paths")
+                    # Try some alternative paths that might be used on Render
+                    alternative_paths = [
+                        os.path.join('/opt/render/project/src', 'media', file_path),
+                        os.path.join('/opt/render/project', 'media', file_path),
+                        os.path.join('/app', 'media', file_path),
+                    ]
+                    
+                    for alt_path in alternative_paths:
+                        if os.path.exists(alt_path) and os.path.isfile(alt_path):
+                            logger.info(f"Found file at alternative path: {alt_path}")
+                            # Determine content type
+                            content_type, _ = mimetypes.guess_type(alt_path)
+                            if content_type is None:
+                                content_type = 'application/octet-stream'
+                            
+                            # Read and serve the file
+                            try:
+                                with open(alt_path, 'rb') as f:
+                                    content = f.read()
+                                
+                                # Create response
+                                response = HttpResponse(content, content_type=content_type)
+                                response['Content-Length'] = str(len(content))
+                                response['Cache-Control'] = 'public, max-age=31536000'  # Cache for 1 year
+                                logger.info(f"Successfully served file from alternative path, content length: {len(content)}")
+                                return response
+                            except Exception as e:
+                                logger.error(f"Error reading file {alt_path}: {e}")
+                                continue
+                
+                # For missing files, return a more user-friendly response
+                # This helps with debugging and provides better UX
+                response_content = f"File not found: {file_path}".encode('utf-8')
+                response = HttpResponse(response_content, status=404, content_type='text/plain')
                 return response
         else:
             logger.info(f"MediaFileMiddleware - Not a media request: {request.path}")

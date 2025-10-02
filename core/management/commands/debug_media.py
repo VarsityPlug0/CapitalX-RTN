@@ -33,6 +33,12 @@ class Command(BaseCommand):
                 self.stdout.write(f"Error listing media directory: {e}")
         else:
             self.stdout.write(f"MEDIA_ROOT exists: False")
+            # Try to create it
+            try:
+                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+                self.stdout.write(f"Created MEDIA_ROOT directory")
+            except Exception as e:
+                self.stdout.write(f"Failed to create MEDIA_ROOT directory: {e}")
         
         # Test a specific file path
         test_path = os.path.join(settings.MEDIA_ROOT, 'vouchers')
@@ -50,5 +56,34 @@ class Command(BaseCommand):
                 self.stdout.write(f"Error listing vouchers directory: {e}")
         else:
             self.stdout.write(f"Vouchers directory exists: False")
+            # Try to create it
+            try:
+                os.makedirs(test_path, exist_ok=True)
+                self.stdout.write(f"Created vouchers directory")
+            except Exception as e:
+                self.stdout.write(f"Failed to create vouchers directory: {e}")
+        
+        # Test deposit_proofs directory
+        test_path = os.path.join(settings.MEDIA_ROOT, 'deposit_proofs')
+        if os.path.exists(test_path):
+            self.stdout.write(f"Deposit proofs directory exists: True")
+            try:
+                files = os.listdir(test_path)
+                self.stdout.write(f"Deposit proof files: {len(files)}")
+                for file in files[:5]:  # Show first 5 files
+                    file_path = os.path.join(test_path, file)
+                    if os.path.exists(file_path):
+                        size = os.path.getsize(file_path)
+                        self.stdout.write(f"  - {file} ({size} bytes)")
+            except Exception as e:
+                self.stdout.write(f"Error listing deposit_proofs directory: {e}")
+        else:
+            self.stdout.write(f"Deposit proofs directory exists: False")
+            # Try to create it
+            try:
+                os.makedirs(test_path, exist_ok=True)
+                self.stdout.write(f"Created deposit_proofs directory")
+            except Exception as e:
+                self.stdout.write(f"Failed to create deposit_proofs directory: {e}")
         
         self.stdout.write("=== End Debug ===")
