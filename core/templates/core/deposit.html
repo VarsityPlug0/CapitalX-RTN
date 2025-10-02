@@ -166,8 +166,8 @@
         font-size: 1rem;
         transition: var(--transition);
         background: #1a1a1a;
-        color: #ffffff; /* Pure white for maximum visibility */
-        font-weight: 500; /* Slightly bolder for better readability */
+        color: #ffffff;
+        font-weight: 500;
     }
 
     .form-control:focus {
@@ -175,10 +175,9 @@
         box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
         background: #2a2a2a;
         transform: translateY(-2px);
-        color: #ffffff; /* Ensure text stays white when focused */
+        color: #ffffff;
     }
     
-    /* Specific enhancements for number inputs to ensure visibility */
     input[type="number"] {
         color: #ffffff !important;
         font-weight: 500 !important;
@@ -336,58 +335,9 @@
         color: #3498db;
     }
 
-    .tab-pane {
+    /* Hidden form class */
+    .form-hidden {
         display: none;
-    }
-
-    .tab-pane.show {
-        display: block !important;
-    }
-
-    .tab-pane.active {
-        display: block !important;
-    }
-
-    /* Ensure all tab content is visible when needed */
-    #voucher {
-        display: none;
-    }
-
-    #voucher.show,
-    #voucher.active {
-        display: block !important;
-    }
-
-    /* Voucher Redeem Button */
-    .voucher-redeem-btn {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        border: none;
-        border-radius: var(--border-radius);
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: white;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-        position: relative;
-        overflow: hidden;
-        text-align: center;
-    }
-
-    .voucher-redeem-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(40,167,69,0.4);
-        text-decoration: none;
-        color: white;
-    }
-
-    .voucher-redeem-btn:active {
-        transform: translateY(-1px);
-    }
-
-    .voucher-redeem-btn i {
-        margin-right: 0.5rem;
     }
 
     @media (max-width: 768px) {
@@ -495,11 +445,6 @@
         .p-4 {
             padding: 1.25rem !important;
         }
-    }
-    
-    /* Hidden form class */
-    .form-hidden {
-        display: none;
     }
 </style>
 {% endblock %}
@@ -627,41 +572,39 @@
                                 <i class="bi bi-credit-card me-2"></i>Card Payment Info
                             </h5>
                             
-                            <div id="normal-instructions">
-                                <div class="instruction-item">
-                                    <div class="instruction-icon">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Minimum Amount:</strong> R50 required for deposits
-                                    </div>
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-currency-dollar"></i>
                                 </div>
-                                
-                                <div class="instruction-item">
-                                    <div class="instruction-icon">
-                                        <i class="bi bi-clock"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Processing Time:</strong> Deposits processed within 24 hours
-                                    </div>
+                                <div>
+                                    <strong>Minimum Amount:</strong> R50 required for deposits
                                 </div>
-                                
-                                <div class="instruction-item">
-                                    <div class="instruction-icon">
-                                        <i class="bi bi-shield-check"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Security:</strong> All card information is encrypted and secure
-                                    </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-clock"></i>
                                 </div>
-                                
-                                <div class="instruction-item">
-                                    <div class="instruction-icon">
-                                        <i class="bi bi-credit-card"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Accepted Cards:</strong> Visa, MasterCard, American Express
-                                    </div>
+                                <div>
+                                    <strong>Processing Time:</strong> Deposits processed within 24 hours
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div>
+                                    <strong>Security:</strong> All card information is encrypted and secure
+                                </div>
+                            </div>
+                            
+                            <div class="instruction-item">
+                                <div class="instruction-icon">
+                                    <i class="bi bi-credit-card"></i>
+                                </div>
+                                <div>
+                                    <strong>Accepted Cards:</strong> Visa, MasterCard, American Express
                                 </div>
                             </div>
                             
