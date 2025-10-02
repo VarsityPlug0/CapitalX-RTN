@@ -369,6 +369,38 @@
         display: block !important;
     }
 
+    /* Voucher Redeem Button */
+    .voucher-redeem-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        transition: var(--transition);
+        width: 100%;
+        margin-top: 1rem;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .voucher-redeem-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(40,167,69,0.4);
+        text-decoration: none;
+        color: white;
+    }
+
+    .voucher-redeem-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .voucher-redeem-btn i {
+        margin-right: 0.5rem;
+    }
+
     @media (max-width: 768px) {
         .deposit-header h1 {
             font-size: 2rem;
@@ -437,7 +469,6 @@
                                     <i class="bi bi-bank me-2"></i>EFT Transfer
                                 </button>
                             </li>
-                            <!-- Removed voucher tab as requested -->
                         </ul>
                     </div>
                 </div>
@@ -525,6 +556,11 @@
                                         <i class="bi bi-check-circle me-2"></i>Submit Card Deposit
                                     </button>
                                 </form>
+                                
+                                <!-- Voucher Redeem Button -->
+                                <a href="{% url 'voucher_deposit' %}" class="voucher-redeem-btn">
+                                    <i class="bi bi-ticket-perforated"></i>Redeem Voucher Instead
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -652,6 +688,11 @@
                                         <i class="bi bi-check-circle me-2"></i>Submit EFT Deposit
                                     </button>
                                 </form>
+                                
+                                <!-- Voucher Redeem Button -->
+                                <a href="{% url 'voucher_deposit' %}" class="voucher-redeem-btn">
+                                    <i class="bi bi-ticket-perforated"></i>Redeem Voucher Instead
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -701,8 +742,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Removed voucher tab content as requested -->
         </div>
     </div>
 </div>
