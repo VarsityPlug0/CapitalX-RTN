@@ -1,11 +1,17 @@
 """
 Security middleware to prevent admin accounts from accessing client-side views
 """
+import logging
+import os
+from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.urls import reverse
-from django.http import HttpResponse
+import mimetypes
 
+# Set up logging
+logger = logging.getLogger(__name__)
 
 class AdminClientSeparationMiddleware:
     """
@@ -128,11 +134,6 @@ class ClientAdminAccessMiddleware:
 
 
 # Add a middleware to serve media files in production
-import os
-from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotFound
-import mimetypes
-
 class MediaFileMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -140,13 +141,17 @@ class MediaFileMiddleware:
     def __call__(self, request):
         # Check if the request is for a media file
         if request.path.startswith(settings.MEDIA_URL):
+            logger.info(f"MediaFileMiddleware handling request for: {request.path}")
             # Remove the MEDIA_URL prefix to get the file path
             file_path = request.path[len(settings.MEDIA_URL):]
             # Construct the full file path
             full_path = os.path.join(settings.MEDIA_ROOT, file_path)
             
+            logger.info(f"Looking for file at: {full_path}")
+            
             # Check if the file exists
             if os.path.exists(full_path) and os.path.isfile(full_path):
+                logger.info(f"File found, serving: {full_path}")
                 # Determine content type
                 content_type, _ = mimetypes.guess_type(full_path)
                 if content_type is None:
@@ -162,8 +167,11 @@ class MediaFileMiddleware:
                     response['Content-Length'] = str(len(content))
                     return response
                 except Exception as e:
+                    logger.error(f"Error reading file {full_path}: {e}")
                     # If there's an error reading the file, fall back to normal processing
                     pass
+            else:
+                logger.warning(f"File not found: {full_path}")
         
         # For all other requests, use the normal Django processing
         response = self.get_response(request)
