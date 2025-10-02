@@ -24,3 +24,5 @@ application = WhiteNoise(django_application)
 application.add_files(settings.STATIC_ROOT, prefix=settings.STATIC_URL.strip('/'))
 # Add media files support with correct prefix
 application.add_files(settings.MEDIA_ROOT, prefix=settings.MEDIA_URL.strip('/'))
+# Configure Whitenoise to allow all origins
+application.allow_all_origins = True
