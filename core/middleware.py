@@ -125,3 +125,46 @@ class ClientAdminAccessMiddleware:
         
         response = self.get_response(request)
         return response
+
+
+# Add a middleware to serve media files in production
+import os
+from django.conf import settings
+from django.http import HttpResponse, HttpResponseNotFound
+import mimetypes
+
+class MediaFileMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Check if the request is for a media file
+        if request.path.startswith(settings.MEDIA_URL):
+            # Remove the MEDIA_URL prefix to get the file path
+            file_path = request.path[len(settings.MEDIA_URL):]
+            # Construct the full file path
+            full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+            
+            # Check if the file exists
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                # Determine content type
+                content_type, _ = mimetypes.guess_type(full_path)
+                if content_type is None:
+                    content_type = 'application/octet-stream'
+                
+                # Read and serve the file
+                try:
+                    with open(full_path, 'rb') as f:
+                        content = f.read()
+                    
+                    # Create response
+                    response = HttpResponse(content, content_type=content_type)
+                    response['Content-Length'] = str(len(content))
+                    return response
+                except Exception as e:
+                    # If there's an error reading the file, fall back to normal processing
+                    pass
+        
+        # For all other requests, use the normal Django processing
+        response = self.get_response(request)
+        return response

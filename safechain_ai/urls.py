@@ -35,5 +35,5 @@ urlpatterns = [
 
 # Serve media files in both development and production
 # Note: This is not recommended for high-traffic production applications
-# but is a temporary fix for the media file serving issue
+# but is necessary for this application to work correctly
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

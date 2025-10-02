@@ -97,6 +97,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'core.middleware.AdminClientSeparationMiddleware',  # Security: Block admin from client
+    'core.middleware.MediaFileMiddleware',  # Serve media files in production
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -196,16 +197,16 @@ if not MEDIA_URL.endswith('/'):
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Whitenoise settings for serving media files in production
-# Configure Whitenoise to serve media files
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
-
-# Additional Whitenoise settings for better media file serving
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
-# Custom storage backend for media files that works with Whitenoise
-# This ensures media files are served correctly in production
+# Custom settings to ensure media files are served correctly
+WHITENOISE_STATIC_PREFIX = '/static/'
+WHITENOISE_MEDIA_PREFIX = '/media/'
+
+# Additional settings for media file serving in production
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Ensure proper handling of media files
