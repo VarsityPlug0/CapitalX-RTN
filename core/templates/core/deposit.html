@@ -437,11 +437,7 @@
                                     <i class="bi bi-bank me-2"></i>EFT Transfer
                                 </button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="voucher-tab" data-bs-toggle="tab" data-bs-target="#voucher" type="button" role="tab">
-                                    <i class="bi bi-ticket-perforated me-2"></i>Voucher
-                                </button>
-                            </li>
+                            <!-- Removed voucher tab as requested -->
                         </ul>
                     </div>
                 </div>
@@ -458,8 +454,6 @@
             {% endfor %}
         {% endif %}
 
-
-        
         <div class="tab-content" id="depositTabContent">
             <!-- Bank Card Tab -->
             <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab">
@@ -483,8 +477,6 @@
                                         <label for="amount">Amount (R)</label>
                                         <div class="form-text">Minimum deposit amount is R50</div>
                                     </div>
-
-
 
                                     <!-- Card Details Section -->
                                     <div class="card-details-section">
@@ -710,180 +702,7 @@
                 </div>
             </div>
 
-            <!-- Voucher Tab -->
-            <div class="tab-pane fade" id="voucher" role="tabpanel" aria-labelledby="voucher-tab">
-                <div class="row justify-content-center">
-                    <div class="col-lg-7">
-                        <div class="deposit-card">
-                            <div class="form-section">
-                                <h4 class="mb-4 text-center">
-                                    <i class="bi bi-ticket-perforated me-2 text-primary"></i>Voucher Deposit
-                                </h4>
-                                
-                                <form method="post" action="{% url 'voucher_deposit' %}" enctype="multipart/form-data" id="voucher-deposit-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="payment_method" value="voucher">
-                                    
-                                    <!-- Amount field -->
-                                    <div class="form-floating mb-3">
-                                        <input type="number" name="voucher_amount" id="voucher_amount" class="form-control" 
-                                               placeholder="Amount" min="50" step="0.01" required>
-                                        <label for="voucher_amount">Voucher Amount (R)</label>
-                                        <div class="form-text">Minimum voucher amount is R50</div>
-                                    </div>
-
-                                    <!-- Voucher Details Section -->
-                                    <div class="card-details-section">
-                                        <h6 class="mb-3">
-                                            <i class="bi bi-ticket-perforated me-2 text-success"></i>Voucher Information
-                                        </h6>
-                                        
-                                        <div class="form-floating mb-3">
-                                            <input type="text" name="voucher_code" id="voucher_code" class="form-control" 
-                                                   placeholder="Voucher Code" required>
-                                            <label for="voucher_code">Voucher Code</label>
-                                            <div class="form-text">Enter the code printed on your voucher</div>
-                                        </div>
-
-                                        <div class="form-floating mb-3">
-                                            <input type="file" name="voucher_image" id="voucher_image" class="form-control" 
-                                                   accept="image/*">
-                                            <label for="voucher_image">Voucher Image (Optional)</label>
-                                            <div class="form-text">Upload photo of your voucher for verification</div>
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-submit" id="voucher-submit-btn">
-                                        <i class="bi bi-check-circle me-2"></i>Submit Voucher
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-lg-5">
-                        <div class="instructions-section">
-                            <h5 class="fw-bold mb-4 text-primary">
-                                <i class="bi bi-info-circle me-2"></i>Voucher Info
-                            </h5>
-                            
-                            <div class="instruction-item">
-                                <div class="instruction-icon">
-                                    <i class="bi bi-check-circle"></i>
-                                </div>
-                                <div>
-                                    <strong>Accepted:</strong> Gift cards, vouchers, prepaid cards
-                                </div>
-                            </div>
-                            
-                            <div class="instruction-item">
-                                <div class="instruction-icon">
-                                    <i class="bi bi-clock"></i>
-                                </div>
-                                <div>
-                                    <strong>Processing:</strong> Within 2 hours
-                                </div>
-                            </div>
-                            
-                            <div class="instruction-item">
-                                <div class="instruction-icon">
-                                    <i class="bi bi-shield-check"></i>
-                                </div>
-                                <div>
-                                    <strong>Security:</strong> Your voucher details are protected
-                                </div>
-                            </div>
-                            
-                            <div class="instruction-item">
-                                <div class="instruction-icon">
-                                    <i class="bi bi-gift"></i>
-                                </div>
-                                <div>
-                                    <strong>Fast Approval:</strong> Usually processed within 2 hours
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-            
-            <!-- Instructions Section -->
-            <div class="col-lg-5">
-                <div class="instructions-section">
-                    <h5 class="fw-bold mb-4 text-primary">
-                        <i class="bi bi-info-circle me-2"></i>Important Information
-                    </h5>
-                    
-                    <div id="normal-instructions">
-                        <div class="instruction-item">
-                            <div class="instruction-icon">
-                                <i class="bi bi-currency-dollar"></i>
-                            </div>
-                            <div>
-                                <strong>Minimum Amount:</strong> R50 required for deposits
-                            </div>
-                        </div>
-                        
-                        <div class="instruction-item">
-                            <div class="instruction-icon">
-                                <i class="bi bi-clock"></i>
-                            </div>
-                            <div>
-                                <strong>Processing Time:</strong> Deposits processed within 24 hours
-                            </div>
-                        </div>
-                        
-                        <div class="instruction-item">
-                            <div class="instruction-icon">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <div>
-                                <strong>Security:</strong> All card information is encrypted and secure
-                            </div>
-                        </div>
-                        
-                        <div class="instruction-item">
-                            <div class="instruction-icon">
-                                <i class="bi bi-credit-card"></i>
-                            </div>
-                            <div>
-                                <strong>Accepted Cards:</strong> Visa, MasterCard, American Express
-                            </div>
-                        </div>
-                    </div>
-                    
-
-                                <i class="bi bi-check-circle"></i>
-                            </div>
-                            <div>
-
-                            </div>
-                        </div>
-                        
-                        <div class="instruction-item">
-                            <div class="instruction-icon">
-                                <i class="bi bi-shield-lock"></i>
-                            </div>
-                            <div>
-                                <strong>Data Protection:</strong> Your information is completely secure
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Security Notice -->
-                    <div class="mt-4 p-3 bg-dark rounded">
-                        <h6 class="text-success mb-2">
-                            <i class="bi bi-shield-check me-2"></i>Security Features
-                        </h6>
-                        <ul class="list-unstyled mb-0 small text-light">
-                            <li><i class="bi bi-check text-success me-1"></i>256-bit SSL encryption</li>
-                            <li><i class="bi bi-check text-success me-1"></i>PCI DSS compliant</li>
-                            <li><i class="bi bi-check text-success me-1"></i>Secure data transmission</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            <!-- Removed voucher tab content as requested -->
         </div>
     </div>
 </div>
@@ -941,24 +760,6 @@
         }
     });
 
-    document.getElementById('voucher-deposit-form').addEventListener('submit', function(e) {
-        // Voucher form validation
-        const amount = document.getElementById('voucher_amount').value;
-        const code = document.getElementById('voucher_code').value;
-        
-        if (!amount || !code) {
-            e.preventDefault();
-            alert('Please fill in all required fields for voucher deposit.');
-            return;
-        }
-        
-        if (parseFloat(amount) < 50) {
-            e.preventDefault();
-            alert('Minimum voucher amount is R50.');
-            return;
-        }
-    });
-
     // Card brand detection and icon highlight
     function detectCardBrand(number) {
         number = number.replace(/\D/g, '');
@@ -997,58 +798,5 @@
         }
         e.target.value = value;
     });
-
-    // Add smooth animations
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'scale(1.02)';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'scale(1)';
-        });
-    });
-
-    // Tab switching with smooth transitions
-    document.querySelectorAll('#depositTabs button').forEach(button => {
-        button.addEventListener('click', function() {
-            console.log('Tab clicked:', this.textContent.trim());
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('#depositTabs button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add active class to clicked tab
-            this.classList.add('active');
-            
-            // Hide all tab content
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('show', 'active');
-                console.log('Hiding tab:', pane.id);
-            });
-            
-            // Show selected tab content
-            const targetId = this.getAttribute('data-bs-target').substring(1);
-            const targetPane = document.getElementById(targetId);
-            if (targetPane) {
-                targetPane.classList.add('show', 'active');
-                console.log('Showing tab:', targetId);
-            } else {
-                console.error('Target tab not found:', targetId);
-            }
-        });
-    });
-
-    // Debug: Log all tabs on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('All nav items:', document.querySelectorAll('#depositTabs .nav-item').length);
-        console.log('All nav links:', document.querySelectorAll('#depositTabs .nav-link').length);
-        console.log('All tab panes:', document.querySelectorAll('.tab-pane').length);
-        
-        document.querySelectorAll('#depositTabs .nav-item').forEach((item, index) => {
-            console.log(`Nav item ${index}:`, item.textContent.trim());
-        });
-    });
 </script>
-{% endblock %} 
+{% endblock %}

@@ -676,7 +676,7 @@ def logout_view(request):
 def deposit_view(request):
     if request.method == 'POST':
         # Get deposit amount (handle different form field names)
-        amount_str = request.POST.get('amount') or request.POST.get('eft_amount') or request.POST.get('voucher_amount')
+        amount_str = request.POST.get('amount') or request.POST.get('eft_amount')
         
         # Validate and parse amount
         if not amount_str or amount_str.strip() == "":
@@ -1751,22 +1751,6 @@ def delete_account(request):
         return redirect('home')
     
     return redirect('profile')
-
-@login_required
-def voucher_deposit(request):
-    if request.method == 'POST':
-        form = VoucherDepositForm(request.POST, request.FILES)
-        if form.is_valid():
-            deposit = form.save(commit=False)
-            deposit.user = request.user
-            deposit.payment_method = 'voucher'
-            deposit.status = 'pending'
-            deposit.save()
-            messages.success(request, 'Your voucher deposit has been submitted and is pending approval.')
-            return redirect('wallet')
-    else:
-        form = VoucherDepositForm()
-    return render(request, 'core/voucher_deposit.html', {'form': form})
 
 def support_view(request):
     pass
