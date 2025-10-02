@@ -194,22 +194,18 @@ if not MEDIA_URL.endswith('/'):
 
 # Whitenoise settings for serving static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Whitenoise settings for serving media files in production
+# Configure Whitenoise to serve media files
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
 
 # Additional Whitenoise settings for better media file serving
 WHITENOISE_ALLOW_ALL_ORIGINS = True
-WHITENOISE_IMMUTABLE_FILE_TEST = lambda name, url: True
 
-# Ensure Whitenoise serves media files correctly
-WHITENOISE_STATIC_PREFIX = '/static/'
-WHITENOISE_MEDIA_PREFIX = '/media/'
-
-# Additional settings for media file serving in production
+# Custom storage backend for media files that works with Whitenoise
+# This ensures media files are served correctly in production
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Ensure proper handling of media files

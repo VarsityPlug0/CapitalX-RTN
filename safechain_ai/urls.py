@@ -33,8 +33,7 @@ urlpatterns = [
     path('admin_dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
 ]
 
-# Serve media files in development and production
+# Serve media files in both development and production
 # Note: This is not recommended for high-traffic production applications
-# In production, Whitenoise will serve these files
-# Always serve media files regardless of DEBUG setting to ensure they work in production
+# but is a temporary fix for the media file serving issue
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
