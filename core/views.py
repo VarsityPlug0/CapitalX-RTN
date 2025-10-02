@@ -23,6 +23,12 @@ from django.views.decorators.http import require_POST
 from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email, send_admin_deposit_notification
 from .decorators import client_only
 
+# REST Framework imports
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
+
 # Home view
 # Landing page for the application
 def home_view(request):
@@ -1183,6 +1189,25 @@ def cash_out_view(request, investment_id):
         messages.error(request, 'Invalid investment.')
         return redirect('portfolio')
 
+# API view to generate authentication token
+from rest_framework.authtoken.models import Token
+
+@login_required
+def generate_api_token(request):
+    """
+    Generate or retrieve an API token for the current user
+    """
+    token, created = Token.objects.get_or_create(user=request.user)
+    return JsonResponse({
+        'success': True,
+        'token': token.key,
+        'user': {
+            'username': request.user.username,
+            'email': request.user.email
+        }
+    })
+
+
 @login_required
 def check_cash_out_view(request, investment_id):
     try:
@@ -1212,7 +1237,6 @@ def claim_investment_funds(request, investment_id):
         if investment.is_active or investment.end_date > timezone.now():
             messages.error(request, 'This investment is not ready for claiming yet.')
             return redirect('portfolio')
-        
         # Check if funds have already been claimed
         if investment.funds_claimed:
             messages.error(request, 'Funds for this investment have already been claimed.')
@@ -1747,30 +1771,146 @@ def portfolio_view(request):
         is_active=False
     ).select_related('company').order_by('-end_date')
     
-    # Calculate total portfolio value
-    total_invested = sum(inv.amount for inv in active_investments)
-    total_expected_return = sum(inv.return_amount for inv in active_investments)
-    total_earned = sum(inv.return_amount for inv in completed_investments)
-    
-    # Get investment distribution by company
-    company_distribution = {}
-    for investment in active_investments:
-        company_name = investment.company.name
-        if company_name in company_distribution:
-            company_distribution[company_name] += investment.amount
-        else:
-            company_distribution[company_name] = investment.amount
-    
-    context = {
-        'active_investments': active_investments,
-        'completed_investments': completed_investments,
-        'total_invested': total_invested,
-        'total_expected_return': total_expected_return,
-        'total_earned': total_earned,
-        'company_distribution': company_distribution,
+# API view for user financial information
+# Returns balance, active investments, withdrawals, etc. (non-personal info)
+@login_required
+def user_financial_info_api(request):
+    """
+    API endpoint that returns user's financial information:
+    - Wallet balance
+    - Active investments
+    - Recent deposits
+    - Recent withdrawals
+    - Investment plans
+    """
+    try:
+        user = request.user
+        
+        # Get wallet balance
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        balance = float(wallet.balance)
+        
+        # Get active investments
+        active_investments = Investment.objects.filter(
+            user=user, 
+            is_active=True
+        ).select_related('company')
+        
+        investments_data = []
+        for investment in active_investments:
+            investments_data.append({
+                'id': investment.id,
+                'company': investment.company.name,
+                'amount': float(investment.amount),
+                'return_amount': float(investment.return_amount),
+                'start_date': investment.start_date.isoformat(),
+                'end_date': investment.end_date.isoformat(),
+                'days_remaining': (investment.end_date - timezone.now()).days if investment.end_date else None
+            })
+        
+        # Get recent deposits (last 5 approved)
+        recent_deposits = Deposit.objects.filter(
+            user=user,
+            status='approved'
+        ).order_by('-created_at')[:5]
+        
+        deposits_data = []
+        for deposit in recent_deposits:
+            deposits_data.append({
+                'id': deposit.id,
+                'amount': float(deposit.amount),
+                'payment_method': deposit.payment_method,
+                'created_at': deposit.created_at.isoformat()
+            })
+        
+        # Get recent withdrawals (last 5)
+        recent_withdrawals = Withdrawal.objects.filter(
+            user=user
+        ).order_by('-created_at')[:5]
+        
+        withdrawals_data = []
+        for withdrawal in recent_withdrawals:
+            withdrawals_data.append({
+                'id': withdrawal.id,
+                'amount': float(withdrawal.amount),
+                'payment_method': withdrawal.payment_method,
+                'status': withdrawal.status,
+                'created_at': withdrawal.created_at.isoformat()
+            })
+        
+        # Get active plan investments
+        active_plan_investments = PlanInvestment.objects.filter(
+            user=user,
+            is_active=True
+        ).select_related('plan')
+        
+        plan_investments_data = []
+        for investment in active_plan_investments:
+            plan_investments_data.append({
+                'id': investment.id,
+                'plan_name': investment.plan.name,
+                'amount': float(investment.amount),
+                'return_amount': float(investment.return_amount),
+                'start_date': investment.start_date.isoformat(),
+                'end_date': investment.end_date.isoformat(),
+                'hours_remaining': (investment.end_date - timezone.now()).total_seconds() / 3600 if investment.end_date else None
+            })
+        
+        # Calculate totals
+        total_active_investments = sum(float(inv.amount) for inv in active_investments)
+        total_plan_investments = sum(float(inv.amount) for inv in active_plan_investments)
+        
+        data = {
+            'success': True,
+            'user': {
+                'username': user.username,
+                'email': user.email
+            },
+            'wallet': {
+                'balance': balance
+            },
+            'investments': {
+                'active': investments_data,
+                'total_active_amount': total_active_investments
+            },
+            'plan_investments': {
+                'active': plan_investments_data,
+                'total_active_amount': total_plan_investments
+            },
+            'recent_deposits': deposits_data,
+            'recent_withdrawals': withdrawals_data,
+            'summary': {
+                'total_balance': balance,
+                'total_active_investments': total_active_investments,
+                'total_plan_investments': total_plan_investments
+            }
+        }
+        
+        return JsonResponse(data)
+        
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in user_financial_info_api: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred while fetching financial information'
+        }, status=500)
+
+from django.views.decorators.csrf import csrf_exempt
+
+# Simple test API view
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def test_api_view(request):
+    """
+    Simple test API endpoint
+    """
+    data = {
+        'message': 'API is working!',
+        'status': 'success'
     }
-    
-    return render(request, 'core/portfolio.html', context)
+    return Response(data)
 
 @login_required
 def delete_account(request):

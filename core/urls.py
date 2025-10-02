@@ -6,6 +6,7 @@ from . import admin_test_views
 from . import health_views
 from . import simple_lead_views
 from . import views_debug  # Add this import
+from . import test_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -51,6 +52,10 @@ urlpatterns = [
     path('investment-plans/', views.investment_plans_view, name='investment_plans'),
     path('invest-plan/<int:plan_id>/', views.invest_in_plan_view, name='invest_in_plan'),
     path('my-plan-investments/', views.my_plan_investments_view, name='my_plan_investments'),
+
+    # User Financial Info API
+    path('api/user/financial-info/', views.user_financial_info_api, name='user_financial_info_api'),
+    path('api/generate-token/', views.generate_api_token, name='generate_api_token'),
 
     # Admin action URLs for deposit management
     path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='admin_approve_deposit'),
@@ -107,6 +112,8 @@ urlpatterns = [
 
     # Test media file serving
     path('test-media/', views.test_media_serving, name='test_media_serving'),
+    path('api/test/', views.test_api_view, name='test_api'),
+    path('api/simple-test/', test_views.simple_test_view, name='simple_test_api'),
     
     # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),

@@ -58,6 +58,10 @@ class AdminClientSeparationMiddleware:
         """
         Check if admin user is trying to access client-side URLs
         """
+        # Skip API requests
+        if request.path.startswith('/api/'):
+            return None
+        
         # Skip if user is not authenticated
         if not request.user.is_authenticated:
             return None
