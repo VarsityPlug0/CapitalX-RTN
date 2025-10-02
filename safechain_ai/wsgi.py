@@ -11,7 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 from whitenoise import WhiteNoise
-from whitenoise.storage import CompressedManifestStaticFilesStorage
 from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'safechain_ai.settings')
@@ -28,6 +27,3 @@ application.add_files(settings.MEDIA_ROOT, prefix=settings.MEDIA_URL.strip('/'))
 # Additional Whitenoise configuration
 application.allow_all_origins = True
 application.autorefresh = True
-
-# Ensure media files are served with proper headers
-application.charset = 'utf-8'
