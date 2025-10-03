@@ -74,8 +74,10 @@ The system automatically assigns a bank account to each user based on their user
 The system now includes enhanced security for withdrawals:
 
 1. **Balance Validation**: Users cannot request withdrawals that exceed their available balance
-2. **Frozen Amounts**: Withdrawal amounts are frozen until approved or rejected by admin
-3. **Minimum Amount**: Minimum withdrawal amount is R50
+2. **Immediate Deduction**: Withdrawal amounts are immediately deducted from the available balance when placed
+3. **Frozen Amounts**: Withdrawal amounts are frozen until approved or rejected by admin
+4. **Automatic Refund**: If a withdrawal is rejected, the amount is automatically refunded to the user's wallet
+5. **Minimum Amount**: Minimum withdrawal amount is R50
 
 ## 📧 Email Templates
 
