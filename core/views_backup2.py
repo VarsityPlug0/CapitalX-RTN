@@ -490,10 +490,10 @@ def wallet_view(request):
         wallet, created = Wallet.objects.get_or_create(user=user)
         
         # Get all transactions
-        deposits = Deposit.objects.filter(user=user).order_by('-created_at')
+        deposits = Deposit.objects.filter(user=user).exclude(payment_method='voucher').order_by('-created_at')
+        voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
         withdrawals = Withdrawal.objects.filter(user=user).order_by('-created_at')
         investments = Investment.objects.filter(user=user).order_by('-created_at')
-        voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
         
         # Separate pending deposits for special display
         pending_deposits = deposits.filter(status='pending')
@@ -568,7 +568,7 @@ def wallet_view(request):
         
         # Add pagination
         from django.core.paginator import Paginator
-        paginator = Paginator(transactions, 5)  # Show 5 transactions per page (reduced from 10)
+        paginator = Paginator(transactions, 10)  # Show 10 transactions per page (increased from 5)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
