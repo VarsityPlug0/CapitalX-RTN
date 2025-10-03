@@ -490,10 +490,10 @@ def wallet_view(request):
         wallet, created = Wallet.objects.get_or_create(user=user)
         
         # Get all transactions
-        deposits = Deposit.objects.filter(user=user).order_by('-created_at')
+        deposits = Deposit.objects.filter(user=user).exclude(payment_method='voucher').order_by('-created_at')
+        voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
         withdrawals = Withdrawal.objects.filter(user=user).order_by('-created_at')
         investments = Investment.objects.filter(user=user).order_by('-created_at')
-        voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
         
         # Separate pending deposits for special display
         pending_deposits = deposits.filter(status='pending')
@@ -568,7 +568,7 @@ def wallet_view(request):
         
         # Add pagination
         from django.core.paginator import Paginator
-        paginator = Paginator(transactions, 5)  # Show 5 transactions per page (reduced from 10)
+        paginator = Paginator(transactions, 10)  # Show 10 transactions per page (increased from 5)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -967,34 +967,34 @@ def withdrawal_view(request):
         
         if not amount_str:
             messages.error(request, 'Amount is required.')
-            return redirect('withdrawal')
+            return redirect('withdraw')
             
         try:
             amount = Decimal(amount_str)
         except (ValueError, TypeError):
             messages.error(request, 'Invalid amount. Please enter a valid number.')
-            return redirect('withdrawal')
+            return redirect('withdraw')
         
         if amount < 50:
             messages.error(request, 'Minimum withdrawal amount is R50.')
-            return redirect('withdrawal')
+            return redirect('withdraw')
         
         # Check if user has sufficient balance (this check is also in the model)
         try:
             wallet = Wallet.objects.get(user=request.user)
             if amount > wallet.balance:
                 messages.error(request, f'Insufficient balance. Your available balance is R{wallet.balance}.')
-                return redirect('withdrawal')
+                return redirect('withdraw')
         except Wallet.DoesNotExist:
             messages.error(request, 'Wallet not found. Please contact support.')
-            return redirect('withdrawal')
+            return redirect('withdraw')
         
         # Calculate total earnings (sum of all completed investment returns for the user)
         total_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
         total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')
         if total_earnings > 0 and total_deposits < (Decimal('0.5') * total_earnings):
             messages.error(request, 'You must deposit at least 50% of your total earnings before you can withdraw.')
-            return redirect('withdrawal')
+            return redirect('withdraw')
         
         try:
             withdrawal_data = {
@@ -1034,7 +1034,7 @@ def withdrawal_view(request):
             return redirect('wallet')
         except ValueError as e:
             messages.error(request, str(e))
-            return redirect('withdrawal')
+            return redirect('withdraw')
         
     return render(request, 'core/withdrawal.html')
 
