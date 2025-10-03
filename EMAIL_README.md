@@ -9,6 +9,7 @@ This document explains how to set up and use the comprehensive email functionali
 - ✅ **Password Reset Emails** - Django's built-in password reset functionality
 - ✅ **Deposit Confirmations** - Sent when users make deposits (Card, Bitcoin, Voucher)
 - ✅ **Withdrawal Confirmations** - Sent when users request withdrawals
+- ✅ **Admin Withdrawal Notifications** - Sent to admin when users request withdrawals
 - ✅ **Referral Bonus Notifications** - Sent when users earn referral bonuses
 - ✅ **Security Alerts** - Sent for suspicious account activity
 - ✅ **Account Verification** - Email verification for new accounts
@@ -63,6 +64,7 @@ core/templates/core/emails/
 ├── password_reset.html      # Password reset emails
 ├── deposit_confirmation.html # Deposit confirmations
 ├── withdrawal_confirmation.html # Withdrawal confirmations
+├── admin_withdrawal_notification.html # Admin withdrawal notifications
 ├── referral_bonus.html      # Referral bonus notifications
 ├── security_alert.html      # Security alerts
 ├── account_verification.html # Account verification
