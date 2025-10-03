@@ -31,16 +31,6 @@ BANK_CHOICES = [
 class EFTBankAccount(models.Model):
     BANK_ACCOUNTS = [
         {
-            'bank': 'TYM',
-            'bank_name': 'TymeBank',
-            'account_holder': 'CapitalX Platform',
-            'account_name': 'EveryDay account',
-            'account_type': 'Current Account',
-            'account_number': '51128444674',
-            'branch_code': '678910',
-            'payshap_id': '0642726273@Tymebank'
-        },
-        {
             'bank': 'DISCOVERY',
             'bank_name': 'Discovery Bank',
             'account_holder': 'CapitalX Platform',
