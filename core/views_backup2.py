@@ -1204,7 +1204,7 @@ import secrets
 def generate_api_token(request):
     """
     Generate or retrieve an API token for the current user
-    """
+    ""
     token, created = Token.objects.get_or_create(user=request.user)
     return JsonResponse({
         'success': True,
@@ -1842,7 +1842,7 @@ def portfolio_view(request):
 # Returns balance, active investments, withdrawals, etc. (non-personal info)
 @login_required
 def user_financial_info_api(request):
-    """API endpoint that returns user's financial information."""
+    """API endpoint that returns user's financial information"""
     try:
         user = request.user
         

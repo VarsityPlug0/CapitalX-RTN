@@ -462,3 +462,41 @@ def send_admin_deposit_notification(deposit):
     except Exception as e:
         print(f"Failed to send admin deposit notification: {e}")
         return False
+
+def send_admin_withdrawal_notification(withdrawal):
+    """Send email notification to admin when a user makes a withdrawal request"""
+    from django.utils import timezone
+    
+    admin_email = 'mkhabeleenterprise@gmail.com'  # Admin email for notifications
+    client_email = withdrawal.user.email  # Client's registered email
+    
+    # Determine email subject based on payment method
+    if withdrawal.payment_method == 'bank':
+        subject = f"🏛️ Bank Withdrawal Request - R{withdrawal.amount} from {withdrawal.user.username}"
+    else:
+        subject = f"💸 New Withdrawal Request - R{withdrawal.amount} from {withdrawal.user.username}"
+    
+    template = 'core/emails/admin_withdrawal_notification.html'
+    
+    context = {
+        'withdrawal': withdrawal,
+        'user': withdrawal.user,
+        'amount': withdrawal.amount,
+        'payment_method': withdrawal.get_payment_method_display(),
+        'admin_panel_url': f'{get_site_url()}/capitalx_admin/core/',
+        'site_url': get_site_url(),
+    }
+    
+    try:
+        # Send email to admin
+        admin_result = email_service.send_custom_email(
+            to_email=admin_email,
+            subject=subject,
+            template_name=template,
+            context=context
+        )
+        
+        return admin_result
+    except Exception as e:
+        print(f"Failed to send admin withdrawal notification: {e}")
+        return False
