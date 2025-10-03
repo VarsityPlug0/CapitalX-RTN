@@ -396,24 +396,24 @@ class Withdrawal(models.Model):
                 old_instance = Withdrawal.objects.get(pk=self.pk)
                 # If status is changing from pending to approved
                 if old_instance.status == 'pending' and self.status == 'approved':
-                    # Get the user's wallet
-                    wallet = self.user.wallet
-                    if wallet.balance >= self.amount:
-                        wallet.balance -= self.amount
-                        wallet.save()
-                    else:
-                        raise ValueError("Insufficient balance for withdrawal")
-                # If status is changing from pending to rejected, no balance change needed
-                elif old_instance.status == 'pending' and self.status == 'rejected':
-                    # No action needed, withdrawal amount remains frozen
+                    # Amount is already deducted when withdrawal was created, no additional action needed
                     pass
+                # If status is changing from pending to rejected
+                elif old_instance.status == 'pending' and self.status == 'rejected':
+                    # Return the frozen amount back to user's wallet
+                    wallet = self.user.wallet
+                    wallet.balance += self.amount
+                    wallet.save()
             except Withdrawal.DoesNotExist:
-                # This is a new withdrawal, freeze the amount
-                # We'll check balance in the view before creating
                 pass
         else:
-            # This is a new withdrawal, check balance in the view before creating
-            pass
+            # This is a new withdrawal, deduct amount from user's wallet immediately
+            wallet = self.user.wallet
+            if wallet.balance >= self.amount:
+                wallet.balance -= self.amount
+                wallet.save()
+            else:
+                raise ValueError("Insufficient balance for withdrawal")
         super().save(*args, **kwargs)
 
 # Wallet model (one per user)

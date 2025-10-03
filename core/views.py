@@ -968,7 +968,7 @@ def withdrawal_view(request):
             messages.error(request, 'Minimum withdrawal amount is R50.')
             return redirect('withdrawal')
         
-        # Check if user has sufficient balance
+        # Check if user has sufficient balance (this check is also in the model)
         try:
             wallet = Wallet.objects.get(user=request.user)
             if amount > wallet.balance:
@@ -1002,6 +1002,7 @@ def withdrawal_view(request):
                     'account_type': request.POST.get('account_type', ''),
                 })
             
+            # Create withdrawal (balance will be deducted in the model's save method)
             withdrawal = Withdrawal.objects.create(**withdrawal_data)
             
             # Send withdrawal confirmation email to user
