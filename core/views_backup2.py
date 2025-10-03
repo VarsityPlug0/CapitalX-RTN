@@ -515,7 +515,8 @@ def wallet_view(request):
                 'transaction_type': 'deposit',
                 'amount': deposit.amount,
                 'status': deposit.status,
-                'description': f'Deposit via {deposit.payment_method}'
+                'description': f'Deposit via {deposit.get_payment_method_display()}',
+                'id': deposit.id
             })
         
         # Add withdrawals
@@ -525,7 +526,8 @@ def wallet_view(request):
                 'transaction_type': 'withdrawal',
                 'amount': withdrawal.amount,
                 'status': withdrawal.status,
-                'description': f'Withdrawal via {withdrawal.payment_method}'
+                'description': f'Withdrawal via {withdrawal.get_payment_method_display()}',
+                'id': withdrawal.id
             })
         
         # Add voucher deposits
@@ -535,7 +537,8 @@ def wallet_view(request):
                 'transaction_type': 'Voucher Deposit',
                 'amount': voucher.amount,
                 'status': voucher.status,
-                'description': 'Voucher Deposit'
+                'description': 'Voucher Deposit',
+                'id': voucher.id
             })
 
         # Add investments
@@ -545,7 +548,8 @@ def wallet_view(request):
                 'transaction_type': 'investment',
                 'amount': investment.amount,
                 'status': 'Active' if investment.is_active else 'Completed',
-                'description': f'Investment in {investment.company.name}'
+                'description': f'Investment in {investment.company.name}',
+                'id': investment.id
             })
             
             # Add returns for completed investments
@@ -555,15 +559,22 @@ def wallet_view(request):
                     'transaction_type': 'return',
                     'amount': investment.return_amount,
                     'status': 'Completed',
-                    'description': f'Return from {investment.company.name}'
+                    'description': f'Return from {investment.company.name}',
+                    'id': investment.id
                 })
         
         # Sort transactions by date (newest first)
         transactions.sort(key=lambda x: x['created_at'], reverse=True)
         
+        # Add pagination
+        from django.core.paginator import Paginator
+        paginator = Paginator(transactions, 5)  # Show 5 transactions per page (reduced from 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
         context = {
             'wallet': wallet,
-            'transactions': transactions,
+            'transactions': page_obj,
             'pending_deposits': pending_deposits,
             'approved_deposits': approved_deposits,
             'rejected_deposits': rejected_deposits,

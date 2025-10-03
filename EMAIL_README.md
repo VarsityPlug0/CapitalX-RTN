@@ -79,6 +79,16 @@ The system now includes enhanced security for withdrawals:
 4. **Automatic Refund**: If a withdrawal is rejected, the amount is automatically refunded to the user's wallet
 5. **Minimum Amount**: Minimum withdrawal amount is R50
 
+## 📊 Improved Transaction History
+
+The transaction history in the wallet view has been enhanced with space-saving features:
+
+1. **Compact Display**: Reduced padding and smaller text for more efficient space usage
+2. **Pagination**: Transactions are paginated (5 per page) for easier browsing
+3. **Chronological Sorting**: All transactions are sorted by date (newest first)
+4. **Comprehensive Display**: Shows deposits, withdrawals, investments, and returns
+5. **Detailed Information**: Each transaction includes type, amount, status, and description
+
 ## 📧 Email Templates
 
 ### **Template Structure:**

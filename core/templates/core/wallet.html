@@ -108,10 +108,10 @@
 
     <!-- Transaction History -->
     <div class="card">
-        <div class="card-body">
-            <h2 class="h4 mb-4">Transaction History</h2>
+        <div class="card-body p-3">
+            <h2 class="h5 mb-3">Transaction History</h2>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -124,35 +124,37 @@
                     <tbody>
                         {% for transaction in transactions %}
                         <tr>
-                            <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                            <td class="small">{{ transaction.created_at|date:"M d, Y H:i" }}</td>
                             <td>
                                 {% if transaction.transaction_type == 'deposit' %}
-                                    <span class="badge bg-success">Deposit</span>
+                                    <span class="badge bg-success small">Deposit</span>
                                 {% elif transaction.transaction_type == 'withdrawal' %}
-                                    <span class="badge bg-warning">Withdrawal</span>
+                                    <span class="badge bg-warning small">Withdrawal</span>
                                 {% elif transaction.transaction_type == 'investment' %}
-                                    <span class="badge bg-primary">Investment</span>
+                                    <span class="badge bg-primary small">Investment</span>
                                 {% elif transaction.transaction_type == 'return' %}
-                                    <span class="badge bg-info">Return</span>
+                                    <span class="badge bg-info small">Return</span>
+                                {% elif transaction.transaction_type == 'Voucher Deposit' %}
+                                    <span class="badge bg-secondary small">Voucher</span>
                                 {% endif %}
                             </td>
-                            <td>R{{ transaction.amount|floatformat:2 }}</td>
+                            <td class="small">R{{ transaction.amount|floatformat:2 }}</td>
                             <td>
                                 {% if transaction.status == 'completed' or transaction.status == 'approved' %}
-                                    <span class="badge bg-success">Completed</span>
+                                    <span class="badge bg-success small">Completed</span>
                                 {% elif transaction.status == 'pending' %}
-                                    <span class="badge bg-warning">Pending</span>
+                                    <span class="badge bg-warning small">Pending</span>
                                 {% elif transaction.status == 'failed' or transaction.status == 'rejected' %}
-                                    <span class="badge bg-danger">Failed</span>
+                                    <span class="badge bg-danger small">Failed</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ transaction.status|title }}</span>
+                                    <span class="badge bg-secondary small">{{ transaction.status|title }}</span>
                                 {% endif %}
                             </td>
-                            <td>{{ transaction.description }}</td>
+                            <td class="small">{{ transaction.description }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">No transactions yet</td>
+                            <td colspan="5" class="text-center small">No transactions yet</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -161,37 +163,37 @@
 
             <!-- Pagination -->
             {% if transactions.has_other_pages %}
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
+            <nav class="mt-2">
+                <ul class="pagination pagination-sm justify-content-center mb-2">
                     {% if transactions.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ transactions.previous_page_number }}">Previous</a>
+                        <a class="page-link py-1 px-2" href="?page={{ transactions.previous_page_number }}">Previous</a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
-                        <span class="page-link">Previous</span>
+                        <span class="page-link py-1 px-2">Previous</span>
                     </li>
                     {% endif %}
 
                     {% for num in transactions.paginator.page_range %}
                     {% if transactions.number == num %}
                     <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
+                        <span class="page-link py-1 px-2">{{ num }}</span>
                     </li>
                     {% else %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        <a class="page-link py-1 px-2" href="?page={{ num }}">{{ num }}</a>
                     </li>
                     {% endif %}
                     {% endfor %}
 
                     {% if transactions.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ transactions.next_page_number }}">Next</a>
+                        <a class="page-link py-1 px-2" href="?page={{ transactions.next_page_number }}">Next</a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
-                        <span class="page-link">Next</span>
+                        <span class="page-link py-1 px-2">Next</span>
                     </li>
                     {% endif %}
                 </ul>
