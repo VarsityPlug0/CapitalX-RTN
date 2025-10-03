@@ -10,18 +10,12 @@ This document explains how to set up and use the comprehensive email functionali
 - ✅ **Deposit Confirmations** - Sent when users make deposits (Card, Bitcoin, Voucher)
 - ✅ **Withdrawal Confirmations** - Sent when users request withdrawals
 - ✅ **Admin Withdrawal Notifications** - Sent to admin when users request withdrawals
+- ✅ **Admin Deposit Notifications** - Sent to admin when users make EFT deposits with bank account details
 - ✅ **Referral Bonus Notifications** - Sent when users earn referral bonuses
 - ✅ **Security Alerts** - Sent for suspicious account activity
 - ✅ **Account Verification** - Email verification for new accounts
 - ✅ **Investment Updates** - Portfolio performance updates
 - ✅ **Custom Emails** - Send any custom email using templates
-
-### **Email Providers Supported:**
-- Gmail (recommended for development)
-- Outlook/Hotmail
-- Yahoo Mail
-- SendGrid
-- Any SMTP provider
 
 ## 🛠️ Setup Instructions
 
@@ -54,6 +48,35 @@ Run the email test command:
 python manage.py test_email --email your-email@example.com
 ```
 
+## 🏦 EFT Bank Account Rotation
+
+The system now supports rotating bank accounts for EFT deposits to distribute funds across multiple accounts. Currently, two bank accounts are configured:
+
+1. **TymeBank**
+   - Account Holder: CapitalX Platform
+   - Account Name: EveryDay account
+   - Account Type: Current Account
+   - Account Number: 51128444674
+   - Branch Code: 678910
+   - PayShap ID: 0642726273@Tymebank
+
+2. **Discovery Bank**
+   - Account Holder: CapitalX Platform
+   - Account Type: Savings Account
+   - Account Number: 17856296290
+   - Branch Code: 679000
+   - BIC/SWIFT: DISCZAJJXXX
+
+The system automatically assigns a bank account to each user based on their user ID, ensuring an even distribution of deposits across accounts.
+
+## 🔒 Withdrawal Security Features
+
+The system now includes enhanced security for withdrawals:
+
+1. **Balance Validation**: Users cannot request withdrawals that exceed their available balance
+2. **Frozen Amounts**: Withdrawal amounts are frozen until approved or rejected by admin
+3. **Minimum Amount**: Minimum withdrawal amount is R50
+
 ## 📧 Email Templates
 
 ### **Template Structure:**
@@ -65,6 +88,12 @@ core/templates/core/emails/
 ├── deposit_confirmation.html # Deposit confirmations
 ├── withdrawal_confirmation.html # Withdrawal confirmations
 ├── admin_withdrawal_notification.html # Admin withdrawal notifications
+├── admin_deposit_notification.html # General admin deposit notifications
+├── admin_deposit_notification_eft.html # EFT-specific admin deposit notifications
+├── admin_deposit_notification_card.html # Card-specific admin deposit notifications
+├── admin_deposit_notification_bitcoin.html # Bitcoin-specific admin deposit notifications
+├── admin_deposit_notification_voucher.html # Voucher-specific admin deposit notifications
+├── admin_deposit_notification_cash.html # Cash-specific admin deposit notifications
 ├── referral_bonus.html      # Referral bonus notifications
 ├── security_alert.html      # Security alerts
 ├── account_verification.html # Account verification

@@ -763,6 +763,15 @@ def deposit_view(request):
             eft_reference = request.POST.get('reference', '').strip()
             proof_image = request.FILES.get('proof_image')
             
+            # Get rotated bank account for this user
+            from .models import EFTBankAccount
+            bank_account = EFTBankAccount.get_rotated_account(request.user.id)
+            
+            # Add bank account info to admin notes
+            bank_info = f"Bank: {bank_account['bank_name']}, Account Holder: {bank_account['account_holder']}"
+            if 'account_number' in bank_account:
+                bank_info += f", Account: {bank_account['account_number']}"
+            
             # Basic validation for EFT details
             if not eft_reference:
                 messages.error(request, 'Please provide a payment reference.')
@@ -773,7 +782,7 @@ def deposit_view(request):
                 return redirect('deposit')
             
             deposit_data.update({
-                'admin_notes': f'EFT deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}. Reference: {eft_reference}',
+                'admin_notes': f'EFT deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}. Reference: {eft_reference}. {bank_info}',
                 'proof_image': proof_image,
             })
         
@@ -795,8 +804,15 @@ def deposit_view(request):
     # Handle GET request - check for payment method parameter
     selected_method = request.GET.get('method', 'card')
     
+    # For EFT deposits, get the rotated bank account to display
+    eft_bank_account = None
+    if selected_method == 'eft':
+        from .models import EFTBankAccount
+        eft_bank_account = EFTBankAccount.get_rotated_account(request.user.id)
+    
     return render(request, 'core/deposit.html', {
-        'selected_payment_method': selected_method
+        'selected_payment_method': selected_method,
+        'eft_bank_account': eft_bank_account
     })
 
 # Bitcoin deposit view
@@ -953,7 +969,15 @@ def withdrawal_view(request):
             return redirect('withdrawal')
         
         # Check if user has sufficient balance
-        wallet = Wallet.objects.get(user=request.user)
+        try:
+            wallet = Wallet.objects.get(user=request.user)
+            if amount > wallet.balance:
+                messages.error(request, f'Insufficient balance. Your available balance is R{wallet.balance}.')
+                return redirect('withdrawal')
+        except Wallet.DoesNotExist:
+            messages.error(request, 'Wallet not found. Please contact support.')
+            return redirect('withdrawal')
+        
         # Calculate total earnings (sum of all completed investment returns for the user)
         total_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
         total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')

@@ -655,13 +655,30 @@
                                         <div class="bank-info p-3 bg-dark rounded mb-3">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <strong class="text-light">Bank:</strong> Standard Bank<br>
-                                                    <strong class="text-light">Account Name:</strong> CapitalX Investments<br>
-                                                    <strong class="text-light">Account Type:</strong> Business Account
+                                                    {% if eft_bank_account %}
+                                                        <strong class="text-light">Bank:</strong> {{ eft_bank_account.bank_name }}<br>
+                                                        <strong class="text-light">Account Holder:</strong> {{ eft_bank_account.account_holder }}<br>
+                                                        <strong class="text-light">Account Type:</strong> {{ eft_bank_account.account_type }}<br>
+                                                        {% if eft_bank_account.bic_swift %}
+                                                        <strong class="text-light">BIC/SWIFT:</strong> {{ eft_bank_account.bic_swift }}<br>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <strong class="text-light">Bank:</strong> Standard Bank<br>
+                                                        <strong class="text-light">Account Name:</strong> CapitalX Investments<br>
+                                                        <strong class="text-light">Account Type:</strong> Business Account
+                                                    {% endif %}
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <strong class="text-light">Account Number:</strong> 1234567890<br>
-                                                    <strong class="text-light">Branch Code:</strong> 051001<br>
+                                                    {% if eft_bank_account %}
+                                                        <strong class="text-light">Account Number:</strong> {{ eft_bank_account.account_number }}<br>
+                                                        <strong class="text-light">Branch Code:</strong> {{ eft_bank_account.branch_code }}<br>
+                                                        {% if eft_bank_account.payshap_id %}
+                                                        <strong class="text-light">PayShap ID:</strong> {{ eft_bank_account.payshap_id }}<br>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <strong class="text-light">Account Number:</strong> 1234567890<br>
+                                                        <strong class="text-light">Branch Code:</strong> 051001<br>
+                                                    {% endif %}
                                                     <strong class="text-light">Reference:</strong> Your Username
                                                 </div>
                                             </div>

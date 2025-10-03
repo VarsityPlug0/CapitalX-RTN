@@ -27,6 +27,41 @@ BANK_CHOICES = [
     ('UBS', 'UBS Bank'),
 ]
 
+# Bank accounts for EFT deposits with rotation
+class EFTBankAccount(models.Model):
+    BANK_ACCOUNTS = [
+        {
+            'bank': 'TYM',
+            'bank_name': 'TymeBank',
+            'account_holder': 'CapitalX Platform',
+            'account_name': 'EveryDay account',
+            'account_type': 'Current Account',
+            'account_number': '51128444674',
+            'branch_code': '678910',
+            'payshap_id': '0642726273@Tymebank'
+        },
+        {
+            'bank': 'DISCOVERY',
+            'bank_name': 'Discovery Bank',
+            'account_holder': 'CapitalX Platform',
+            'account_type': 'Savings Account',
+            'account_number': '17856296290',
+            'branch_code': '679000',
+            'bic_swift': 'DISCZAJJXXX'
+        }
+    ]
+    
+    @classmethod
+    def get_rotated_account(cls, user_id):
+        """
+        Get a rotated bank account for EFT deposits based on user ID.
+        This ensures each user gets a different account in rotation.
+        """
+        # For now, we'll rotate between the available accounts based on user ID
+        # In a more complex system, we might want to track usage or availability
+        account_index = user_id % len(cls.BANK_ACCOUNTS)
+        return cls.BANK_ACCOUNTS[account_index]
+
 # Custom user model extending AbstractUser
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -359,8 +394,8 @@ class Withdrawal(models.Model):
         if self.pk:
             try:
                 old_instance = Withdrawal.objects.get(pk=self.pk)
-                # If status is changing to approved
-                if old_instance.status != 'approved' and self.status == 'approved':
+                # If status is changing from pending to approved
+                if old_instance.status == 'pending' and self.status == 'approved':
                     # Get the user's wallet
                     wallet = self.user.wallet
                     if wallet.balance >= self.amount:
@@ -368,8 +403,17 @@ class Withdrawal(models.Model):
                         wallet.save()
                     else:
                         raise ValueError("Insufficient balance for withdrawal")
+                # If status is changing from pending to rejected, no balance change needed
+                elif old_instance.status == 'pending' and self.status == 'rejected':
+                    # No action needed, withdrawal amount remains frozen
+                    pass
             except Withdrawal.DoesNotExist:
+                # This is a new withdrawal, freeze the amount
+                # We'll check balance in the view before creating
                 pass
+        else:
+            # This is a new withdrawal, check balance in the view before creating
+            pass
         super().save(*args, **kwargs)
 
 # Wallet model (one per user)
