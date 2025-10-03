@@ -53,6 +53,75 @@
         {% endif %}
     </div>
     
+    <!-- Extract bank account information from admin notes -->
+    {% if deposit.admin_notes %}
+        {% if "TymeBank" in deposit.admin_notes %}
+        <div class="info-box" style="border-left: 4px solid #0056b3;">
+            <h3>🏦 Bank Account Information</h3>
+            <table class="info-table">
+                <tr>
+                    <td class="label">Bank:</td>
+                    <td class="value">TymeBank</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Holder:</td>
+                    <td class="value">Mr Sambo</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Name:</td>
+                    <td class="value">EveryDay account</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Type:</td>
+                    <td class="value">Current Account</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Number:</td>
+                    <td class="value">51128444674</td>
+                </tr>
+                <tr>
+                    <td class="label">Branch Code:</td>
+                    <td class="value">678910</td>
+                </tr>
+                <tr>
+                    <td class="label">PayShap ID:</td>
+                    <td class="value">0642726273@Tymebank</td>
+                </tr>
+            </table>
+        </div>
+        {% elif "Discovery" in deposit.admin_notes %}
+        <div class="info-box" style="border-left: 4px solid #0056b3;">
+            <h3>🏦 Bank Account Information</h3>
+            <table class="info-table">
+                <tr>
+                    <td class="label">Bank:</td>
+                    <td class="value">Discovery Bank</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Holder:</td>
+                    <td class="value">Thabang Nkwana</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Type:</td>
+                    <td class="value">Savings Account</td>
+                </tr>
+                <tr>
+                    <td class="label">Account Number:</td>
+                    <td class="value">17856296290</td>
+                </tr>
+                <tr>
+                    <td class="label">Branch Code:</td>
+                    <td class="value">679000</td>
+                </tr>
+                <tr>
+                    <td class="label">BIC/SWIFT:</td>
+                    <td class="value">DISCZAJJXXX</td>
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+    {% endif %}
+    
     <div class="info-box" style="border-left: 4px solid #28a745;">
         <h3>👤 User Information</h3>
         <table class="info-table">
