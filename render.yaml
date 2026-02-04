@@ -3,7 +3,7 @@ services:
     name: capitalx-platform
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput --verbosity=2"
+    buildCommand: "./production_build.sh"
     startCommand: "gunicorn safechain_ai.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
