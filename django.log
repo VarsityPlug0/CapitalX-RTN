@@ -3412,3 +3412,147 @@ Email sent successfully to mkhabeleenterprise@gmail.com
 Email sent successfully to test@example.com
 Email sent successfully to mkhabeleenterprise@gmail.com
 Email sent successfully to test@example.com
+Watching for file changes with StatReloader
+MediaFileMiddleware START processing request for: /
+MediaFileMiddleware - Not a media request: /
+MediaFileMiddleware END processing request for: /
+"GET / HTTP/1.1" 200 14768
+"GET /static/css/reset.css HTTP/1.1" 200 693
+"GET /static/css/main.css HTTP/1.1" 200 21701
+"GET /static/js/theme.js HTTP/1.1" 200 2296
+"GET /static/images/logo.png HTTP/1.1" 200 1577484
+MediaFileMiddleware START processing request for: /favicon.ico
+MediaFileMiddleware - Not a media request: /favicon.ico
+MediaFileMiddleware END processing request for: /favicon.ico
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 19106
+MediaFileMiddleware START processing request for: /
+MediaFileMiddleware - Not a media request: /
+MediaFileMiddleware END processing request for: /
+"GET /?id=c3a99c7d-2bb3-4db0-b53c-bfca3e6efcdf&vscodeBrowserReqId=1770211559953 HTTP/1.1" 200 14768
+MediaFileMiddleware START processing request for: /register/
+MediaFileMiddleware - Not a media request: /register/
+MediaFileMiddleware END processing request for: /register/
+"GET /register/ HTTP/1.1" 200 12831
+MediaFileMiddleware START processing request for: /register/
+MediaFileMiddleware - Not a media request: /register/
+MediaFileMiddleware END processing request for: /register/
+"POST /register/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /register/
+MediaFileMiddleware - Not a media request: /register/
+MediaFileMiddleware END processing request for: /register/
+"GET /register/ HTTP/1.1" 200 13151
+"GET /static/css/main.css HTTP/1.1" 304 0
+"GET /static/css/reset.css HTTP/1.1" 304 0
+"GET /static/js/theme.js HTTP/1.1" 304 0
+"GET /static/images/logo.png HTTP/1.1" 304 0
+MediaFileMiddleware START processing request for: /register/
+MediaFileMiddleware - Not a media request: /register/
+MediaFileMiddleware END processing request for: /register/
+"POST /register/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /register/
+MediaFileMiddleware - Not a media request: /register/
+MediaFileMiddleware END processing request for: /register/
+"GET /register/ HTTP/1.1" 200 13153
+MediaFileMiddleware START processing request for: /register/
+MediaFileMiddleware - Not a media request: /register/
+MediaFileMiddleware END processing request for: /register/
+"GET /register/ HTTP/1.1" 200 12831
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"GET /login/ HTTP/1.1" 200 10404
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 200 10727
+"GET /static/css/reset.css HTTP/1.1" 304 0
+"GET /static/images/logo.png HTTP/1.1" 304 0
+"GET /static/css/main.css HTTP/1.1" 304 0
+"GET /static/js/theme.js HTTP/1.1" 304 0
+MediaFileMiddleware START processing request for: /password_reset/
+MediaFileMiddleware - Not a media request: /password_reset/
+MediaFileMiddleware END processing request for: /password_reset/
+"GET /password_reset/ HTTP/1.1" 200 4670
+MediaFileMiddleware START processing request for: /password_reset/
+MediaFileMiddleware - Not a media request: /password_reset/
+MediaFileMiddleware END processing request for: /password_reset/
+"POST /password_reset/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /password_reset/done/
+MediaFileMiddleware - Not a media request: /password_reset/done/
+MediaFileMiddleware END processing request for: /password_reset/done/
+"GET /password_reset/done/ HTTP/1.1" 200 4143
+MediaFileMiddleware START processing request for: /reset/MTk/d3gvi5-73e753b516bc1155fb98aae205e89603/
+MediaFileMiddleware - Not a media request: /reset/MTk/d3gvi5-73e753b516bc1155fb98aae205e89603/
+MediaFileMiddleware END processing request for: /reset/MTk/d3gvi5-73e753b516bc1155fb98aae205e89603/
+"GET /reset/MTk/d3gvi5-73e753b516bc1155fb98aae205e89603/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /reset/MTk/set-password/
+MediaFileMiddleware - Not a media request: /reset/MTk/set-password/
+MediaFileMiddleware END processing request for: /reset/MTk/set-password/
+"GET /reset/MTk/set-password/ HTTP/1.1" 200 5112
+MediaFileMiddleware START processing request for: /reset/MTk/set-password/
+MediaFileMiddleware - Not a media request: /reset/MTk/set-password/
+MediaFileMiddleware END processing request for: /reset/MTk/set-password/
+"POST /reset/MTk/set-password/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /reset/done/
+MediaFileMiddleware - Not a media request: /reset/done/
+MediaFileMiddleware END processing request for: /reset/done/
+"GET /reset/done/ HTTP/1.1" 200 3977
+"GET /static/css/main.css HTTP/1.1" 304 0
+"GET /static/css/reset.css HTTP/1.1" 304 0
+"GET /static/images/logo.png HTTP/1.1" 304 0
+"GET /static/js/theme.js HTTP/1.1" 304 0
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"GET /login/ HTTP/1.1" 200 10404
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17521
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17521
+"GET /static/css/main.css HTTP/1.1" 304 0
+"GET /static/css/reset.css HTTP/1.1" 304 0
+"GET /static/images/logo.png HTTP/1.1" 304 0
+"GET /static/js/theme.js HTTP/1.1" 304 0
+MediaFileMiddleware START processing request for: /tiers/
+MediaFileMiddleware - Not a media request: /tiers/
+MediaFileMiddleware END processing request for: /tiers/
+"GET /tiers/ HTTP/1.1" 200 14315
+MediaFileMiddleware START processing request for: /investment-plans/
+MediaFileMiddleware - Not a media request: /investment-plans/
+MediaFileMiddleware END processing request for: /investment-plans/
+"GET /investment-plans/ HTTP/1.1" 200 54994
+MediaFileMiddleware START processing request for: /my-plan-investments/
+MediaFileMiddleware - Not a media request: /my-plan-investments/
+MediaFileMiddleware END processing request for: /my-plan-investments/
+"GET /my-plan-investments/ HTTP/1.1" 200 42109
+MediaFileMiddleware START processing request for: /wallet/
+MediaFileMiddleware - Not a media request: /wallet/
+MediaFileMiddleware END processing request for: /wallet/
+"GET /wallet/ HTTP/1.1" 200 17522
+MediaFileMiddleware START processing request for: /investment-plans/
+MediaFileMiddleware - Not a media request: /investment-plans/
+MediaFileMiddleware END processing request for: /investment-plans/
+"GET /investment-plans/ HTTP/1.1" 200 54994
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17140
+MediaFileMiddleware START processing request for: /referral/
+MediaFileMiddleware - Not a media request: /referral/
+MediaFileMiddleware END processing request for: /referral/
+"GET /referral/ HTTP/1.1" 200 10942
+C:\Users\money\HustleProjects\investment\safechain_ai\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\investment\safechain_ai\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\money\HustleProjects\investment\safechain_ai\settings.py changed, reloading.
+Watching for file changes with StatReloader

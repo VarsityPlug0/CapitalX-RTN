@@ -3,7 +3,7 @@ services:
     name: capitalx-platform
     env: python
     plan: free
-    buildCommand: "./build.sh"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput --verbosity=2"
     startCommand: "gunicorn safechain_ai.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
@@ -18,6 +18,10 @@ services:
         value: standardbankingconfirmation@gmail.com
       - key: EMAIL_HOST_PASSWORD
         sync: false
+      - key: WHITENOISE_MANIFEST_STRICT
+        value: "False"
+      - key: STATIC_URL
+        value: "/static/"
       - key: DATABASE_URL
         fromDatabase:
           name: capitalx-database
