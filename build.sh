@@ -8,8 +8,11 @@ pip install --upgrade pip
 # Install Python dependencies with verbose output
 pip install -r requirements.txt --verbose
 
-# Collect static files
-python manage.py collectstatic --no-input
+# Ensure static files directory exists
+mkdir -p staticfiles
+
+# Collect static files with more verbose output
+python manage.py collectstatic --no-input --verbosity=2
 
 # Apply database migrations
 python manage.py migrate

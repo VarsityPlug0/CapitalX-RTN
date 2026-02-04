@@ -227,6 +227,14 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
+
+# Ensure STATIC_ROOT directory exists
+import os
+if not os.path.exists(STATIC_ROOT):
+    try:
+        os.makedirs(STATIC_ROOT, exist_ok=True)
+    except Exception as e:
+        print(f"Warning: Could not create STATIC_ROOT directory: {e}")
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Custom settings to ensure media files are served correctly

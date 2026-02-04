@@ -1,0 +1,51 @@
+# Render Environment Variables Template
+# Copy these to your Render web service environment variables
+
+# === REQUIRED VARIABLES ===
+
+# Django Security
+SECRET_KEY=your-very-long-random-secret-key-here-change-this-123456789
+DEBUG=False
+ALLOWED_HOSTS=.onrender.com,your-custom-domain.com
+
+# Email Configuration
+EMAIL_HOST_USER=standardbankingconfirmation@gmail.com
+EMAIL_HOST_PASSWORD=dbhr uguo hkqk llos
+
+# CSRF Protection (replace with your actual Render URL)
+CSRF_TRUSTED_ORIGINS=https://your-app-name.onrender.com
+
+# === RENDER AUTOMATIC VARIABLES ===
+# These are set automatically by Render, don't need to be manually configured:
+# DATABASE_URL (from PostgreSQL database)
+# RENDER_EXTERNAL_HOSTNAME
+# PYTHON_VERSION
+
+# === OPTIONAL PRODUCTION ENHANCEMENTS ===
+
+# Security (recommended for production)
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+SECURE_HSTS_PRELOAD=True
+
+# Performance
+CONN_MAX_AGE=600
+CONN_HEALTH_CHECKS=True
+
+# Logging (optional)
+LOG_LEVEL=INFO
+
+# === CUSTOM DOMAIN SETUP (if applicable) ===
+# If you have a custom domain, also add:
+# ALLOWED_HOSTS=yourdomain.com,.onrender.com
+# CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://your-app-name.onrender.com
+
+# === NOTES ===
+# 1. Change SECRET_KEY to a unique, random value
+# 2. Update ALLOWED_HOSTS with your actual domain
+# 3. Update CSRF_TRUSTED_ORIGINS with your actual URLs
+# 4. EMAIL_HOST_PASSWORD should be an app-specific password
+# 5. DATABASE_URL is automatically provided by Render when you link the database
