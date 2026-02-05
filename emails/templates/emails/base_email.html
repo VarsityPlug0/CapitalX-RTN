@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject|default:app_name }}</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .email-header {
+            background: linear-gradient(135deg, {{ primary_color|default:"#667eea" }} 0%, {{ secondary_color|default:"#764ba2" }} 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        /* Content */
+        .email-content {
+            padding: 30px 25px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: #555;
+            line-height: 1.7;
+        }
+        
+        .main-content p {
+            margin-bottom: 16px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, {{ primary_color|default:"#667eea" }} 0%, {{ secondary_color|default:"#764ba2" }} 100%);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 200px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b5b95 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #e081e8 0%, #e04a5f 100%);
+        }
+        
+        /* Info boxes */
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid {{ primary_color|default:"#667eea" }};
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .info-box h3 {
+            color: {{ primary_color|default:"#667eea" }};
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .info-box p {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Amount/Currency styling */
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+            background: linear-gradient(135deg, {{ primary_color|default:"#667eea" }} 0%, {{ secondary_color|default:"#764ba2" }} 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Table styles for better mobile display */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .info-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .info-table .label {
+            font-weight: 600;
+            color: #4a5568;
+            width: 40%;
+        }
+        
+        .info-table .value {
+            color: #2d3748;
+        }
+        
+        /* Footer */
+        .email-footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .footer-links {
+            margin-bottom: 15px;
+        }
+        
+        .footer-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 14px;
+            display: inline-block;
+            padding: 5px 0;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .social-links {
+            margin-bottom: 15px;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 50%;
+            line-height: 36px;
+            margin: 0 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .social-links a:hover {
+            background-color: #2980b9;
+            transform: scale(1.1);
+        }
+        
+        .disclaimer {
+            font-size: 11px;
+            color: #bdc3c7;
+            line-height: 1.5;
+            margin-top: 15px;
+        }
+        
+        .disclaimer p {
+            margin-bottom: 8px;
+        }
+        
+        /* Mobile-first responsive design */
+        @media only screen and (max-width: 640px) {
+            .email-container {
+                margin: 0 !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            
+            .email-content {
+                padding: 20px 16px !important;
+            }
+            
+            .email-header {
+                padding: 20px 16px !important;
+            }
+            
+            .logo {
+                font-size: 24px !important;
+            }
+            
+            .tagline {
+                font-size: 13px !important;
+            }
+            
+            .greeting {
+                font-size: 16px !important;
+                margin-bottom: 16px !important;
+            }
+            
+            .main-content {
+                font-size: 15px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .btn {
+                display: block !important;
+                width: 100% !important;
+                text-align: center !important;
+                padding: 18px 16px !important;
+                font-size: 16px !important;
+                margin: 16px 0 !important;
+                min-width: auto !important;
+            }
+            
+            .info-box {
+                padding: 16px !important;
+                margin: 16px 0 !important;
+            }
+            
+            .info-box h3 {
+                font-size: 16px !important;
+            }
+            
+            .amount {
+                font-size: 20px !important;
+            }
+            
+            .info-table td {
+                padding: 10px 4px !important;
+                font-size: 13px !important;
+            }
+            
+            .info-table .label {
+                width: 45% !important;
+            }
+            
+            .footer-links a {
+                display: block !important;
+                margin: 8px 0 !important;
+                padding: 8px 0 !important;
+            }
+            
+            .social-links a {
+                width: 44px !important;
+                height: 44px !important;
+                line-height: 44px !important;
+                margin: 0 6px !important;
+                font-size: 16px !important;
+            }
+            
+            .disclaimer {
+                font-size: 10px !important;
+                line-height: 1.4 !important;
+            }
+        }
+        
+        /* Very small screens (iPhone SE, etc.) */
+        @media only screen and (max-width: 375px) {
+            .email-content {
+                padding: 16px 12px !important;
+            }
+            
+            .email-header {
+                padding: 16px 12px !important;
+            }
+            
+            .btn {
+                padding: 16px 12px !important;
+                font-size: 15px !important;
+            }
+            
+            .info-box {
+                padding: 12px !important;
+            }
+            
+            .social-links a {
+                width: 40px !important;
+                height: 40px !important;
+                line-height: 40px !important;
+                margin: 0 4px !important;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .email-container {
+                background-color: #1a202c !important;
+            }
+            
+            .email-content {
+                background-color: #1a202c !important;
+            }
+            
+            .greeting {
+                color: #e2e8f0 !important;
+            }
+            
+            .main-content {
+                color: #cbd5e0 !important;
+            }
+            
+            .info-box {
+                background-color: #2d3748 !important;
+            }
+            
+            .info-table td {
+                border-bottom-color: #4a5568 !important;
+            }
+            
+            .info-table .label {
+                color: #a0aec0 !important;
+            }
+            
+            .info-table .value {
+                color: #e2e8f0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <div class="logo">{{ app_name|default:"CapitalX" }}</div>
+            <div class="tagline">{{ tagline|default:"Your Gateway to Smart Investments" }}</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="email-content">
+            {% block content %}
+            <!-- Email content goes here -->
+            {% endblock %}
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <div class="footer-links">
+                <a href="{{ site_url|default:'http://localhost:8000' }}">Home</a>
+                <a href="{{ site_url|default:'http://localhost:8000' }}/about">About</a>
+                <a href="{{ site_url|default:'http://localhost:8000' }}/contact">Contact</a>
+                <a href="{{ site_url|default:'http://localhost:8000' }}/support">Support</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="#" title="Facebook">f</a>
+                <a href="#" title="Twitter">t</a>
+                <a href="#" title="LinkedIn">in</a>
+                <a href="#" title="Instagram">ig</a>
+            </div>
+            
+            <div class="disclaimer">
+                <p>This email was sent to {{ user.email }} from {{ app_name|default:"CapitalX" }}.</p>
+                <p>If you have any questions, please contact our support team.</p>
+                <p>{{ footer_text|default:"© 2024 CapitalX. All rights reserved." }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

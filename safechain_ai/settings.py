@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'core',
+    'emails',  # Reusable email system with configurable branding
     'crispy_forms',
     'crispy_bootstrap5',
 ]

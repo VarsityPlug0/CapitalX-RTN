@@ -1,0 +1,66 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    ✅ Verify Your {{ app_name|default:"CapitalX" }} Account
+</div>
+
+<div class="main-content">
+    <p>Hello {{ user.full_name|default:user.username }},</p>
+
+    <p>Thank you for creating your {{ app_name|default:"CapitalX" }} account! To complete your registration and start
+        investing, please verify your email address.</p>
+
+    <div class="info-box">
+        <h3>🔐 Why Verify?</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>Account Security:</strong> Ensures only you can access your account</li>
+            <li><strong>Full Access:</strong> Unlocks all {{ app_name|default:"CapitalX" }} features</li>
+            <li><strong>Investment Ready:</strong> Start making deposits and investments</li>
+            <li><strong>Communication:</strong> Receive important updates and notifications</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ verification_url }}" class="btn">Verify My Email</a>
+    </div>
+
+    <p><strong>Verification Link:</strong></p>
+    <p
+        style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; word-break: break-all;">
+        {{ verification_url }}
+    </p>
+
+    <div class="info-box">
+        <h3>📱 What Happens Next?</h3>
+        <ol style="margin-left: 20px;">
+            <li><strong>Click the verification link above</strong></li>
+            <li><strong>Your account will be verified instantly</strong></li>
+            <li><strong>You'll be redirected to your dashboard</strong></li>
+            <li><strong>Start your investment journey!</strong></li>
+        </ol>
+    </div>
+
+    <p><strong>Can't Click the Button?</strong></p>
+    <p>If the button above doesn't work, copy and paste the verification link into your web browser's address bar.</p>
+
+    <p><strong>Didn't Create This Account?</strong></p>
+    <p>If you didn't create a {{ app_name|default:"CapitalX" }} account, please ignore this email. Your email address
+        may have been entered by mistake.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'http://localhost:8000' }}/login" class="btn btn-secondary">Go to Login</a>
+    </div>
+
+    <p><strong>Need Help?</strong></p>
+    <p>If you're having trouble verifying your account, our support team is here to help:</p>
+    <ul style="margin-left: 20px;">
+        <li><strong>Email:</strong> {{ support_email|default:"support@example.com" }}</li>
+        <li><strong>Live Chat:</strong> Available on our website</li>
+    </ul>
+
+    <p>Welcome to {{ app_name|default:"CapitalX" }}! We're excited to help you achieve your financial goals.</p>
+
+    <p>Best regards,<br>The {{ app_name|default:"CapitalX" }} Team</p>
+</div>
+{% endblock %}

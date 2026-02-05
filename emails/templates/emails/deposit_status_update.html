@@ -1,0 +1,49 @@
+{% extends "emails/base_email.html" %}
+
+{% block subject %}📋 Deposit Status Update - R{{ amount }}{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    Hello {{ user.first_name|default:user.username }},
+</div>
+
+<div class="main-content">
+    <p>The status of your deposit has been updated.</p>
+
+    <div class="info-box">
+        <h3>📋 Status Update</h3>
+        <table class="info-table">
+            <tr>
+                <td class="label">Amount:</td>
+                <td class="value"><span class="amount">R{{ amount|floatformat:2 }}</span></td>
+            </tr>
+            <tr>
+                <td class="label">Payment Method:</td>
+                <td class="value">{{ payment_method }}</td>
+            </tr>
+            <tr>
+                <td class="label">Previous Status:</td>
+                <td class="value">{{ old_status }}</td>
+            </tr>
+            <tr>
+                <td class="label">Current Status:</td>
+                <td class="value" style="font-weight: bold;">{{ new_status }}</td>
+            </tr>
+            <tr>
+                <td class="label">Updated:</td>
+                <td class="value">{{ updated_date|date:"M d, Y H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'http://localhost:8000' }}/wallet/" class="btn">View Wallet</a>
+        <a href="{{ site_url|default:'http://localhost:8000' }}/dashboard/" class="btn"
+            style="background: #6c757d; margin-left: 10px;">Dashboard</a>
+    </div>
+
+    <p>If you have any questions about this update, please contact our support team.</p>
+
+    <p>Best regards,<br><strong>The {{ app_name|default:"CapitalX" }} Team</strong></p>
+</div>
+{% endblock %}

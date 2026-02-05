@@ -1,0 +1,79 @@
+{% extends "emails/base_email.html" %}
+
+{% block subject %}🎉 You Earned R{{ reward_amount }} Referral Bonus!{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    🎉 Referral Bonus Earned!
+</div>
+
+<div class="main-content">
+    <p>Hello {{ referrer.first_name|default:referrer.username }},</p>
+
+    <p>Great news! You've just earned a referral bonus because <strong>{{
+            referred_user.first_name|default:referred_user.username }}</strong> made a deposit!</p>
+
+    <div class="info-box" style="border-left: 4px solid #28a745;">
+        <h3>💰 Bonus Details</h3>
+        <table class="info-table">
+            <tr>
+                <td class="label">Bonus Amount:</td>
+                <td class="value"><span class="amount" style="color: #28a745; font-size: 1.2em;">R{{
+                        reward_amount|floatformat:2 }}</span></td>
+            </tr>
+            <tr>
+                <td class="label">Referred Person:</td>
+                <td class="value">{{ referred_user.first_name|default:referred_user.username }}</td>
+            </tr>
+            <tr>
+                <td class="label">Their Deposit:</td>
+                <td class="value">R{{ deposit_amount|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td class="label">Date Earned:</td>
+                <td class="value">{{ earned_date|date:"M d, Y H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="info-box">
+        <h3>🎯 How Deposit Referrals Work</h3>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+            <li><strong>R10 Per Deposit:</strong> You earn R10 for every deposit your referrals make</li>
+            <li><strong>No Limit:</strong> Earn from multiple deposits by the same person</li>
+            <li><strong>Instant Credit:</strong> Bonuses are added to your wallet immediately</li>
+            <li><strong>Keep Referring:</strong> The more people you refer, the more you earn</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url|default:'http://localhost:8000' }}/wallet/" class="btn" style="background: #28a745;">View
+            Wallet</a>
+        <a href="{{ site_url|default:'http://localhost:8000' }}/referral/" class="btn"
+            style="background: #3498db; margin-left: 10px;">Invite More Friends</a>
+    </div>
+
+    <div class="info-box">
+        <h3>🔗 Your Referral Link</h3>
+        <p
+            style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; word-break: break-all; margin: 15px 0;">
+            {{ site_url|default:'http://localhost:8000' }}/register/?ref={{ referrer.username }}
+        </p>
+    </div>
+
+    <div class="info-box">
+        <h3>💡 Maximize Your Earnings</h3>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+            <li><strong>Share your success:</strong> Tell people about your investment gains</li>
+            <li><strong>Help them get started:</strong> Guide them through their first deposit</li>
+            <li><strong>Stay active:</strong> Regular users make more deposits</li>
+            <li><strong>Use multiple channels:</strong> WhatsApp, social media, email</li>
+        </ul>
+    </div>
+
+    <p style="margin-top: 30px;">Every deposit your referrals make puts R10 directly into your wallet. Keep sharing and
+        keep earning!</p>
+
+    <p>Happy referring!<br><strong>The {{ app_name|default:"CapitalX" }} Team</strong></p>
+</div>
+{% endblock %}
