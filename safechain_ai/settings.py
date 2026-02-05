@@ -221,7 +221,7 @@ if 'RENDER' in os.environ:
     pass
 
 # Whitenoise settings for serving static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Whitenoise settings for serving media files in production
 WHITENOISE_USE_FINDERS = True
