@@ -13,6 +13,9 @@ Features:
 import os
 import logging
 import requests
+from datetime import datetime, timedelta
+from collections import defaultdict
+from openai import OpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -35,11 +38,41 @@ logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '8562033822:AAEeUUjz6ZyYFGJXhk02ueoXLHnmkSPuuF0')
 API_BASE_URL = os.environ.get('CAPITALX_API_URL', 'https://capitalx-rtn-uasg.onrender.com')
 
+# DeepSeek AI Configuration
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DEEPSEEK_MODEL = "deepseek-chat"
+
+# AI System Prompt with safety guardrails
+AI_SYSTEM_PROMPT = """You are CapitalX Assistant, a helpful AI for the CapitalX investment platform.
+
+PLATFORM INFO:
+- CapitalX allows users to invest in company shares
+- Users can deposit via EFT, cash, Bitcoin, card, or voucher
+- Investments have set durations and expected returns
+- Users earn referral bonuses (R10 per referral deposit)
+- Users can check balance, investments, and summary via bot commands
+
+RULES - YOU MUST FOLLOW STRICTLY:
+1. Keep ALL responses under 100 words - be very concise
+2. NEVER give specific investment advice ("buy X", "invest in Y")
+3. NEVER discuss passwords, bot secrets, or OTP codes
+4. NEVER make guarantees about returns or earnings
+5. NEVER access or discuss other users' information
+6. For account-specific questions, tell user to use /balance, /investments, /summary
+7. For issues you cannot help with, direct to support
+8. Decline off-topic or inappropriate requests politely
+"""
+
 # Conversation states
 WAITING_FOR_SECRET = 1
 
 # Store user secrets in memory (in production, use a database)
 user_secrets = {}
+
+# Rate limiting for AI requests (user_id -> list of timestamps)
+ai_rate_limits = defaultdict(list)
+AI_RATE_LIMIT = 10  # Max requests per hour
 
 
 def get_financial_info(secret: str) -> dict:
@@ -129,6 +162,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 • /deposits - Recent deposits
 • /withdrawals - Recent withdrawals
 • /summary - Complete financial summary
+
+**AI Assistant:**
+• /ask <question> - Ask AI about CapitalX
 
 **Other:**
 • /start - Show main menu
@@ -480,6 +516,87 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             )
 
 
+def check_ai_rate_limit(user_id: int) -> bool:
+    """Check if user has exceeded AI rate limit (10 requests/hour)"""
+    now = datetime.now()
+    hour_ago = now - timedelta(hours=1)
+    
+    # Clean old entries
+    ai_rate_limits[user_id] = [t for t in ai_rate_limits[user_id] if t > hour_ago]
+    
+    if len(ai_rate_limits[user_id]) >= AI_RATE_LIMIT:
+        return False
+    
+    ai_rate_limits[user_id].append(now)
+    return True
+
+
+async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle AI questions with DeepSeek"""
+    user_id = update.effective_user.id
+    
+    # Check if API key is configured
+    if not DEEPSEEK_API_KEY:
+        await update.message.reply_text(
+            "AI assistant is not configured. Please contact support."
+        )
+        return
+    
+    # Get the question from command arguments
+    if not context.args:
+        await update.message.reply_text(
+            "Please provide a question.\n\n"
+            "Example: `/ask How do I deposit funds?`",
+            parse_mode='Markdown'
+        )
+        return
+    
+    question = ' '.join(context.args)
+    
+    # Check rate limit
+    if not check_ai_rate_limit(user_id):
+        await update.message.reply_text(
+            "You've reached the limit of 10 AI questions per hour.\n"
+            "Please try again later."
+        )
+        return
+    
+    # Show typing indicator
+    msg = await update.message.reply_text("Thinking...")
+    
+    try:
+        # Initialize DeepSeek client (OpenAI-compatible)
+        client = OpenAI(
+            api_key=DEEPSEEK_API_KEY,
+            base_url=DEEPSEEK_BASE_URL
+        )
+        
+        # Call DeepSeek API
+        response = client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=[
+                {"role": "system", "content": AI_SYSTEM_PROMPT},
+                {"role": "user", "content": question}
+            ],
+            max_tokens=300,
+            temperature=0.7
+        )
+        
+        answer = response.choices[0].message.content
+        
+        await msg.edit_text(
+            f"🤖 **AI Assistant**\n\n{answer}",
+            parse_mode='Markdown'
+        )
+        
+    except Exception as e:
+        logger.error(f"DeepSeek API error: {e}")
+        await msg.edit_text(
+            "Sorry, I couldn't process your question.\n"
+            "Please try again or contact support."
+        )
+
+
 def main() -> None:
     """Start the bot"""
     # Create the Application
@@ -506,6 +623,7 @@ def main() -> None:
     application.add_handler(CommandHandler('deposits', deposits_command))
     application.add_handler(CommandHandler('withdrawals', withdrawals_command))
     application.add_handler(CommandHandler('summary', summary_command))
+    application.add_handler(CommandHandler('ask', ask_command))
     application.add_handler(CallbackQueryHandler(button_callback))
     
     # Run the bot
