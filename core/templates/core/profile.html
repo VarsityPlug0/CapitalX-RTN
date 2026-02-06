@@ -10,22 +10,25 @@
         height: 150px;
         object-fit: cover;
     }
-    
+
     /* Enhanced styling for form controls to ensure number visibility */
     .form-control {
         background-color: var(--surface-alt) !important;
-        color: #ffffff !important; /* Pure white for maximum visibility */
-        font-weight: 500; /* Slightly bolder for better readability */
+        color: #ffffff !important;
+        /* Pure white for maximum visibility */
+        font-weight: 500;
+        /* Slightly bolder for better readability */
         border: 1px solid var(--border);
     }
-    
+
     .form-control:focus {
         background-color: var(--surface) !important;
-        color: #ffffff !important; /* Ensure text stays white when focused */
+        color: #ffffff !important;
+        /* Ensure text stays white when focused */
         border-color: var(--text-secondary);
         box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
     }
-    
+
     /* Specific enhancements for number inputs */
     input[type="number"],
     input[type="tel"] {
@@ -33,7 +36,7 @@
         font-weight: 500 !important;
         background-color: var(--surface-alt) !important;
     }
-    
+
     input[type="number"]:focus,
     input[type="tel"]:focus {
         color: #ffffff !important;
@@ -62,26 +65,29 @@
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
                                 {% if user.profile_picture %}
-                                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle profile-img">
+                                <img src="{{ user.profile_picture.url }}" alt="Profile Picture"
+                                    class="rounded-circle profile-img">
                                 {% else %}
-                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-                                     style="width: 150px; height: 150px; font-size: 3rem;">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                    style="width: 150px; height: 150px; font-size: 3rem;">
                                     {{ user.get_initials }}
                                 </div>
                                 {% endif %}
-                                <label for="profile_picture" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" 
-                                       style="cursor: pointer;">
+                                <label for="profile_picture"
+                                    class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2"
+                                    style="cursor: pointer;">
                                     <i class="bi bi-camera-fill"></i>
                                 </label>
-                                <input type="file" id="profile_picture" name="profile_picture" class="d-none" accept="image/*">
+                                <input type="file" id="profile_picture" name="profile_picture" class="d-none"
+                                    accept="image/*">
                             </div>
                         </div>
 
                         <!-- Full Name -->
                         <div class="mb-3">
                             <label for="full_name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" 
-                                   value="{{ user.get_full_name }}" required>
+                            <input type="text" class="form-control" id="full_name" name="full_name"
+                                value="{{ user.get_full_name }}" required>
                             <div class="invalid-feedback">
                                 Please enter your full name
                             </div>
@@ -90,23 +96,21 @@
                         <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   value="{{ user.email }}" required readonly>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}"
+                                required readonly>
                             <div class="form-text">Email address cannot be changed</div>
                         </div>
 
                         <!-- Phone -->
                         <div class="mb-3">
                             <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" 
-                                   value="{{ user.phone }}">
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}">
                         </div>
 
                         <!-- Two-Factor Authentication -->
                         <div class="mb-4">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="two_factor" name="two_factor" 
-                                       {% if user.two_factor_enabled %}checked{% endif %}>
+                                <input class="form-check-input" type="checkbox" id="two_factor" name="two_factor" {% if user.two_factor_enabled %}checked{% endif %}>
                                 <label class="form-check-label" for="two_factor">
                                     Enable Two-Factor Authentication
                                 </label>
@@ -120,15 +124,13 @@
                         <div class="mb-4">
                             <label class="form-label">Notification Preferences</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" 
-                                       {% if user.email_notifications %}checked{% endif %}>
+                                <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" {% if user.email_notifications %}checked{% endif %}>
                                 <label class="form-check-label" for="email_notifications">
                                     Email Notifications
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="sms_notifications" name="sms_notifications" 
-                                       {% if user.sms_notifications %}checked{% endif %}>
+                                <input class="form-check-input" type="checkbox" id="sms_notifications" name="sms_notifications" {% if user.sms_notifications %}checked{% endif %}>
                                 <label class="form-check-label" for="sms_notifications">
                                     SMS Notifications
                                 </label>
@@ -145,7 +147,7 @@
             <div class="card mt-4">
                 <div class="card-body">
                     <h2 class="h4 mb-4">Security</h2>
-                    
+
                     <!-- Change Password -->
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Change Password</h3>
@@ -153,25 +155,62 @@
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="current_password" class="form-label">Current Password</label>
-                                <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                <input type="password" class="form-control" id="current_password"
+                                    name="current_password" required>
                             </div>
                             <div class="mb-3">
                                 <label for="new_password" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                <input type="password" class="form-control" id="new_password" name="new_password"
+                                    required>
                             </div>
                             <div class="mb-3">
                                 <label for="confirm_password" class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" required>
                             </div>
                             <button type="submit" class="btn btn-outline-primary">Change Password</button>
                         </form>
                     </div>
 
+                    <!-- Telegram Bot Integration -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">🤖 Telegram Bot Integration</h3>
+                        <p class="text-muted mb-3">Connect your account to our Telegram bot to check your balance and
+                            investments on the go.</p>
+
+                        <div id="botSecretContainer">
+                            {% if user.bot_secret %}
+                            <div class="alert alert-success">
+                                <strong>Your Bot Secret:</strong>
+                                <div class="d-flex align-items-center mt-2">
+                                    <code id="botSecretDisplay" class="me-2 p-2 bg-dark text-light rounded"
+                                        style="font-size: 0.9rem;">{{ user.bot_secret }}</code>
+                                    <button type="button" class="btn btn-sm btn-outline-light"
+                                        onclick="copyBotSecret()">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                </div>
+                                <small class="d-block mt-2 text-muted">Send this to @CapitalX_Bot on Telegram using the
+                                    /link command</small>
+                            </div>
+                            <button type="button" class="btn btn-warning" onclick="generateBotSecret()">
+                                <i class="bi bi-arrow-repeat"></i> Regenerate Secret
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-primary" onclick="generateBotSecret()">
+                                <i class="bi bi-telegram"></i> Generate Bot Secret
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     <!-- Delete Account -->
                     <div>
                         <h3 class="h5 mb-3">Delete Account</h3>
-                        <p class="text-muted mb-3">Once you delete your account, there is no going back. Please be certain.</p>
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Delete Account</button>
+                        <p class="text-muted mb-3">Once you delete your account, there is no going back. Please be
+                            certain.</p>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteAccountModal">Delete Account</button>
                     </div>
                 </div>
             </div>
@@ -206,7 +245,7 @@
 {% block extra_js %}
 <script>
     // Form validation
-    (function() {
+    (function () {
         'use strict';
         const forms = document.querySelectorAll('.needs-validation');
         Array.from(forms).forEach(form => {
@@ -221,16 +260,72 @@
     })();
 
     // Profile picture preview
-    document.getElementById('profile_picture').addEventListener('change', function(e) {
+    document.getElementById('profile_picture').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const img = document.querySelector('.rounded-circle');
                 img.src = e.target.result;
             }
             reader.readAsDataURL(file);
         }
     });
+
+    // Bot Secret Functions
+    function generateBotSecret() {
+        fetch('{% url "generate_bot_secret" %}', {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the UI with new secret
+                    const container = document.getElementById('botSecretContainer');
+                    container.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Your Bot Secret:</strong>
+                        <div class="d-flex align-items-center mt-2">
+                            <code id="botSecretDisplay" class="me-2 p-2 bg-dark text-light rounded" style="font-size: 0.9rem;">${data.secret}</code>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="copyBotSecret()">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                        <small class="d-block mt-2 text-muted">Send this to @CapitalX_Bot on Telegram using the /link command</small>
+                    </div>
+                    <button type="button" class="btn btn-warning" onclick="generateBotSecret()">
+                        <i class="bi bi-arrow-repeat"></i> Regenerate Secret
+                    </button>
+                `;
+                    alert('Bot secret generated! Copy it and use /link in Telegram.');
+                } else {
+                    alert('Failed to generate bot secret. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    }
+
+    function copyBotSecret() {
+        const secret = document.getElementById('botSecretDisplay').textContent;
+        navigator.clipboard.writeText(secret).then(() => {
+            alert('Bot secret copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = secret;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Bot secret copied to clipboard!');
+        });
+    }
 </script>
-{% endblock %} 
+{% endblock %}

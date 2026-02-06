@@ -3557,3 +3557,336 @@ Watching for file changes with StatReloader
 C:\Users\money\HustleProjects\investment\safechain_ai\settings.py changed, reloading.
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+MediaFileMiddleware START processing request for: /
+MediaFileMiddleware - Not a media request: /
+MediaFileMiddleware END processing request for: /
+"GET / HTTP/1.1" 200 14768
+"GET /static/css/reset.css HTTP/1.1" 200 1100
+"GET /static/css/main.css HTTP/1.1" 200 21701
+"GET /static/js/theme.js HTTP/1.1" 200 2296
+"GET /static/images/logo.png HTTP/1.1" 200 1577484
+MediaFileMiddleware START processing request for: /favicon.ico
+MediaFileMiddleware - Not a media request: /favicon.ico
+MediaFileMiddleware END processing request for: /favicon.ico
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 19106
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"GET /login/ HTTP/1.1" 200 10404
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 200 10727
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 200 10727
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 200 10727
+MediaFileMiddleware START processing request for: /password_reset/
+MediaFileMiddleware - Not a media request: /password_reset/
+MediaFileMiddleware END processing request for: /password_reset/
+"GET /password_reset/ HTTP/1.1" 200 4670
+MediaFileMiddleware START processing request for: /password_reset/
+MediaFileMiddleware - Not a media request: /password_reset/
+MediaFileMiddleware END processing request for: /password_reset/
+"POST /password_reset/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /password_reset/done/
+MediaFileMiddleware - Not a media request: /password_reset/done/
+MediaFileMiddleware END processing request for: /password_reset/done/
+"GET /password_reset/done/ HTTP/1.1" 200 4143
+MediaFileMiddleware START processing request for: /reset/MTk/d3kbz1-da8100b0b02ec8cc9e9e168001c68139/
+MediaFileMiddleware - Not a media request: /reset/MTk/d3kbz1-da8100b0b02ec8cc9e9e168001c68139/
+MediaFileMiddleware END processing request for: /reset/MTk/d3kbz1-da8100b0b02ec8cc9e9e168001c68139/
+"GET /reset/MTk/d3kbz1-da8100b0b02ec8cc9e9e168001c68139/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /reset/MTk/set-password/
+MediaFileMiddleware - Not a media request: /reset/MTk/set-password/
+MediaFileMiddleware END processing request for: /reset/MTk/set-password/
+"GET /reset/MTk/set-password/ HTTP/1.1" 200 5112
+MediaFileMiddleware START processing request for: /reset/MTk/set-password/
+MediaFileMiddleware - Not a media request: /reset/MTk/set-password/
+MediaFileMiddleware END processing request for: /reset/MTk/set-password/
+"POST /reset/MTk/set-password/ HTTP/1.1" 200 5207
+MediaFileMiddleware START processing request for: /reset/MTk/set-password/
+MediaFileMiddleware - Not a media request: /reset/MTk/set-password/
+MediaFileMiddleware END processing request for: /reset/MTk/set-password/
+"POST /reset/MTk/set-password/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /reset/done/
+MediaFileMiddleware - Not a media request: /reset/done/
+MediaFileMiddleware END processing request for: /reset/done/
+"GET /reset/done/ HTTP/1.1" 200 3977
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"GET /login/ HTTP/1.1" 200 10404
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17140
+MediaFileMiddleware START processing request for: /profile/
+MediaFileMiddleware - Not a media request: /profile/
+MediaFileMiddleware END processing request for: /profile/
+"GET /profile/ HTTP/1.1" 200 16884
+MediaFileMiddleware START processing request for: /
+MediaFileMiddleware - Not a media request: /
+MediaFileMiddleware END processing request for: /
+"GET / HTTP/1.1" 200 14768
+"GET /static/css/main.css HTTP/1.1" 304 0
+"GET /static/images/logo.png HTTP/1.1" 304 0
+"GET /static/css/reset.css HTTP/1.1" 200 1100
+"GET /static/js/theme.js HTTP/1.1" 304 0
+MediaFileMiddleware START processing request for: /favicon.ico
+MediaFileMiddleware - Not a media request: /favicon.ico
+MediaFileMiddleware END processing request for: /favicon.ico
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 19106
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"GET /login/ HTTP/1.1" 200 10404
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17140
+MediaFileMiddleware START processing request for: /profile/
+MediaFileMiddleware - Not a media request: /profile/
+Internal Server Error: /profile/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 502, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'endif'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\investment\core\views.py", line 643, in profile_view
+    return render(request, 'core/profile.html')
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 510, in parse
+    raise self.error(token, e)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 508, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 295, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 510, in parse
+    raise self.error(token, e)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 508, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 504, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 555, in invalid_block_tag
+    raise self.error(
+    ...<8 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 114: 'endif', expected 'endblock'. Did you forget to register or load this tag?
+MediaFileMiddleware END processing request for: /profile/
+"GET /profile/ HTTP/1.1" 500 214168
+MediaFileMiddleware START processing request for: /profile/
+MediaFileMiddleware - Not a media request: /profile/
+Internal Server Error: /profile/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 502, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'endif'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\investment\core\views.py", line 643, in profile_view
+    return render(request, 'core/profile.html')
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 510, in parse
+    raise self.error(token, e)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 508, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 295, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 510, in parse
+    raise self.error(token, e)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 508, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 504, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 555, in invalid_block_tag
+    raise self.error(
+    ...<8 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 114: 'endif', expected 'endblock'. Did you forget to register or load this tag?
+MediaFileMiddleware END processing request for: /profile/
+"GET /profile/ HTTP/1.1" 500 214305
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17140
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+- Broken pipe from ('127.0.0.1', 61188)
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17140
+MediaFileMiddleware START processing request for: /dashboard/
+MediaFileMiddleware - Not a media request: /dashboard/
+MediaFileMiddleware END processing request for: /dashboard/
+"GET /dashboard/ HTTP/1.1" 200 17140
+MediaFileMiddleware START processing request for: /profile/
+MediaFileMiddleware - Not a media request: /profile/
+Internal Server Error: /profile/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 502, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'endif'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\investment\core\views.py", line 643, in profile_view
+    return render(request, 'core/profile.html')
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 510, in parse
+    raise self.error(token, e)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 508, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 295, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 510, in parse
+    raise self.error(token, e)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 508, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 504, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 555, in invalid_block_tag
+    raise self.error(
+    ...<8 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 114: 'endif', expected 'endblock'. Did you forget to register or load this tag?
+MediaFileMiddleware END processing request for: /profile/
+"GET /profile/ HTTP/1.1" 500 214168
+Watching for file changes with StatReloader
