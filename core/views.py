@@ -47,11 +47,11 @@ def home_view(request):
         total_earnings=Sum('rewards__reward_amount')
     ).filter(total_earnings__isnull=False).order_by('-total_earnings')[:3]
     
-    # Generate referral link for authenticated users
+    # Generate referral link for authenticated users (using referral_code for privacy)
     referral_link = None
     if request.user.is_authenticated:
         referral_link = request.build_absolute_uri(
-            reverse('register') + f'?ref={request.user.username}'
+            reverse('register') + f'?ref={request.user.referral_code}'
         )
     
     # Mock testimonials (replace with real data later)
@@ -155,10 +155,10 @@ def register_view(request):
             # Create a wallet for the user
             Wallet.objects.create(user=user)
             
-            # Handle referral code from form
+            # Handle referral code from form (lookup by referral_code, not username)
             if referral_code:
                 try:
-                    referrer = CustomUser.objects.get(username=referral_code)
+                    referrer = CustomUser.objects.get(referral_code=referral_code)
                     Referral.objects.create(inviter=referrer, invitee=user)
                 except CustomUser.DoesNotExist:
                     # If referral code is invalid, just continue without error
@@ -599,9 +599,9 @@ def referral_view(request):
     referrals = Referral.objects.filter(inviter=user)
     total_bonus = sum(ref.bonus_amount for ref in referrals)
     
-    # Generate the full referral link
+    # Generate the full referral link (using referral_code for privacy)
     referral_link = request.build_absolute_uri(
-        reverse('register') + f'?ref={user.username}'
+        reverse('register') + f'?ref={user.referral_code}'
     )
     
     context = {

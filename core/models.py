@@ -68,9 +68,28 @@ class CustomUser(AbstractUser):
     is_email_verified = models.BooleanField(default=False)
     email_verification_token = models.CharField(max_length=100, blank=True, null=True)
     email_verification_sent_at = models.DateTimeField(blank=True, null=True)
+    # Referral code - unique code for privacy-safe referral links
+    referral_code = models.CharField(max_length=12, unique=True, blank=True, null=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+    
+    @staticmethod
+    def generate_referral_code():
+        """Generate a unique 8-character alphanumeric referral code"""
+        chars = string.ascii_uppercase + string.digits
+        # Exclude confusing characters like 0/O and 1/I/L
+        chars = chars.replace('0', '').replace('O', '').replace('1', '').replace('I', '').replace('L', '')
+        while True:
+            code = 'CX' + ''.join(random.choices(chars, k=6))  # CX prefix + 6 random chars
+            if not CustomUser.objects.filter(referral_code=code).exists():
+                return code
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate referral code if not set
+        if not self.referral_code:
+            self.referral_code = self.generate_referral_code()
+        super().save(*args, **kwargs)
 
     def update_level(self):
         """Update user level based on total investment"""

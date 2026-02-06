@@ -57,7 +57,7 @@
         <h3>🔗 Your Referral Link</h3>
         <p
             style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; word-break: break-all; margin: 15px 0;">
-            {{ site_url|default:'http://localhost:8000' }}/register/?ref={{ referrer.username }}
+            {{ site_url|default:'http://localhost:8000' }}/register/?ref={{ referrer.referral_code }}
         </p>
     </div>
 
