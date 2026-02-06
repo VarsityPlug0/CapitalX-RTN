@@ -617,6 +617,63 @@ async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
 
 
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle any text message - respond naturally with AI"""
+    user_id = update.effective_user.id
+    message_text = update.message.text.strip()
+    
+    # Skip if empty
+    if not message_text:
+        return
+    
+    # Check if API key is configured
+    if not DEEPSEEK_API_KEY:
+        await update.message.reply_text(
+            "Hi! I'm the CapitalX assistant.\n\n"
+            "Use /start to see what I can help you with!"
+        )
+        return
+    
+    # Check rate limit
+    if not check_ai_rate_limit(user_id):
+        await update.message.reply_text(
+            "You've sent a lot of messages! Take a short break and try again in a bit."
+        )
+        return
+    
+    # Show typing indicator
+    msg = await update.message.reply_text("...")
+    
+    try:
+        # Initialize DeepSeek client
+        client = OpenAI(
+            api_key=DEEPSEEK_API_KEY,
+            base_url=DEEPSEEK_BASE_URL
+        )
+        
+        # Call DeepSeek API for natural conversation
+        response = client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=[
+                {"role": "system", "content": AI_SYSTEM_PROMPT},
+                {"role": "user", "content": message_text}
+            ],
+            max_tokens=300,
+            temperature=0.7
+        )
+        
+        answer = response.choices[0].message.content
+        
+        await msg.edit_text(answer, parse_mode='Markdown')
+        
+    except Exception as e:
+        logger.error(f"DeepSeek API error: {e}")
+        await msg.edit_text(
+            "Hmm, I had trouble understanding that.\n"
+            "Try asking again or use /help to see what I can do!"
+        )
+
+
 def main() -> None:
     """Start the bot"""
     # Create the Application
@@ -645,6 +702,9 @@ def main() -> None:
     application.add_handler(CommandHandler('summary', summary_command))
     application.add_handler(CommandHandler('ask', ask_command))
     application.add_handler(CallbackQueryHandler(button_callback))
+    
+    # Handle any text message naturally (must be last to not override other handlers)
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     # Run the bot
     print("CapitalX Telegram Bot is starting...")
