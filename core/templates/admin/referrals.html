@@ -1,0 +1,107 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Referral Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-user-friends me-2"></i>Referral Management</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Referrals</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Total Referrals</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-check"></i></div>
+            <div class="stat-value">{{ stats.active }}</div>
+            <div class="stat-label">Active</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">{{ stats.pending }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card danger">
+            <div class="stat-icon"><i class="fas fa-coins"></i></div>
+            <div class="stat-value">R{{ stats.total_rewards|floatformat:0 }}</div>
+            <div class="stat-label">Total Rewards Paid</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Inviter</th>
+                        <th>Invitee</th>
+                        <th>Status</th>
+                        <th>Bonus</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ref in referrals %}
+                    <tr>
+                        <td>{{ ref.inviter.email }}</td>
+                        <td>{{ ref.invitee.email }}</td>
+                        <td>
+                            {% if ref.status == 'active' %}
+                            <span class="badge bg-success">Active</span>
+                            {% elif ref.status == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>R{{ ref.bonus_amount|floatformat:0 }}</td>
+                        <td><small class="text-muted">{{ ref.created_at|date:"M d, Y" }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No referrals found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if referrals.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if referrals.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ referrals.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        {% for num in referrals.paginator.page_range %}
+        {% if referrals.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > referrals.number|add:'-3' and num < referrals.number|add:'3' %} <li class="page-item"><a
+                class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if referrals.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ referrals.next_page_number }}">Next</a></li>
+            {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -6,6 +6,7 @@ from . import admin_test_views
 from . import health_views
 from . import simple_lead_views
 from . import views_debug  # Add this import
+from . import admin_views  # Unified admin dashboard views
 try:
     from . import test_views
     TEST_VIEWS_AVAILABLE = True
@@ -63,16 +64,31 @@ urlpatterns = [
     path('api/user/financial-info/', views.user_financial_info_api, name='user_financial_info_api'),
     path('api/generate-token/', views.generate_api_token, name='generate_api_token'),
 
-    # Admin action URLs for deposit management
-    path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='admin_approve_deposit'),
-    path('admin/deposit/<int:deposit_id>/reject/', views.admin_reject_deposit, name='admin_reject_deposit'),
+    # Admin action URLs for deposit management (legacy - redirects to new system)
+    path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='legacy_admin_approve_deposit'),
+    path('admin/deposit/<int:deposit_id>/reject/', views.admin_reject_deposit, name='legacy_admin_reject_deposit'),
     path('admin/deposit-dashboard/', views.deposit_dashboard_view, name='deposit_dashboard'),
     
-    # Unified Admin Dashboard
+    # Unified Admin Dashboard (new RBAC-based system)
+    path('admin/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin/deposits/', admin_views.admin_deposits, name='admin_deposits'),
+    path('admin/deposits/<int:deposit_id>/approve/', admin_views.admin_approve_deposit, name='admin_approve_deposit'),
+    path('admin/deposits/<int:deposit_id>/reject/', admin_views.admin_reject_deposit, name='admin_reject_deposit'),
+    path('admin/withdrawals/', admin_views.admin_withdrawals, name='admin_withdrawals'),
+    path('admin/investments/', admin_views.admin_investments, name='admin_investments'),
+    path('admin/users/', admin_views.admin_users, name='admin_users'),
+    path('admin/referrals/', admin_views.admin_referrals, name='admin_referrals'),
+    path('admin/companies/', admin_views.admin_companies, name='admin_companies'),
+    path('admin/investment-plans/', admin_views.admin_investment_plans, name='admin_investment_plans'),
+    path('admin/leads-dashboard/', admin_views.admin_leads, name='admin_leads'),
+    path('admin/campaigns-overview/', admin_views.admin_campaigns, name='admin_campaigns'),
+    
+    # Legacy Unified Admin Dashboard (redirect to new)
     path('admin/unified-dashboard/', views.unified_admin_dashboard, name='unified_admin_dashboard'),
     path('admin/manage-users/', views.manage_users_view, name='manage_users'),
     path('admin/manage-companies/', views.manage_companies_view, name='manage_companies'),
     path('admin/manage-investment-plans/', views.manage_investment_plans_view, name='manage_investment_plans'),
+
 
     # Email Lead System URLs
     path('admin/leads/', lead_views.lead_dashboard, name='lead_dashboard'),

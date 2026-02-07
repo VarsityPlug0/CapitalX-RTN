@@ -1,0 +1,58 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Company Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-building me-2"></i>Company Management</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Companies</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Investment Tiers (Companies)</h5>
+        <a href="/capitalx_admin/core/company/add/" class="btn btn-primary btn-sm" target="_blank">
+            <i class="fas fa-plus me-1"></i>Add Company
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Share Price</th>
+                        <th>Expected Return</th>
+                        <th>Duration</th>
+                        <th>Min Level</th>
+                        <th>Investments</th>
+                        <th>Total Invested</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in companies %}
+                    <tr>
+                        <td class="fw-bold">{{ company.name }}</td>
+                        <td>R{{ company.share_price|floatformat:0 }}</td>
+                        <td class="text-success">R{{ company.expected_return|floatformat:0 }}</td>
+                        <td>{{ company.duration_days }} days</td>
+                        <td><span class="badge bg-primary">Level {{ company.min_level }}</span></td>
+                        <td>{{ company.investment_count|default:0 }}</td>
+                        <td>R{{ company.total_invested|floatformat:0|default:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No companies found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

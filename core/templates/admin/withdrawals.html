@@ -1,0 +1,127 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Withdrawal Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-money-check-alt me-2"></i>Withdrawal Management</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Withdrawals</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">{{ stats.pending_count|default:0 }}</div>
+            <div class="stat-label">Pending (R{{ stats.pending_amount|floatformat:0|default:0 }})</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-check"></i></div>
+            <div class="stat-value">{{ stats.approved_count|default:0 }}</div>
+            <div class="stat-label">Approved (R{{ stats.approved_amount|floatformat:0|default:0 }})</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Search by email/username"
+                    value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Withdrawals Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Bank</th>
+                        <th>Account</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for withdrawal in withdrawals %}
+                    <tr>
+                        <td>#{{ withdrawal.id }}</td>
+                        <td>{{ withdrawal.user.email|truncatechars:25 }}</td>
+                        <td class="fw-bold">R{{ withdrawal.amount|floatformat:0 }}</td>
+                        <td>{{ withdrawal.bank_name|default:'-' }}</td>
+                        <td>{{ withdrawal.account_number|truncatechars:12|default:'-' }}</td>
+                        <td>
+                            {% if withdrawal.status == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                            {% elif withdrawal.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ withdrawal.created_at|date:"M d, H:i" }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No withdrawals found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if withdrawals.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if withdrawals.has_previous %}
+        <li class="page-item"><a class="page-link"
+                href="?page={{ withdrawals.previous_page_number }}&status={{ status_filter }}&search={{ search }}">Previous</a>
+        </li>
+        {% endif %}
+        {% for num in withdrawals.paginator.page_range %}
+        {% if withdrawals.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > withdrawals.number|add:'-3' and num < withdrawals.number|add:'3' %} <li class="page-item"><a
+                class="page-link" href="?page={{ num }}&status={{ status_filter }}&search={{ search }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if withdrawals.has_next %}
+            <li class="page-item"><a class="page-link"
+                    href="?page={{ withdrawals.next_page_number }}&status={{ status_filter }}&search={{ search }}">Next</a>
+            </li>
+            {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

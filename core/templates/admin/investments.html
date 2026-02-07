@@ -1,0 +1,126 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Investment Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-chart-line me-2"></i>Investment Management</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Investments</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-value">{{ stats.total_count|default:0 }}</div>
+            <div class="stat-label">Total Investments</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-play"></i></div>
+            <div class="stat-value">{{ stats.active_count|default:0 }}</div>
+            <div class="stat-label">Active (R{{ stats.active_amount|floatformat:0|default:0 }})</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Search by email/username/company"
+                    value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Investments Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Company</th>
+                        <th>Amount</th>
+                        <th>Returns</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in investments %}
+                    <tr>
+                        <td>#{{ inv.id }}</td>
+                        <td>{{ inv.user.email|truncatechars:20 }}</td>
+                        <td>{{ inv.company.name|truncatechars:15 }}</td>
+                        <td class="fw-bold">R{{ inv.amount|floatformat:0 }}</td>
+                        <td class="text-success">R{{ inv.return_amount|floatformat:0 }}</td>
+                        <td>
+                            {% if inv.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Completed</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ inv.start_date|date:"M d, Y" }}</small></td>
+                        <td><small>{{ inv.end_date|date:"M d, Y" }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No investments found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if investments.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if investments.has_previous %}
+        <li class="page-item"><a class="page-link"
+                href="?page={{ investments.previous_page_number }}&status={{ status_filter }}&search={{ search }}">Previous</a>
+        </li>
+        {% endif %}
+        {% for num in investments.paginator.page_range %}
+        {% if investments.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > investments.number|add:'-3' and num < investments.number|add:'3' %} <li class="page-item"><a
+                class="page-link" href="?page={{ num }}&status={{ status_filter }}&search={{ search }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if investments.has_next %}
+            <li class="page-item"><a class="page-link"
+                    href="?page={{ investments.next_page_number }}&status={{ status_filter }}&search={{ search }}">Next</a>
+            </li>
+            {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

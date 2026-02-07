@@ -420,7 +420,7 @@ def lead_analytics(request):
     )
     
     # Monthly trends (last 6 months)
-    from django.db.models import TruncMonth
+    from django.db.models.functions import TruncMonth
     monthly_stats = (
         Lead.objects
         .filter(created_at__gte=timezone.now() - timezone.timedelta(days=180))

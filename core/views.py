@@ -208,26 +208,29 @@ def login_view(request):
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
-            # Check if email is verified
-            if not user.is_email_verified:
-                messages.warning(request, 'Please verify your email before logging in.')
-                return render(request, 'core/verify_otp.html', {
-                    'email': email,
-                    'purpose': 'email_verification',
-                    'show_resend': True
-                })
+            # Skip email verification for admin/staff users
+            if not user.is_staff and not user.is_superuser:
+                # Check if email is verified (only for regular users)
+                if not user.is_email_verified:
+                    messages.warning(request, 'Please verify your email before logging in.')
+                    return render(request, 'core/verify_otp.html', {
+                        'email': email,
+                        'purpose': 'email_verification',
+                        'show_resend': True
+                    })
             
             login(request, user)
             
             # Redirect admin users to Lead Manager, regular users to dashboard
             if user.is_staff or user.is_superuser:
                 messages.success(request, f'Welcome back, {user.first_name or user.username}! You have admin access.')
-                return redirect('lead_manager_dashboard')
+                return redirect('admin_dashboard')  # Redirect to new unified admin dashboard
             else:
                 return redirect('dashboard')
         else:
             messages.error(request, 'Invalid email or password.')
     return render(request, 'core/login.html')
+
 
 # Dashboard view
 # Shows user balance, investments, and referral stats

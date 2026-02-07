@@ -69,9 +69,25 @@ class CustomUser(AbstractUser):
     email_verification_sent_at = models.DateTimeField(blank=True, null=True)
     # Referral code - unique code for privacy-safe referral links
     referral_code = models.CharField(max_length=12, unique=True, blank=True, null=True)
+    # Admin role for RBAC (Role-Based Access Control)
+    admin_role = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True,
+        choices=[
+            ('', 'No Admin Role'),
+            ('super_admin', 'Super Admin'),
+            ('finance_admin', 'Finance Admin'),
+            ('user_admin', 'User Admin'),
+            ('marketing_admin', 'Marketing Admin'),
+            ('content_admin', 'Content Admin'),
+        ],
+        help_text="Role-based access control for admin dashboard sections"
+    )
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
     
     @staticmethod
     def generate_referral_code():

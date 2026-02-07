@@ -1,0 +1,151 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Deposit Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-file-invoice-dollar me-2"></i>Deposit Management</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Deposits</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">{{ stats.pending_count|default:0 }}</div>
+            <div class="stat-label">Pending (R{{ stats.pending_amount|floatformat:0|default:0 }})</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-check"></i></div>
+            <div class="stat-value">{{ stats.approved_count|default:0 }}</div>
+            <div class="stat-label">Approved (R{{ stats.approved_amount|floatformat:0|default:0 }})</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="method" class="form-select">
+                    <option value="">All Methods</option>
+                    <option value="eft" {% if payment_method == 'eft' %}selected{% endif %}>EFT</option>
+                    <option value="card" {% if payment_method == 'card' %}selected{% endif %}>Card</option>
+                    <option value="bitcoin" {% if payment_method == 'bitcoin' %}selected{% endif %}>Bitcoin</option>
+                    <option value="voucher" {% if payment_method == 'voucher' %}selected{% endif %}>Voucher</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search by email/username"
+                    value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Deposits Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deposit in deposits %}
+                    <tr>
+                        <td>#{{ deposit.id }}</td>
+                        <td>{{ deposit.user.email|truncatechars:25 }}</td>
+                        <td class="fw-bold">R{{ deposit.amount|floatformat:0 }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ deposit.get_payment_method_display }}</span>
+                        </td>
+                        <td>
+                            {% if deposit.status == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                            {% elif deposit.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ deposit.created_at|date:"M d, H:i" }}</small></td>
+                        <td>
+                            {% if deposit.status == 'pending' %}
+                            <a href="{% url 'admin_approve_deposit' deposit.id %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Approve
+                            </a>
+                            <a href="{% url 'admin_reject_deposit' deposit.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-times"></i> Reject
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No deposits found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if deposits.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if deposits.has_previous %}
+        <li class="page-item"><a class="page-link"
+                href="?page={{ deposits.previous_page_number }}&status={{ status_filter }}&method={{ payment_method }}&search={{ search }}">Previous</a>
+        </li>
+        {% endif %}
+        {% for num in deposits.paginator.page_range %}
+        {% if deposits.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > deposits.number|add:'-3' and num < deposits.number|add:'3' %} <li class="page-item"><a
+                class="page-link"
+                href="?page={{ num }}&status={{ status_filter }}&method={{ payment_method }}&search={{ search }}">{{ num
+                }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if deposits.has_next %}
+            <li class="page-item"><a class="page-link"
+                    href="?page={{ deposits.next_page_number }}&status={{ status_filter }}&method={{ payment_method }}&search={{ search }}">Next</a>
+            </li>
+            {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
