@@ -9,6 +9,7 @@
         border-color: #00e5ff;
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
+
     .btn-primary {
         background: #00e5ff;
         background: linear-gradient(to right, #18c2d6, #00e5ff);
@@ -16,6 +17,7 @@
         border: none;
         transition: all 0.3s ease;
     }
+
     .btn-primary:hover {
         box-shadow: 0 0 20px rgba(0, 229, 255, 0.7);
         transform: translateY(-2px);
@@ -33,12 +35,12 @@
             </div>
             <div class="card-body p-4">
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">Close</button>
-                        </div>
-                    {% endfor %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">Close</button>
+                </div>
+                {% endfor %}
                 {% endif %}
 
                 <form method="post">
@@ -52,11 +54,13 @@
                         <label for="email">Email</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" name="subject" id="subject" class="form-control" placeholder="Subject" required>
+                        <input type="text" name="subject" id="subject" class="form-control" placeholder="Subject"
+                            required>
                         <label for="subject">Subject</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <textarea name="message" id="message" class="form-control" placeholder="Message" rows="5" style="height: 120px;" required></textarea>
+                        <textarea name="message" id="message" class="form-control" placeholder="Message" rows="5"
+                            style="height: 120px;" required></textarea>
                         <label for="message">Message</label>
                     </div>
                     <div class="d-grid">
@@ -65,14 +69,30 @@
                 </form>
 
                 <div class="row mt-5 text-center">
-                    <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="col-md-3 mb-3 mb-md-0">
                         <div class="p-3">
                             <i class="bi bi-envelope-at h2 text-primary"></i>
                             <h3 class="h5 mt-2">Email Us</h3>
-                            <a href="mailto:support@aicryptovault.com" class="text-muted text-decoration-none">support@aicryptovault.com</a>
+                            <a href="mailto:support@aicryptovault.com"
+                                class="text-muted text-decoration-none">support@aicryptovault.com</a>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="p-3">
+                            <i class="bi bi-whatsapp h2 text-success"></i>
+                            <h3 class="h5 mt-2">WhatsApp</h3>
+                            <a href="https://wa.me/27799894722" class="text-muted text-decoration-none">079 989 4722</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="p-3">
+                            <i class="bi bi-instagram h2" style="color: #E1306C;"></i>
+                            <h3 class="h5 mt-2">Instagram</h3>
+                            <a href="https://www.instagram.com/safechainai?igsh=MTZ4M2ZmOXQ0bTVwbQ%3D%3D&utm_source=qr"
+                                class="text-muted text-decoration-none" target="_blank">@safechainai</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="p-3">
                             <i class="bi bi-clock-history h2 text-primary"></i>
                             <h3 class="h5 mt-2">Response Time</h3>
@@ -84,4 +104,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

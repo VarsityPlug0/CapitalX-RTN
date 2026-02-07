@@ -31,13 +31,12 @@ BANK_CHOICES = [
 class EFTBankAccount(models.Model):
     BANK_ACCOUNTS = [
         {
-            'bank': 'DISCOVERY',
-            'bank_name': 'Discovery Bank',
-            'account_holder': 'CapitalX Platform',
-            'account_type': 'Savings Account',
-            'account_number': '17856296290',
-            'branch_code': '679000',
-            'bic_swift': 'DISCZAJJXXX'
+            'bank': 'ABSA',
+            'bank_name': 'ABSA',
+            'account_holder': 'CapitalX',
+            'account_type': 'Business',
+            'account_number': '9397248336',
+            'branch_code': '632005'
         }
     ]
     

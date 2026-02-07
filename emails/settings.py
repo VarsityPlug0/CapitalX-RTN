@@ -50,3 +50,7 @@ EMAIL_ADMIN_EMAIL = get_setting('EMAIL_ADMIN_EMAIL', get_setting('DEFAULT_FROM_E
 # Footer settings
 EMAIL_FOOTER_TEXT = get_setting('EMAIL_FOOTER_TEXT', f'© 2024 {EMAIL_APP_NAME}. All rights reserved.')
 EMAIL_TAGLINE = get_setting('EMAIL_TAGLINE', 'Your Gateway to Smart Investments')
+
+# WhatsApp contact
+EMAIL_WHATSAPP_NUMBER = get_setting('EMAIL_WHATSAPP_NUMBER', '079 989 4722')
+
