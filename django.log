@@ -7049,3 +7049,78 @@ MediaFileMiddleware END processing request for: /admin/leads/analytics/
 "GET /admin/leads/analytics/ HTTP/1.1" 500 79485
 C:\Users\money\HustleProjects\investment\core\lead_views.py changed, reloading.
 Watching for file changes with StatReloader
+MediaFileMiddleware START processing request for: /admin/leads/analytics/
+MediaFileMiddleware - Not a media request: /admin/leads/analytics/
+Internal Server Error: /admin/leads/analytics/
+Traceback (most recent call last):
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\money\HustleProjects\investment\core\decorators.py", line 49, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\money\HustleProjects\investment\core\lead_views.py", line 447, in lead_analytics
+    return render(request, 'core/lead_analytics.html', context)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\money\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/lead_analytics.html
+MediaFileMiddleware END processing request for: /admin/leads/analytics/
+"GET /admin/leads/analytics/ HTTP/1.1" 500 97641
+MediaFileMiddleware START processing request for: /admin/leads/analytics/
+MediaFileMiddleware - Not a media request: /admin/leads/analytics/
+MediaFileMiddleware END processing request for: /admin/leads/analytics/
+"GET /admin/leads/analytics/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"GET /login/ HTTP/1.1" 200 10735
+MediaFileMiddleware START processing request for: /login/
+MediaFileMiddleware - Not a media request: /login/
+MediaFileMiddleware END processing request for: /login/
+"POST /login/ HTTP/1.1" 302 0
+MediaFileMiddleware START processing request for: /admin_dashboard/
+MediaFileMiddleware - Not a media request: /admin_dashboard/
+Starting admin dashboard view processing
+Found 4 tiers
+Processing tier 1: Foundation Tier
+Processing tier 2: Test Company
+Processing tier 3: Growth Tier
+Processing tier 4: Premium Tier
+Rendering admin dashboard template
+Admin dashboard view completed successfully
+MediaFileMiddleware END processing request for: /admin_dashboard/
+"GET /admin_dashboard/ HTTP/1.1" 200 29638
+MediaFileMiddleware START processing request for: /admin/leads/analytics/
+MediaFileMiddleware - Not a media request: /admin/leads/analytics/
+MediaFileMiddleware END processing request for: /admin/leads/analytics/
+"GET /admin/leads/analytics/ HTTP/1.1" 200 13263
+MediaFileMiddleware START processing request for: /admin/leads/
+MediaFileMiddleware - Not a media request: /admin/leads/
+MediaFileMiddleware END processing request for: /admin/leads/
+"GET /admin/leads/ HTTP/1.1" 200 14354
+MediaFileMiddleware START processing request for: /admin/
+MediaFileMiddleware - Not a media request: /admin/
+MediaFileMiddleware END processing request for: /admin/
+"GET /admin/ HTTP/1.1" 200 32688
+MediaFileMiddleware START processing request for: /capitalx_admin/
+MediaFileMiddleware - Not a media request: /capitalx_admin/
+MediaFileMiddleware END processing request for: /capitalx_admin/
+"GET /capitalx_admin/ HTTP/1.1" 200 12938
+"GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+"GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+"GET /static/admin/css/responsive.css HTTP/1.1" 200 17905
+"GET /static/admin/css/base.css HTTP/1.1" 200 21544
+"GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2682
+"GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+"GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+"GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+"GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+"GET /static/admin/js/theme.js HTTP/1.1" 200 1943
+MediaFileMiddleware START processing request for: /admin/deposits/
+MediaFileMiddleware - Not a media request: /admin/deposits/
+MediaFileMiddleware END processing request for: /admin/deposits/
+"GET /admin/deposits/ HTTP/1.1" 200 33150
