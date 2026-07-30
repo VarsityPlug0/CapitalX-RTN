@@ -41,6 +41,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 /* ── TYPOGRAPHY ── */
@@ -581,7 +582,11 @@ main { flex: 1; padding: 1.5rem 0; }
 @media (max-width: 768px) {
   .btn { min-height: 42px; }
   .form-control, .form-select { font-size: 16px !important; }
+  /* Prevent navbar user-button from overflowing */
+  .navbar .btn.dropdown-toggle { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 }
+/* Global horizontal overflow guard */
+html { overflow-x: hidden; }
 
 /* ── ACCESSIBILITY ── */
 :focus-visible { outline: 2px solid var(--cx-blue); outline-offset: 2px; }

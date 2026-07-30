@@ -1,189 +1,213 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Dashboard - {{ user.username }}{% endblock %}
+{% block title %}Dashboard - CapitalX{% endblock %}
 
 {% block extra_css %}
 <style>
-    .stat-card {
-        background-color: var(--card-bg);
-        border: 1px solid #444;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 255, 0, 0.1);
-    }
-    .stat-icon {
-        font-size: 2.5rem;
-        color: var(--primary-green);
-    }
-    .quick-action-card {
-        background-color: rgba(0, 255, 0, 0.1);
-        border-color: var(--primary-green);
-        color: var(--primary-green);
-        text-align: center;
-        padding: 1.5rem;
-        transition: background-color 0.3s ease;
-    }
-    .quick-action-card:hover {
-        background-color: rgba(0, 255, 0, 0.2);
-        color: #fff;
-    }
+  .db-welcome { padding: 1.75rem 0 1.25rem; border-bottom: 1px solid var(--cx-card-border); margin-bottom: 1.75rem; }
+  .db-welcome h1 { font-size: clamp(1.375rem,4vw,1.875rem); font-weight: 800; color: #fff; margin: 0 0 .25rem; }
+  .db-welcome p { color: var(--cx-muted); margin: 0; font-size: .9rem; }
+
+  /* Stats grid */
+  .db-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; margin-bottom: 1.75rem; }
+  @media(min-width:768px){ .db-stats { grid-template-columns: repeat(4,1fr); } }
+  .db-stat { background: var(--cx-card); border: 1px solid var(--cx-card-border); border-radius: 14px; padding: 1.125rem 1.25rem; }
+  .db-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.125rem; margin-bottom: .75rem; }
+  .db-stat-icon.blue  { background: rgba(37,99,235,.15); color: var(--cx-blue-light); }
+  .db-stat-icon.green { background: rgba(16,185,129,.15); color: var(--cx-green); }
+  .db-stat-icon.yellow{ background: rgba(245,158,11,.15); color: #f59e0b; }
+  .db-stat-icon.purple{ background: rgba(139,92,246,.15); color: #a78bfa; }
+  .db-stat-label { font-size: .75rem; color: var(--cx-muted); margin-bottom: .25rem; }
+  .db-stat-value { font-size: 1.375rem; font-weight: 800; color: #fff; line-height: 1.1; }
+  .db-stat-sub { font-size: .75rem; color: var(--cx-muted); margin-top: .25rem; }
+
+  /* Section card */
+  .db-card { background: var(--cx-card); border: 1px solid var(--cx-card-border); border-radius: 16px; margin-bottom: 1rem; overflow: hidden; }
+  .db-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--cx-card-border); display: flex; align-items: center; justify-content: space-between; }
+  .db-card-title { font-size: .9375rem; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: .5rem; }
+  .db-card-body { padding: 0; }
+
+  /* Quick actions */
+  .db-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .625rem; }
+  @media(min-width:992px){ .db-actions { grid-template-columns: 1fr; } }
+  .db-action-btn { display: flex; align-items: center; gap: .625rem; padding: .75rem 1rem; background: var(--cx-bg-2); border: 1px solid var(--cx-card-border); border-radius: 12px; color: var(--cx-text-2); font-size: .875rem; font-weight: 500; text-decoration: none; transition: all .15s; }
+  .db-action-btn:hover { background: var(--cx-card-hover); border-color: #2d3a50; color: #fff; }
+  .db-action-btn i { width: 20px; text-align: center; color: var(--cx-blue-light); font-size: 1rem; }
+
+  /* Table */
+  .db-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+  .db-table th { background: rgba(255,255,255,.03); color: var(--cx-muted); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: .75rem 1.25rem; border-bottom: 1px solid var(--cx-card-border); white-space: nowrap; }
+  .db-table td { padding: .875rem 1.25rem; border-bottom: 1px solid var(--cx-card-border); color: var(--cx-text-2); vertical-align: middle; }
+  .db-table tr:last-child td { border-bottom: none; }
+  .db-table tr:hover td { background: rgba(255,255,255,.02); }
+  .db-table .empty td { text-align: center; color: var(--cx-muted); padding: 2rem; }
+
+  /* Badge */
+  .db-badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 600; padding: .25rem .625rem; border-radius: 20px; }
+  .db-badge.active   { background: rgba(16,185,129,.15); color: var(--cx-green); }
+  .db-badge.approved { background: rgba(16,185,129,.15); color: var(--cx-green); }
+  .db-badge.pending  { background: rgba(245,158,11,.12); color: #f59e0b; }
+  .db-badge.rejected { background: rgba(239,68,68,.1);  color: #ef4444; }
+
+  /* Verify alert */
+  .db-verify { background: rgba(37,99,235,.1); border: 1px solid rgba(37,99,235,.25); border-radius: 12px; padding: 1rem; display: flex; align-items: flex-start; gap: .75rem; }
+  .db-verify i { color: var(--cx-blue-light); font-size: 1.125rem; flex-shrink: 0; margin-top: .125rem; }
+  .db-verify p { color: var(--cx-text-2); font-size: .875rem; margin: 0 0 .625rem; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <!-- Header -->
-    <div class="mb-5">
-        <span class="badge bg-success">Live</span>
-        <h1 class="display-5 fw-bold mt-2">Welcome, {{ user.username|default:'Shadow' }}!</h1>
-        <p class="text-muted">Your investment dashboard</p>
-    </div>
 
-    <div class="row g-4">
-        <!-- Main Content -->
-        <div class="col-lg-9">
-            <!-- Stats Row -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="card stat-card p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3"><i class="bi bi-graph-up-arrow"></i></div>
-                            <div>
-                                <p class="text-muted mb-1">Total Expected Return</p>
-                                <h4 class="fw-bold mb-0">R{{ total_expected_return }}</h4>
-                                <small class="text-muted">Max waiting time: {{ max_waiting_time }} days</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card stat-card p-3">
-                         <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3"><i class="bi bi-wallet2"></i></div>
-                            <div>
-                                <p class="text-muted mb-1">Wallet Balance</p>
-                                <h4 class="fw-bold mb-0">R{{ user.wallet.balance }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card stat-card p-3">
-                         <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3"><i class="bi bi-clock-history"></i></div>
-                            <div>
-                                <p class="text-muted mb-1">Active Investments</p>
-                                <h4 class="fw-bold mb-0">{{ active_investments.count }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card stat-card p-3">
-                         <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3"><i class="bi bi-award-fill"></i></div>
-                            <div>
-                                <p class="text-muted mb-1">Current Level</p>
-                                <h4 class="fw-bold mb-0">Level {{ user.level }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Investments Table -->
-            <div class="card bg-dark text-white mb-4">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Active Investments</h5>
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Company</th><th>Amount</th><th>Expected Return</th><th>Start Date</th><th>End Date</th><th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for investment in active_investments %}
-                                <tr>
-                                    <td>{{ investment.company.name }}</td>
-                                    <td>R{{ investment.amount }}</td>
-                                    <td>R{{ investment.return_amount }}</td>
-                                    <td>{{ investment.start_date|date:"M d, Y" }}</td>
-                                    <td>{{ investment.end_date|date:"M d, Y" }}</td>
-                                    <td>
-                                        <span class="badge bg-success">Active</span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6">No active investments</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Deposits Table -->
-            <div class="card bg-dark text-white">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Recent Deposits</h5>
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Amount</th><th>Payment Method</th><th>Status</th><th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for deposit in deposits %}
-                                <tr>
-                                    <td>R{{ deposit.amount }}</td>
-                                    <td>{{ deposit.get_payment_method_display }}</td>
-                                    <td>
-                                        {% if deposit.status == 'approved' %}
-                                            <span class="badge bg-success">{{ deposit.get_status_display }}</span>
-                                        {% elif deposit.status == 'rejected' %}
-                                            <span class="badge bg-danger">{{ deposit.get_status_display }}</span>
-                                        {% else %}
-                                            <span class="badge bg-warning text-dark">{{ deposit.get_status_display }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ deposit.created_at|date:"M d, Y" }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4">No recent deposits</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="col-lg-3">
-            <h5 class="fw-bold mb-3">Quick Actions</h5>
-            <div class="list-group">
-                <a href="{% url 'deposit' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">Make Deposit</a>
-                <a href="{% url 'investment_plans' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">🚀 Investment Plans</a>
-                <a href="{% url 'tiers' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">Invest Now</a>
-                <a href="{% url 'referral' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">Refer Friends</a>
-                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action quick-action-card mb-2 rounded">View Profile</a>
-                {% if not has_verified_account %}
-                <div class="alert alert-info mt-2">
-                  <i class="bi bi-info-circle me-2"></i>Make your first deposit to get verified and start investing!
-                  <a href="{% url 'deposit' %}" class="btn btn-primary btn-sm mt-2">Make Deposit</a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<!-- Welcome header -->
+<div class="db-welcome">
+  <div class="d-flex align-items-center gap-2 mb-1">
+    <span class="db-badge active"><i class="bi bi-circle-fill" style="font-size:.5rem;"></i> Live</span>
+  </div>
+  <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
+  <p>Here's what's happening with your investments today.</p>
 </div>
-{% endblock %} 
+
+<!-- Stats -->
+<div class="db-stats">
+  <div class="db-stat">
+    <div class="db-stat-icon green"><i class="bi bi-graph-up-arrow"></i></div>
+    <div class="db-stat-label">Total Expected Return</div>
+    <div class="db-stat-value">R{{ total_expected_return }}</div>
+    <div class="db-stat-sub">{{ max_waiting_time }} days max wait</div>
+  </div>
+  <div class="db-stat">
+    <div class="db-stat-icon blue"><i class="bi bi-wallet2"></i></div>
+    <div class="db-stat-label">Wallet Balance</div>
+    <div class="db-stat-value">R{{ user.wallet.balance }}</div>
+    <div class="db-stat-sub"><a href="{% url 'deposit' %}" style="color:var(--cx-blue-light);font-size:.75rem;">Add funds</a></div>
+  </div>
+  <div class="db-stat">
+    <div class="db-stat-icon yellow"><i class="bi bi-clock-history"></i></div>
+    <div class="db-stat-label">Active Investments</div>
+    <div class="db-stat-value">{{ active_investments.count }}</div>
+    <div class="db-stat-sub">Running now</div>
+  </div>
+  <div class="db-stat">
+    <div class="db-stat-icon purple"><i class="bi bi-award-fill"></i></div>
+    <div class="db-stat-label">Current Level</div>
+    <div class="db-stat-value">Level {{ user.level }}</div>
+    <div class="db-stat-sub">Keep investing</div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Left: tables -->
+  <div class="col-lg-9">
+
+    <!-- Active Investments -->
+    <div class="db-card mb-3">
+      <div class="db-card-header">
+        <span class="db-card-title"><i class="bi bi-graph-up" style="color:var(--cx-green);"></i> Active Investments</span>
+        <a href="{% url 'investment_plans' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>New Plan</a>
+      </div>
+      <div class="db-card-body">
+        <div class="table-responsive">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Amount</th>
+                <th>Return</th>
+                <th class="d-none d-sm-table-cell">Start</th>
+                <th class="d-none d-md-table-cell">End</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inv in active_investments %}
+              <tr>
+                <td style="font-weight:600;color:#fff;">{{ inv.company.name }}</td>
+                <td>R{{ inv.amount }}</td>
+                <td style="color:var(--cx-green);font-weight:600;">R{{ inv.return_amount }}</td>
+                <td class="d-none d-sm-table-cell">{{ inv.start_date|date:"d M Y" }}</td>
+                <td class="d-none d-md-table-cell">{{ inv.end_date|date:"d M Y" }}</td>
+                <td><span class="db-badge active"><i class="bi bi-circle-fill" style="font-size:.45rem;"></i> Active</span></td>
+              </tr>
+              {% empty %}
+              <tr class="empty"><td colspan="6"><i class="bi bi-inbox me-2"></i>No active investments yet.<br><a href="{% url 'investment_plans' %}" style="color:var(--cx-blue-light);">Browse plans</a></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Deposits -->
+    <div class="db-card">
+      <div class="db-card-header">
+        <span class="db-card-title"><i class="bi bi-arrow-down-circle" style="color:var(--cx-blue-light);"></i> Recent Deposits</span>
+        <a href="{% url 'deposit' %}" class="btn btn-secondary btn-sm"><i class="bi bi-plus me-1"></i>Deposit</a>
+      </div>
+      <div class="db-card-body">
+        <div class="table-responsive">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Amount</th>
+                <th class="d-none d-sm-table-cell">Method</th>
+                <th>Status</th>
+                <th class="d-none d-md-table-cell">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for dep in deposits %}
+              <tr>
+                <td style="font-weight:600;color:#fff;">R{{ dep.amount }}</td>
+                <td class="d-none d-sm-table-cell">{{ dep.get_payment_method_display }}</td>
+                <td>
+                  {% if dep.status == 'approved' %}
+                    <span class="db-badge approved"><i class="bi bi-check-circle-fill"></i> Approved</span>
+                  {% elif dep.status == 'rejected' %}
+                    <span class="db-badge rejected"><i class="bi bi-x-circle-fill"></i> Rejected</span>
+                  {% else %}
+                    <span class="db-badge pending"><i class="bi bi-clock"></i> Pending</span>
+                  {% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">{{ dep.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr class="empty"><td colspan="4"><i class="bi bi-inbox me-2"></i>No deposits yet.<br><a href="{% url 'deposit' %}" style="color:var(--cx-blue-light);">Make your first deposit</a></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: Quick actions -->
+  <div class="col-lg-3">
+    {% if not has_verified_account %}
+    <div class="db-verify mb-3">
+      <i class="bi bi-info-circle-fill"></i>
+      <div>
+        <p>Make your first deposit to get verified and start investing!</p>
+        <a href="{% url 'deposit' %}" class="btn btn-primary btn-sm w-100">Make Deposit</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="db-card p-3">
+      <div class="db-card-title mb-3" style="padding:0;">Quick Actions</div>
+      <div class="db-actions">
+        <a href="{% url 'deposit' %}" class="db-action-btn"><i class="bi bi-arrow-down-circle"></i> Deposit</a>
+        <a href="{% url 'withdraw' %}" class="db-action-btn"><i class="bi bi-arrow-up-circle"></i> Withdraw</a>
+        <a href="{% url 'investment_plans' %}" class="db-action-btn"><i class="bi bi-diagram-3"></i> Plans</a>
+        <a href="{% url 'tiers' %}" class="db-action-btn"><i class="bi bi-layers"></i> Tiers</a>
+        <a href="{% url 'referral' %}" class="db-action-btn"><i class="bi bi-people"></i> Referrals</a>
+        <a href="{% url 'portfolio' %}" class="db-action-btn"><i class="bi bi-briefcase"></i> Portfolio</a>
+        <a href="{% url 'wallet' %}" class="db-action-btn"><i class="bi bi-wallet2"></i> Wallet</a>
+        <a href="{% url 'profile' %}" class="db-action-btn"><i class="bi bi-person"></i> Profile</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

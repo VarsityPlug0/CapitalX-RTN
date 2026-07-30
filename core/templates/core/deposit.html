@@ -5,446 +5,100 @@
 
 {% block extra_css %}
 <style>
-    :root {
-        --primary-color: #007bff;
-        --success-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --dark-color: #343a40;
-        --light-color: #f8f9fa;
-        --border-radius: 12px;
-        --box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        --transition: all 0.3s ease;
-    }
-
-    .deposit-container {
-        background: linear-gradient(135deg, var(--cx-bg) 0%, var(--cx-bg-2) 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
-
-    .deposit-card {
-        background: rgba(30, 30, 30, 0.95);
-        
-        border-radius: var(--border-radius);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        border:1px solid var(--cx-card-border);
-        overflow: hidden;
-    }
+    .deposit-container { padding: 0; }
 
     .deposit-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
-        color: white;
-        padding: 2rem;
+        background: var(--cx-blue);
+        border-radius: 16px;
+        color: #fff;
+        padding: 1.75rem 1.5rem;
         text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .deposit-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: float 6s ease-in-out infinite;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(180deg); }
-    }
-
-    .deposit-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        position: relative;
-        z-index: 2;
-    }
-    
-    .deposit-header h1.display-5 {
-        font-size: 2.75rem;
-        font-weight: 700;
-    }
-    
-    .deposit-header p.lead {
-        font-size: 1.25rem;
-        opacity: 0.95;
-        margin-bottom: 0;
-    }
-
-    .deposit-header p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-        position: relative;
-        z-index: 2;
-    }
-
-    .nav-tabs {
-        border: none;
-        background: #2a2a2a;
-        border-radius: var(--border-radius);
-        padding: 0.5rem;
-        margin: 0;
-        flex-wrap: wrap;
-        display: flex;
-        width: 100%;
-    }
-
-    /* Unified button styling for deposit options */
-    .nav-link.flex-fill {
-        border: none;
-        border-radius: var(--border-radius);
-        color: var(--dark-color);
-        font-weight: 600;
-        padding: 1rem 1.25rem;
-        margin: 0 0.5rem;
-        transition: var(--transition);
-        position: relative;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        width: 100%;
-        text-align: center;
-        display: block;
-        visibility: visible;
-        opacity: 1;
-        flex: 1 1 auto;
-        min-width: 180px;
-        background: #e9ecef;
-        font-size: 1.1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .nav-link.flex-fill:hover {
-        background: rgba(0,123,255,0.2);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,123,255,0.2);
-    }
-
-    .nav-link.flex-fill.active {
-        background: var(--primary-color);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
-        font-weight: 600;
-    }
-
-    .nav-link.flex-fill::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        transition: left 0.5s;
-    }
-
-    .nav-link.flex-fill:hover::before {
-        left: 100%;
-    }
-
-    .form-section {
-        padding: 2rem;
-        background: #2a2a2a;
-        color: #ffffff;
-    }
-
-    .form-floating {
         margin-bottom: 1.5rem;
     }
+    .deposit-header h1 { font-size: clamp(1.375rem,4vw,1.875rem); font-weight: 800; margin: 0 0 .25rem; color: #fff; }
+    .deposit-header p { margin: 0; opacity: .85; font-size: .9375rem; color: #fff; }
 
-    .form-control {
-        border: 2px solid #444;
-        border-radius: var(--border-radius);
-        padding: 1rem 1.25rem;
-        font-size: 1rem;
-        transition: var(--transition);
-        background: #1a1a1a;
-        color: #ffffff;
-        font-weight: 500;
+    .deposit-card {
+        background: var(--cx-card);
+        border-radius: 16px;
+        border: 1px solid var(--cx-card-border);
+        overflow: hidden;
     }
 
-    .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-        background: #2a2a2a;
-        transform: translateY(-2px);
-        color: #ffffff;
-    }
-    
-    input[type="number"] {
-        color: #ffffff !important;
-        font-weight: 500 !important;
-        background: #1a1a1a !important;
-    }
-    
-    input[type="number"]:focus {
-        color: #ffffff !important;
-        background: #2a2a2a !important;
-    }
+    /* Method tabs */
+    .dep-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: 1rem 1rem .5rem; }
+    .dep-tab { flex: 1 1 140px; display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .75rem 1rem; background: var(--cx-bg-2); border: 1px solid var(--cx-card-border); border-radius: 12px; color: var(--cx-muted); font-size: .875rem; font-weight: 600; text-decoration: none; transition: all .15s; }
+    .dep-tab:hover { background: var(--cx-card-hover); color: var(--cx-text); border-color: #2d3a50; }
+    .dep-tab.active { background: var(--cx-blue); border-color: var(--cx-blue); color: #fff; }
 
-    .form-label {
-        font-weight: 600;
-        color: #ffffff;
-        margin-bottom: 0.5rem;
-    }
+    .form-section { padding: 1.25rem; }
 
     .card-details-section {
-        background: linear-gradient(135deg, #333 0%, #444 100%);
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
-        margin: 1.5rem 0;
-        border: 1px solid #555;
-        color: #ffffff;
+        background: var(--cx-bg-2);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin: 1.25rem 0;
+        border: 1px solid var(--cx-card-border);
     }
 
     .card-brand-icons {
         display: flex;
         align-items: center;
         gap: 1rem;
+        flex-wrap: wrap;
         margin-bottom: 1rem;
-        padding: 1rem;
-        background: #1a1a1a;
-        border-radius: var(--border-radius);
-        border: 1px solid #555;
-        color: #ffffff;
+        padding: .875rem 1rem;
+        background: var(--cx-bg);
+        border-radius: 10px;
+        border: 1px solid var(--cx-card-border);
     }
 
-    .card-icon {
-        height: 40px;
-        transition: var(--transition);
-        filter: grayscale(100%);
-    }
+    .card-icon { height: 36px; filter: grayscale(80%) opacity(.6); transition: all .15s; }
+    .card-icon.active, .card-icon:hover { filter: none; transform: scale(1.08); }
 
-    .card-icon.active {
-        filter: grayscale(0%);
-        transform: scale(1.1);
-    }
-
-    .card-icon:hover {
-        transform: scale(1.1);
-    }
-
-    .btn-submit {
-        background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
-        border: none;
-        border-radius: var(--border-radius);
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: white;
-        transition: var(--transition);
-        width: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-submit::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-        transition: left 0.5s;
-    }
-
-    .btn-submit:hover::before {
-        left: 100%;
-    }
-
-    .btn-submit:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(40,167,69,0.4);
-    }
-
-    .btn-submit:active {
-        transform: translateY(-1px);
-    }
+    .btn-submit { width: 100%; padding: .875rem; font-size: 1rem; font-weight: 700; }
 
     .instructions-section {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8b 100%);
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
+        background: var(--cx-bg-2);
+        border-radius: 14px;
+        padding: 1.25rem;
         height: 100%;
-        border-left: 4px solid var(--primary-color);
-        color: #ffffff;
+        border: 1px solid var(--cx-card-border);
     }
 
     .instruction-item {
         display: flex;
         align-items: flex-start;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background:var(--cx-card);
-        border-radius: var(--border-radius);
-        transition: var(--transition);
-        color: #ffffff;
-    }
-
-    .instruction-item:hover {
-        background:var(--cx-card);
-        transform: translateX(5px);
+        gap: .875rem;
+        margin-bottom: .875rem;
+        padding: .875rem;
+        background: var(--cx-card);
+        border-radius: 10px;
+        border: 1px solid var(--cx-card-border);
     }
 
     .instruction-icon {
-        background: var(--primary-color);
-        color: white;
-        width: 32px;
-        height: 32px;
+        background: var(--cx-blue);
+        color: #fff;
+        width: 32px; height: 32px; flex-shrink: 0;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        flex-shrink: 0;
-    }
-
-    .alert {
-        border: none;
-        border-radius: var(--border-radius);
-        padding: 1rem 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    .form-text {
-        color: #b0b0b0;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
-    .row.g-2 > .col {
-        margin-bottom: 0.5rem;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .875rem;
     }
 
     .bank-info {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        border: 1px solid #555;
-        color: #ffffff;
+        background: var(--cx-bg);
+        border: 1px solid var(--cx-card-border);
+        border-radius: 10px;
+        color: var(--cx-text-2);
     }
+    .bank-info strong { color: var(--cx-blue-light); }
 
-    .bank-info strong {
-        color: var(--cx-blue);
-    }
-
-    /* Hidden form class */
-    .form-hidden {
-        display: none;
-    }
-
-    @media (max-width: 768px) {
-        .deposit-header h1 {
-            font-size: 2rem;
-        }
-        
-        .deposit-header h1.display-5 {
-            font-size: 2.25rem;
-        }
-        
-        .deposit-header p.lead {
-            font-size: 1.1rem;
-        }
-        
-        .form-section {
-            padding: 1rem;
-        }
-        
-        .card-brand-icons {
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .nav-tabs .nav-link {
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-        }
-
-        .nav-tabs .nav-item {
-            flex: 1 1 auto;
-            min-width: 140px;
-        }
-        
-        .nav-link.flex-fill {
-            min-width: 140px;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-    }
+    .form-hidden { display: none; }
 
     @media (max-width: 576px) {
-        .deposit-header h1 {
-            font-size: 1.75rem;
-        }
-        
-        .deposit-header h1.display-5 {
-            font-size: 2rem;
-        }
-        
-        .deposit-header p.lead {
-            font-size: 1rem;
-        }
-        
-        .nav-tabs {
-            flex-direction: column;
-        }
-
-        .nav-tabs .nav-item {
-            flex: none;
-            width: 100%;
-            margin-bottom: 0.75rem;
-        }
-
-        .nav-tabs .nav-link {
-            margin: 0;
-        }
-        
-        .nav-link.flex-fill {
-            flex: none;
-            width: 100%;
-            margin-bottom: 0.75rem;
-            padding: 1rem 1.25rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .d-flex.flex-wrap {
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        
-        .gap-3 {
-            gap: 0.75rem !important;
-        }
-        
-        .p-4 {
-            padding: 1.5rem !important;
-        }
-    }
-    
-    @media (max-width: 400px) {
-        .nav-link.flex-fill {
-            padding: 0.85rem 1rem;
-            font-size: 1rem;
-            min-width: 120px;
-        }
-        
-        .deposit-header h1.display-5 {
-            font-size: 1.75rem;
-        }
-        
-        .p-4 {
-            padding: 1.25rem !important;
-        }
+        .dep-tabs { flex-direction: column; }
+        .dep-tab { flex: none; width: 100%; }
     }
 </style>
 {% endblock %}
@@ -453,29 +107,23 @@
 <div class="deposit-container">
     <div class="container">
         <!-- Header Section -->
-        <div class="deposit-header mb-4">
-            <h1 class="display-5"><i class="bi bi-wallet2 me-3"></i>Fund Your Account</h1>
-            <p class="lead">Choose your preferred deposit method and start investing today</p>
+        <div class="deposit-header">
+            <h1><i class="bi bi-wallet2 me-2"></i>Fund Your Account</h1>
+            <p>Choose your preferred deposit method and start investing today.</p>
         </div>
 
         <!-- Deposit Method Navigation -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-12 col-xl-11 col-lg-12">
-                <div class="deposit-card">
-                    <div class="p-4">
-                        <div class="d-flex flex-wrap justify-content-center gap-3" id="depositTabs">
-                            <a href="{% url 'deposit' %}?method=card" class="nav-link flex-fill text-center" id="card-tab">
-                                <i class="bi bi-credit-card me-2"></i>Bank Card
-                            </a>
-                            <a href="{% url 'deposit' %}?method=eft" class="nav-link flex-fill text-center" id="eft-tab">
-                                <i class="bi bi-bank me-2"></i>EFT Transfer
-                            </a>
-                            <a href="{% url 'voucher_deposit' %}" class="nav-link flex-fill text-center" id="voucher-tab">
-                                <i class="bi bi-ticket-perforated me-2"></i>Redeem Voucher Instead
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <div class="deposit-card mb-4">
+            <div class="dep-tabs" id="depositTabs">
+                <a href="{% url 'deposit' %}?method=card" class="dep-tab" id="card-tab">
+                    <i class="bi bi-credit-card"></i>Bank Card
+                </a>
+                <a href="{% url 'deposit' %}?method=eft" class="dep-tab" id="eft-tab">
+                    <i class="bi bi-bank"></i>EFT Transfer
+                </a>
+                <a href="{% url 'voucher_deposit' %}" class="dep-tab" id="voucher-tab">
+                    <i class="bi bi-ticket-perforated"></i>Voucher
+                </a>
             </div>
         </div>
 
@@ -557,7 +205,7 @@
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="btn btn-submit" id="card-submit-btn">
+                                    <button type="submit" class="btn btn-primary btn-submit" id="card-submit-btn">
                                         <i class="bi bi-check-circle me-2"></i>Submit Card Deposit
                                     </button>
                                 </form>
@@ -699,7 +347,7 @@
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="btn btn-submit" id="eft-submit-btn">
+                                    <button type="submit" class="btn btn-primary btn-submit" id="eft-submit-btn">
                                         <i class="bi bi-check-circle me-2"></i>Submit EFT Deposit
                                     </button>
                                 </form>
@@ -781,8 +429,7 @@
             document.getElementById('eft-form').classList.remove('form-hidden');
             document.getElementById('eft-tab').classList.add('active');
         }
-        
-        // Add active class to voucher tab if we're on the voucher page
+
         if (window.location.pathname === '{% url "voucher_deposit" %}') {
             document.getElementById('voucher-tab').classList.add('active');
         }
