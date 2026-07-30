@@ -1,277 +1,609 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}CapitalXPlatform{% endblock %}
+{% block title %}CapitalX — Invest Smart. Build Wealth.{% endblock %}
 
-{% block content %}
-<!-- Hero Section -->
-<div class="container text-center py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="mb-3">
-                <span class="badge">New</span>
-            </div>
-            <h1 class="display-3 fw-bold">Buy Shares. Get <span style="color:#FFD700;">R50 Free</span>.</h1>
-            <p class="lead text-muted my-4">
-                Start investing with <span class="logo-x">CapitalX<span class="logo-x-gold">Platform</span></span> and win <span style="color:#FFD700;">R100</span> on your first trade!
-            </p>
-            {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Go to Dashboard</a>
-            {% else %}
-                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Start for Free</a>
-            {% endif %}
-        </div>
-    </div>
-</div>
+{% block extra_css %}
+<style>
+  :root {
+    --cx-bg: #080b12;
+    --cx-card: #111520;
+    --cx-card-border: #1e2538;
+    --cx-blue: #2563eb;
+    --cx-blue-light: #3b82f6;
+    --cx-green: #10b981;
+    --cx-text: #f1f5f9;
+    --cx-muted: #8b9cb3;
+  }
 
-<!-- Stats Section -->
-<div class="container my-5">
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card p-3 text-center">
-                <h2 class="display-5 fw-bold">10,000+</h2>
-                <p class="text-muted mb-0">Investors Joined</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-3 text-center">
-                <h2 class="display-5 fw-bold">R5M+</h2>
-                <p class="text-muted mb-0">Total Payouts</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-3 text-center">
-                <h2 class="display-5 fw-bold">15</h2>
-                <p class="text-muted mb-0">AI Strategies Running</p>
-            </div>
-        </div>
-    </div>
-</div>
+  body { background: var(--cx-bg) !important; color: var(--cx-text) !important; }
 
-<!-- Investment Plans Section -->
-<div class="container my-5">
-    <h2 class="text-center fw-bold mb-4"><span class="text-primary">Popular Investment Plans</span></h2>
-    <div class="row g-4">
-        <!-- Short-Term Plan -->
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
-            <div class="card p-4 h-100 w-100 d-flex flex-column">
-                <h3 class="fw-bold">🛒 Shoprite Plan</h3>
-                <span class="badge bg-info mb-2">Short-Term</span>
-                <p class="text-muted mb-1">Investment: R60</p>
-                <p class="text-muted mb-1">Duration: 12 hours</p>
-                <p class="text-muted">Returns: R100</p>
-                <div class="mt-auto">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'investment_plans' %}" class="btn btn-primary w-100">Invest Now</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary w-100">Login to Invest</a>
-                {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mid-Term Plan -->
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
-            <div class="card p-4 h-100 w-100 d-flex flex-column">
-                <h3 class="fw-bold">📱 MTN Plan</h3>
-                <span class="badge bg-warning mb-2">Mid-Term</span>
-                <p class="text-muted mb-1">Investment: R1,000</p>
-                <p class="text-muted mb-1">Duration: 7 days</p>
-                <p class="text-muted">Returns: R4,000</p>
-                <div class="mt-auto">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'investment_plans' %}" class="btn btn-primary w-100">Invest Now</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary w-100">Login to Invest</a>
-                {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <!-- Long-Term Plan -->
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
-            <div class="card p-4 h-100 w-100 d-flex flex-column">
-                <h3 class="fw-bold">💼 Naspers Plan</h3>
-                <span class="badge bg-success mb-2">Long-Term</span>
-                <p class="text-muted mb-1">Investment: R10,000</p>
-                <p class="text-muted mb-1">Duration: 60 days</p>
-                <p class="text-muted">Returns: R50,000</p>
-                <div class="mt-auto">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'investment_plans' %}" class="btn btn-primary w-100">Invest Now</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary w-100">Login to Invest</a>
-                {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="text-center mt-4">
-        <a href="{% url 'investment_plans' %}" class="btn btn-outline-primary">View All Investment Plans</a>
-    </div>
-</div>
+  /* ── NAV ── */
+  .cx-nav {
+    background: #0d1117;
+    border-bottom: 1px solid var(--cx-card-border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .cx-nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .cx-logo-box {
+    width: 40px; height: 40px;
+    background: var(--cx-blue);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; color: #fff;
+  }
+  .cx-brand-text { line-height: 1.1; }
+  .cx-brand-text strong { display: block; font-size: 15px; color: #fff; }
+  .cx-brand-text span { font-size: 11px; color: var(--cx-muted); }
+  .cx-nav-actions { display: flex; align-items: center; gap: 10px; }
+  .cx-btn-login {
+    background: transparent;
+    border: 1.5px solid #2d3a50;
+    color: var(--cx-text);
+    padding: 7px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: border-color .2s;
+  }
+  .cx-btn-login:hover { border-color: var(--cx-blue-light); color: #fff; }
+  .cx-hamburger {
+    width: 40px; height: 40px;
+    background: var(--cx-blue);
+    border: none;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+  }
+  .cx-hamburger span {
+    display: block; width: 18px; height: 2px;
+    background: #fff; border-radius: 2px;
+  }
 
-<!-- Refer and Earn Section -->
-<div class="container my-5">
-    <div class="row align-items-center">
-        <div class="col-lg-6">
-            <h2 class="fw-bold">Refer and Earn</h2>
-            <p class="text-muted">Get R10 for every real user who signs up and deposits.</p>
-            <div class="input-group">
-                <input type="text" id="referralLink" class="form-control" value="{{ referral_link }}" readonly>
-                <button class="btn btn-secondary" type="button" id="copyButton">Copy</button>
-            </div>
-        </div>
-        <div class="col-lg-5 offset-lg-1">
-            <h4 class="fw-bold">Top Referrers</h4>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white">#1 John S. <span class="badge bg-primary rounded-pill">R25,000</span></li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white">#2 Sarah M. <span class="badge bg-primary rounded-pill">R18,500</span></li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white">#3 Michael T. <span class="badge bg-primary rounded-pill">R12,750</span></li>
-            </ul>
-        </div>
-    </div>
-</div>
+  /* ── HERO ── */
+  .cx-hero {
+    background: radial-gradient(ellipse at 70% 50%, #0f1e3d 0%, var(--cx-bg) 60%);
+    padding: 40px 20px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cx-new-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1.5px solid #2d3a50;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--cx-muted);
+    margin-bottom: 18px;
+  }
+  .cx-new-badge i { color: var(--cx-blue-light); }
+  .cx-hero h1 {
+    font-size: clamp(32px, 8vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .cx-hero h1 .accent { color: var(--cx-blue-light); }
+  .cx-hero p { color: var(--cx-muted); font-size: 15px; line-height: 1.6; max-width: 400px; }
+  .cx-hero p .accent { color: var(--cx-green); font-weight: 600; }
+  .cx-chart-card {
+    background: linear-gradient(135deg, #0f1e3d, #0d2051);
+    border: 1px solid #1e3a6e;
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    margin-top: 20px;
+  }
+  .cx-chart-badge {
+    position: absolute; top: 12px; right: 12px;
+    background: #0f2a12;
+    color: var(--cx-green);
+    font-size: 12px; font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #10b981;
+  }
+  .cx-chart-svg { width: 100%; height: 80px; }
+  .cx-btn-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--cx-blue);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: 24px;
+    transition: background .2s, transform .15s;
+  }
+  .cx-btn-cta:hover { background: #1d4ed8; transform: translateY(-1px); color: #fff; }
+  .cx-trust-badges {
+    display: flex; gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .cx-trust-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--cx-muted);
+  }
+  .cx-trust-badge i { color: var(--cx-blue-light); font-size: 14px; }
 
-<!-- How It Works Section -->
-<div class="container my-5">
-    <h2 class="text-center fw-bold mb-4">How It Works</h2>
-    <div class="row g-4 text-center">
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h3 class="display-4">🎁</h3>
-                <h4 class="fw-bold">Sign Up & Get R50 Bonus</h4>
-                <p class="text-muted">Register and instantly receive a R50 bonus to start investing.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h3 class="display-4">💸</h3>
-                <h4 class="fw-bold">Buy Your First Share & Win R100</h4>
-                <p class="text-muted">Make your first trade and get an extra R100 bonus, automatically credited.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h3 class="display-4">🔓</h3>
-                <h4 class="fw-bold">Deposit 50% to Unlock Withdrawals</h4>
-                <p class="text-muted">To withdraw, simply deposit 50% of your total balance. It's that easy!</p>
-            </div>
-        </div>
-    </div>
-</div>
+  /* ── STATS ── */
+  .cx-stats { padding: 24px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cx-stat-card {
+    background: var(--cx-card);
+    border: 1px solid var(--cx-card-border);
+    border-radius: 16px;
+    padding: 20px 16px;
+  }
+  .cx-stat-icon {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+  .cx-stat-icon.blue { background: rgba(37,99,235,.15); color: var(--cx-blue-light); }
+  .cx-stat-icon.green { background: rgba(16,185,129,.15); color: var(--cx-green); }
+  .cx-stat-card h3 { font-size: 26px; font-weight: 800; color: #fff; margin: 0 0 2px; }
+  .cx-stat-card p { font-size: 12px; color: var(--cx-muted); margin: 0 0 8px; }
+  .cx-stat-growth { font-size: 12px; color: var(--cx-green); display: flex; align-items: center; gap: 4px; }
 
-<!-- Trust Section -->
-<div class="container my-5">
-    <div class="row text-center">
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h4 class="fw-bold" style="color:#3399ff;">Fully Regulated</h4>
-                <p class="text-muted">Your investments are protected and compliant with financial regulations.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h4 class="fw-bold" style="color:#FFD700;">Smart Win Logic</h4>
-                <p class="text-muted">Built with clever onboarding – The House Always Wins.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h4 class="fw-bold" style="color:#3399ff;">Secure & Instant</h4>
-                <p class="text-muted">Secure deposits and instant trades for peace of mind.</p>
-            </div>
-        </div>
-    </div>
-</div>
+  /* ── WHY ── */
+  .cx-section { padding: 32px 20px; }
+  .cx-section-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 24px; }
+  .cx-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .cx-feature { text-align: center; }
+  .cx-feature-icon {
+    width: 56px; height: 56px;
+    background: rgba(37,99,235,.12);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 22px;
+    color: var(--cx-blue-light);
+    border: 1px solid rgba(59,130,246,.2);
+  }
+  .cx-feature h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .cx-feature p { font-size: 12px; color: var(--cx-muted); line-height: 1.5; }
 
-<!-- Dashboard Preview / Feature Highlights -->
-<div class="container my-5">
-    <h2 class="text-center fw-bold mb-4">Platform Highlights</h2>
-    <div class="row g-4 text-center">
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h3 class="display-6">📈 Simulated Trading</h3>
-                <p class="text-muted">Experience real-time or simulated share trading with instant feedback.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h3 class="display-6">💰 Bonus vs Real Balance</h3>
-                <p class="text-muted">Track your bonus and real balances separately for full transparency.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h3 class="display-6">⚡ Quick Actions</h3>
-                <p class="text-muted">Deposit, withdraw, or reinvest with a single click from your dashboard.</p>
-            </div>
-        </div>
-    </div>
-</div>
+  /* ── PLANS ── */
+  .cx-plans { display: flex; flex-direction: column; gap: 12px; }
+  .cx-plan-card {
+    background: var(--cx-card);
+    border: 1px solid var(--cx-card-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cx-plan-card.featured { border-color: var(--cx-blue); background: linear-gradient(135deg, #0f1e3d, #111520); }
+  .cx-plan-left h4 { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+  .cx-plan-left span { font-size: 12px; color: var(--cx-muted); }
+  .cx-plan-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; margin-bottom: 6px; display: inline-block; }
+  .cx-plan-badge.short { background: rgba(16,185,129,.15); color: var(--cx-green); }
+  .cx-plan-badge.mid { background: rgba(251,191,36,.12); color: #fbbf24; }
+  .cx-plan-badge.long { background: rgba(37,99,235,.15); color: var(--cx-blue-light); }
+  .cx-plan-right { text-align: right; }
+  .cx-plan-right .returns { font-size: 18px; font-weight: 800; color: var(--cx-green); }
+  .cx-plan-right .duration { font-size: 11px; color: var(--cx-muted); }
+  .cx-plan-arrow {
+    width: 32px; height: 32px;
+    background: var(--cx-blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px;
+    margin-top: 8px;
+    margin-left: auto;
+    text-decoration: none;
+  }
 
-<!-- Testimonials Section -->
-<div class="container my-5">
-    <h2 class="text-center fw-bold mb-4">What Our Investors Say</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card p-4 text-center">
-                <p class="text-warning">★★★★★</p>
-                <p class="text-muted">"I turned R50 into R75 in just 7 days. This platform works!"</p>
-                <footer class="blockquote-footer text-white">John D.</footer>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 text-center">
-                <p class="text-warning">★★★★★</p>
-                <p class="text-muted">"The AI trading system is impressive. My investments are growing steadily."</p>
-                <footer class="blockquote-footer text-white">Sarah M.</footer>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 text-center">
-                <p class="text-warning">★★★★★</p>
-                <p class="text-muted">"Best crypto investment platform I've used. The returns are consistent."</p>
-                <footer class="blockquote-footer text-white">Michael T.</footer>
-            </div>
-        </div>
-    </div>
-</div>
+  /* ── REVIEW ── */
+  .cx-review-card {
+    background: var(--cx-card);
+    border: 1px solid var(--cx-card-border);
+    border-radius: 16px;
+    padding: 24px 20px;
+    margin: 0 20px;
+  }
+  .cx-stars { color: var(--cx-green); font-size: 22px; letter-spacing: 2px; }
+  .cx-rating { font-size: 28px; font-weight: 800; color: #fff; }
+  .cx-rating span { font-size: 16px; color: var(--cx-muted); font-weight: 400; }
+  .cx-review-count { font-size: 13px; color: var(--cx-muted); margin-top: 2px; }
+  .cx-avatars { display: flex; }
+  .cx-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--cx-card);
+    margin-right: -8px;
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff; font-weight: 700;
+  }
+  .cx-review-text { font-size: 13px; color: var(--cx-muted); line-height: 1.6; margin-top: 12px; }
 
-<!-- Newsletter Section -->
-<div class="container my-5 text-center">
-    <h2 class="fw-bold">Stay Updated</h2>
-    <p class="text-muted">Get weekly updates and AI investment tips.</p>
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <form method="post" action="{% url 'newsletter_subscribe' %}">
-                {% csrf_token %}
-                <div class="input-group">
-                    <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
-                    <button class="btn btn-primary" type="submit">Subscribe</button>
-                </div>
-            </form>
-            <p class="text-muted small mt-2">Secure payments · Advanced AI · Trusted by 2+ users</p>
-        </div>
-    </div>
-</div>
+  /* ── TRUST BAR ── */
+  .cx-trust-bar {
+    border-top: 1px solid var(--cx-card-border);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .cx-trust-bar span { font-size: 12px; color: var(--cx-muted); }
+  .cx-trust-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #8b9cb3;
+  }
+  .cx-trust-item i { font-size: 16px; }
+
+  /* ── REFERRAL ── */
+  .cx-ref-card {
+    background: var(--cx-card);
+    border: 1px solid var(--cx-card-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 0 20px;
+  }
+  .cx-ref-input {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
+  .cx-ref-input input {
+    flex: 1;
+    background: #0d1117;
+    border: 1px solid var(--cx-card-border);
+    border-radius: 10px;
+    color: var(--cx-muted);
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+  .cx-ref-input button {
+    background: var(--cx-blue);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cx-ref-input button:hover { background: #1d4ed8; }
+
+  /* ── MOBILE NAV DRAWER ── */
+  .cx-drawer {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 2000;
+  }
+  .cx-drawer.open { display: block; }
+  .cx-drawer-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+  .cx-drawer-panel {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: 260px;
+    background: #0d1117;
+    border-left: 1px solid var(--cx-card-border);
+    padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .cx-drawer-close {
+    align-self: flex-end;
+    background: none; border: none; color: var(--cx-muted);
+    font-size: 24px; cursor: pointer; margin-bottom: 16px;
+  }
+  .cx-drawer-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: var(--cx-text);
+    text-decoration: none;
+    font-size: 15px;
+    transition: background .15s;
+  }
+  .cx-drawer-link:hover, .cx-drawer-link:focus { background: var(--cx-card); color: #fff; }
+  .cx-drawer-link i { color: var(--cx-blue-light); width: 20px; }
+  .cx-drawer-divider { height: 1px; background: var(--cx-card-border); margin: 8px 0; }
+
+  @media (min-width: 768px) {
+    .cx-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding: 60px 40px; }
+    .cx-hero-right { order: 2; }
+    .cx-stats { grid-template-columns: repeat(4, 1fr); padding: 32px 40px; }
+    .cx-features { grid-template-columns: repeat(4, 1fr); }
+    .cx-section { padding: 40px; }
+    .cx-review-card { margin: 0 40px; }
+    .cx-ref-card { margin: 0 40px; }
+    .cx-trust-bar { padding: 24px 40px; }
+    .cx-plans { display: grid; grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
 {% endblock %}
 
-{% block extra_js %}
+{% block main_content %}
+<!-- NAV -->
+<nav class="cx-nav">
+  <a href="{% url 'home' %}" class="cx-nav-brand">
+    <div class="cx-logo-box">X</div>
+    <div class="cx-brand-text">
+      <strong>SafeChain AI</strong>
+      <span>Invest Smart. Build Wealth.</span>
+    </div>
+  </a>
+  <div class="cx-nav-actions">
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="cx-btn-login">Dashboard</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="cx-btn-login">Log in</a>
+    {% endif %}
+    <button class="cx-hamburger" id="drawerToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="cx-drawer" id="navDrawer">
+  <div class="cx-drawer-overlay" id="drawerOverlay"></div>
+  <div class="cx-drawer-panel">
+    <button class="cx-drawer-close" id="drawerClose">&times;</button>
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="cx-drawer-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a href="{% url 'investment_plans' %}" class="cx-drawer-link"><i class="bi bi-diagram-3"></i> Investment Plans</a>
+      <a href="{% url 'tiers' %}" class="cx-drawer-link"><i class="bi bi-graph-up"></i> Tiers</a>
+      <a href="{% url 'wallet' %}" class="cx-drawer-link"><i class="bi bi-wallet2"></i> Wallet</a>
+      <a href="{% url 'referral' %}" class="cx-drawer-link"><i class="bi bi-people"></i> Referrals</a>
+      <a href="{% url 'portfolio' %}" class="cx-drawer-link"><i class="bi bi-briefcase"></i> Portfolio</a>
+      <div class="cx-drawer-divider"></div>
+      {% if user.is_staff or user.is_superuser %}
+        <a href="{% url 'unified_admin_dashboard' %}" class="cx-drawer-link"><i class="bi bi-speedometer"></i> Admin</a>
+      {% endif %}
+      <a href="{% url 'profile' %}" class="cx-drawer-link"><i class="bi bi-person"></i> Profile</a>
+      <a href="{% url 'logout' %}" class="cx-drawer-link"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="cx-drawer-link"><i class="bi bi-box-arrow-in-right"></i> Log In</a>
+      <a href="{% url 'register' %}" class="cx-drawer-link"><i class="bi bi-person-plus"></i> Register</a>
+      <div class="cx-drawer-divider"></div>
+      <a href="{% url 'investment_plans' %}" class="cx-drawer-link"><i class="bi bi-diagram-3"></i> Investment Plans</a>
+      <a href="{% url 'contact' %}" class="cx-drawer-link"><i class="bi bi-envelope"></i> Contact</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+  <div style="padding: 12px 20px;">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- HERO -->
+<section class="cx-hero">
+  <div class="cx-hero-left">
+    <div class="cx-new-badge"><i class="bi bi-stars"></i> NEW</div>
+    <h1>Buy Shares.<br>Get <span class="accent">R50</span> Free.</h1>
+    <p>Start investing with CapitalXPlatform and win <span class="accent">R100</span> on your first trade!</p>
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="cx-btn-cta">
+        <i class="bi bi-graph-up-arrow"></i> Go to Dashboard <i class="bi bi-chevron-right"></i>
+      </a>
+    {% else %}
+      <a href="{% url 'register' %}" class="cx-btn-cta">
+        <i class="bi bi-graph-up-arrow"></i> Start for Free <i class="bi bi-chevron-right"></i>
+      </a>
+    {% endif %}
+    <div class="cx-trust-badges">
+      <div class="cx-trust-badge"><i class="bi bi-shield-check"></i> Secure &amp; Regulated</div>
+      <div class="cx-trust-badge"><i class="bi bi-lightning-charge-fill"></i> Instant Payouts</div>
+      <div class="cx-trust-badge"><i class="bi bi-lock-fill"></i> Bank-Level Security</div>
+    </div>
+  </div>
+  <div class="cx-hero-right">
+    <div class="cx-chart-card">
+      <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-1px;">X</div>
+      <div style="font-size:11px;color:var(--cx-muted);margin-bottom:12px;">CapitalX</div>
+      <div class="cx-chart-badge">+12.45%</div>
+      <svg class="cx-chart-svg" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 65 L30 58 L60 50 L90 42 L110 38 L140 25 L170 15 L200 5" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M0 65 L30 58 L60 50 L90 42 L110 38 L140 25 L170 15 L200 5 L200 80 L0 80Z" fill="url(#chartGrad)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="cx-stats">
+  <div class="cx-stat-card">
+    <div class="cx-stat-icon blue"><i class="bi bi-people-fill"></i></div>
+    <h3>10,000+</h3>
+    <p>Investors Joined</p>
+    <div class="cx-stat-growth"><i class="bi bi-arrow-up-right"></i> +2,340 this month</div>
+  </div>
+  <div class="cx-stat-card">
+    <div class="cx-stat-icon green"><i class="bi bi-wallet2"></i></div>
+    <h3>R5M+</h3>
+    <p>Total Payouts</p>
+    <div class="cx-stat-growth"><i class="bi bi-arrow-up-right"></i> +R520K this month</div>
+  </div>
+  <div class="cx-stat-card">
+    <div class="cx-stat-icon blue"><i class="bi bi-robot"></i></div>
+    <h3>15</h3>
+    <p>AI Strategies</p>
+    <div class="cx-stat-growth"><i class="bi bi-arrow-up-right"></i> Running live</div>
+  </div>
+  <div class="cx-stat-card">
+    <div class="cx-stat-icon green"><i class="bi bi-star-fill"></i></div>
+    <h3>4.8</h3>
+    <p>User Rating</p>
+    <div class="cx-stat-growth"><i class="bi bi-arrow-up-right"></i> 2,500+ reviews</div>
+  </div>
+</div>
+
+<!-- WHY INVEST -->
+<section class="cx-section">
+  <h2 class="cx-section-title">Why Invest with CapitalX?</h2>
+  <div class="cx-features">
+    <div class="cx-feature">
+      <div class="cx-feature-icon"><i class="bi bi-shield-check"></i></div>
+      <h4>Trusted &amp; Secure</h4>
+      <p>Bank-level security and data protection</p>
+    </div>
+    <div class="cx-feature">
+      <div class="cx-feature-icon"><i class="bi bi-lightning-charge"></i></div>
+      <h4>Fast &amp; Easy</h4>
+      <p>Open your account in minutes</p>
+    </div>
+    <div class="cx-feature">
+      <div class="cx-feature-icon"><i class="bi bi-gift"></i></div>
+      <h4>Rewards</h4>
+      <p>Exclusive bonuses for new investors</p>
+    </div>
+    <div class="cx-feature">
+      <div class="cx-feature-icon"><i class="bi bi-bar-chart-line"></i></div>
+      <h4>Smart Tools</h4>
+      <p>AI-powered insights for better decisions</p>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTMENT PLANS -->
+<section class="cx-section" style="padding-top:0;">
+  <h2 class="cx-section-title">Popular Plans</h2>
+  <div class="cx-plans">
+    <div class="cx-plan-card featured">
+      <div class="cx-plan-left">
+        <div class="cx-plan-badge short">Short-Term</div>
+        <h4>Shoprite Plan</h4>
+        <span>Invest R60 · 12 hours</span>
+      </div>
+      <div class="cx-plan-right">
+        <div class="returns">R100</div>
+        <div class="duration">returns</div>
+        <a href="{% if user.is_authenticated %}{% url 'investment_plans' %}{% else %}{% url 'login' %}{% endif %}" class="cx-plan-arrow"><i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="cx-plan-card">
+      <div class="cx-plan-left">
+        <div class="cx-plan-badge mid">Mid-Term</div>
+        <h4>MTN Plan</h4>
+        <span>Invest R1,000 · 7 days</span>
+      </div>
+      <div class="cx-plan-right">
+        <div class="returns">R4,000</div>
+        <div class="duration">returns</div>
+        <a href="{% if user.is_authenticated %}{% url 'investment_plans' %}{% else %}{% url 'login' %}{% endif %}" class="cx-plan-arrow"><i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="cx-plan-card">
+      <div class="cx-plan-left">
+        <div class="cx-plan-badge long">Long-Term</div>
+        <h4>Naspers Plan</h4>
+        <span>Invest R10,000 · 60 days</span>
+      </div>
+      <div class="cx-plan-right">
+        <div class="returns">R50,000</div>
+        <div class="duration">returns</div>
+        <a href="{% if user.is_authenticated %}{% url 'investment_plans' %}{% else %}{% url 'login' %}{% endif %}" class="cx-plan-arrow"><i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:20px;">
+    <a href="{% url 'investment_plans' %}" style="color:var(--cx-blue-light);font-size:14px;text-decoration:none;">View all plans <i class="bi bi-arrow-right"></i></a>
+  </div>
+</section>
+
+<!-- REVIEW CARD -->
+<section class="cx-section" style="padding-top:0;">
+  <div class="cx-review-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div class="cx-stars">★★★★½</div>
+        <div class="cx-rating">4.8 <span>/ 5</span></div>
+        <div class="cx-review-count">From 2,500+ reviews</div>
+      </div>
+      <div>
+        <div class="cx-avatars">
+          <div class="cx-avatar">J</div>
+          <div class="cx-avatar" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);">S</div>
+          <div class="cx-avatar" style="background:linear-gradient(135deg,#065f46,#10b981);">M</div>
+        </div>
+        <p class="cx-review-text" style="max-width:200px;">Join thousands of smart investors growing their wealth with CapitalXPlatform.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFERRAL -->
+{% if user.is_authenticated and referral_link %}
+<section class="cx-section" style="padding-top:0;">
+  <div class="cx-ref-card">
+    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;"><i class="bi bi-people" style="color:var(--cx-blue-light);margin-right:6px;"></i>Refer &amp; Earn R10</div>
+    <div style="font-size:12px;color:var(--cx-muted);">Share your link and earn for every deposit.</div>
+    <div class="cx-ref-input">
+      <input type="text" id="referralLink" value="{{ referral_link }}" readonly>
+      <button id="copyButton">Copy</button>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- TRUST BAR -->
+<div class="cx-trust-bar">
+  <span>Trusted by</span>
+  <div class="cx-trust-item"><i class="bi bi-patch-check-fill" style="color:var(--cx-blue-light);"></i> FSCA</div>
+  <div class="cx-trust-item"><i class="bi bi-building" style="color:var(--cx-muted);"></i> JSE</div>
+  <div class="cx-trust-item"><i class="bi bi-lock-fill" style="color:var(--cx-green);"></i> SSL Secured</div>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#0d1117;border-top:1px solid var(--cx-card-border);padding:20px;text-align:center;">
+  <p style="margin:0;font-size:12px;color:var(--cx-muted);">&copy; {% now "Y" %} SafeChain AI · CapitalXPlatform. All rights reserved.</p>
+  <div style="margin-top:8px;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+    <a href="{% url 'terms' %}" style="font-size:12px;color:var(--cx-muted);text-decoration:none;">Terms</a>
+    <a href="{% url 'privacy' %}" style="font-size:12px;color:var(--cx-muted);text-decoration:none;">Privacy</a>
+    <a href="{% url 'contact' %}" style="font-size:12px;color:var(--cx-muted);text-decoration:none;">Contact</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const copyButton = document.getElementById('copyButton');
-        if(copyButton) {
-            copyButton.addEventListener('click', function() {
-                const referralLink = document.getElementById('referralLink');
-                navigator.clipboard.writeText(referralLink.value).then(() => {
-                    copyButton.textContent = 'Copied!';
-                    setTimeout(() => {
-                        copyButton.textContent = 'Copy';
-                    }, 2000);
-                });
-            });
-        }
+  const drawer = document.getElementById('navDrawer');
+  document.getElementById('drawerToggle').addEventListener('click', () => drawer.classList.add('open'));
+  document.getElementById('drawerClose').addEventListener('click', () => drawer.classList.remove('open'));
+  document.getElementById('drawerOverlay').addEventListener('click', () => drawer.classList.remove('open'));
+
+  const copyBtn = document.getElementById('copyButton');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const val = document.getElementById('referralLink').value;
+      navigator.clipboard.writeText(val).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+      });
     });
+  }
 </script>
 {% endblock %} 

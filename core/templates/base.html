@@ -123,9 +123,11 @@
     {% endif %}
 
     <!-- Main Content -->
+    {% block main_content %}
     <main class="container py-4">
         {% block content %}{% endblock %}
     </main>
+    {% endblock %}
 
     <!-- Footer -->
     <footer class="footer mt-auto py-3">
