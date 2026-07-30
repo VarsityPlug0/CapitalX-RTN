@@ -26,9 +26,9 @@
     }
     
     .card-clean {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
+        border:1px solid var(--cx-card-border);
+        background:var(--cx-card);
+        
     }
     
     .otp-input-mobile {
@@ -37,14 +37,14 @@
         padding: 1rem;
         text-align: center;
         border-radius: 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
+        border:1px solid var(--cx-card-border);
         color: white;
     }
     
     .otp-input-mobile:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: #3399ff;
+        background:var(--cx-card);
+        border-color: var(--cx-blue-light);
         box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
     }
     
@@ -193,7 +193,7 @@
                 </div>
                 
                 <!-- Footer -->
-                <div class="card-footer text-center" style="background: rgba(255, 255, 255, 0.05); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="card-footer text-center" style="background:var(--cx-card); border-top: 1px solid rgba(255, 255, 255, 0.1);">
                     <small class="text-muted">
                         <i class="bi bi-clock me-1"></i>
                         Expires in 10 min

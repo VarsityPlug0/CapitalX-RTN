@@ -18,17 +18,17 @@
     }
 
     .deposit-container {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        background: linear-gradient(135deg, var(--cx-bg) 0%, var(--cx-bg-2) 100%);
         min-height: 100vh;
         padding: 2rem 0;
     }
 
     .deposit-card {
         background: rgba(30, 30, 30, 0.95);
-        backdrop-filter: blur(10px);
+        
         border-radius: var(--border-radius);
         box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border:1px solid var(--cx-card-border);
         overflow: hidden;
     }
 
@@ -283,14 +283,14 @@
         align-items: flex-start;
         margin-bottom: 1rem;
         padding: 0.75rem;
-        background: rgba(255,255,255,0.1);
+        background:var(--cx-card);
         border-radius: var(--border-radius);
         transition: var(--transition);
         color: #ffffff;
     }
 
     .instruction-item:hover {
-        background: rgba(255,255,255,0.2);
+        background:var(--cx-card);
         transform: translateX(5px);
     }
 
@@ -332,7 +332,7 @@
     }
 
     .bank-info strong {
-        color: #3498db;
+        color: var(--cx-blue);
     }
 
     /* Hidden form class */

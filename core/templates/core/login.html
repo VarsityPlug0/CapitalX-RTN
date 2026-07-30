@@ -14,9 +14,9 @@
     }
     
     .login-card {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
+        border:1px solid var(--cx-card-border);
+        background:var(--cx-card);
+        
         border-radius: 1rem;
         width: 100%;
     }
@@ -32,8 +32,8 @@
     }
     
     .login-input {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
+        border:1px solid var(--cx-card-border);
         color: #ffffff; /* Pure white for maximum visibility */
         border-radius: 0.5rem;
         padding: 0.875rem 1rem;
@@ -42,8 +42,8 @@
     }
     
     .login-input:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: #3399ff;
+        background:var(--cx-card);
+        border-color: var(--cx-blue-light);
         box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
         color: #ffffff; /* Ensure text stays white when focused */
     }
@@ -57,18 +57,18 @@
     input[type="tel"] {
         color: #ffffff !important;
         font-weight: 500 !important;
-        background: rgba(255, 255, 255, 0.1) !important;
+        background:var(--cx-card) !important;
     }
     
     input[type="number"]:focus,
     input[type="tel"]:focus {
         color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.15) !important;
+        background:var(--cx-card) !important;
     }
     
     .input-icon {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
+        border:1px solid var(--cx-card-border);
         color: rgba(255, 255, 255, 0.7);
     }
     
@@ -88,7 +88,7 @@
     }
     
     .login-links a {
-        color: #3399ff;
+        color: var(--cx-blue-light);
         text-decoration: none;
         font-size: 0.9rem;
         font-weight: 500;

@@ -6,16 +6,16 @@
 {% block extra_css %}
 <style>
     .invest-container {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        background: linear-gradient(135deg, var(--cx-bg) 0%, var(--cx-bg-2) 100%);
         min-height: 100vh;
         padding: 40px 0;
     }
     
     .invest-card {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
+        border:1px solid var(--cx-card-border);
         border-radius: 20px;
-        backdrop-filter: blur(10px);
+        
         padding: 40px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
@@ -39,12 +39,12 @@
     }
     
     .plan-subtitle {
-        color: #b8c5d3;
+        color: var(--cx-muted);
         font-size: 1.2rem;
     }
     
     .investment-details {
-        background: rgba(255, 255, 255, 0.05);
+        background:var(--cx-card);
         border-radius: 15px;
         padding: 30px;
         margin-bottom: 30px;
@@ -63,7 +63,7 @@
     }
     
     .detail-label {
-        color: #b8c5d3;
+        color: var(--cx-muted);
         font-size: 1.1rem;
         display: flex;
         align-items: center;
@@ -76,13 +76,13 @@
     }
     
     .highlight-amount {
-        color: #2ecc71;
+        color: var(--cx-green);
         font-size: 1.5rem;
         font-weight: bold;
     }
     
     .roi-highlight {
-        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        background: linear-gradient(45deg, var(--cx-green), #059669);
         color: white;
         padding: 8px 20px;
         border-radius: 25px;
@@ -92,7 +92,7 @@
     
     .wallet-warning {
         background: rgba(231, 76, 60, 0.1);
-        border: 1px solid #e74c3c;
+        border: 1px solid var(--cx-red);
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 30px;
@@ -101,7 +101,7 @@
     
     .wallet-info {
         background: rgba(46, 204, 113, 0.1);
-        border: 1px solid #2ecc71;
+        border: 1px solid var(--cx-green);
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 30px;
@@ -109,7 +109,7 @@
     }
     
     .btn-invest-confirm {
-        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        background: linear-gradient(45deg, var(--cx-green), #059669);
         border: none;
         border-radius: 15px;
         color: white;
@@ -121,15 +121,15 @@
     }
     
     .btn-invest-confirm:hover {
-        background: linear-gradient(45deg, #27ae60, #219a52);
+        background: linear-gradient(45deg, #059669, #219a52);
         transform: translateY(-3px);
         box-shadow: 0 15px 30px rgba(46, 204, 113, 0.4);
         color: white;
     }
     
     .btn-back {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
+        border:1px solid var(--cx-card-border);
         border-radius: 12px;
         color: #fff;
         padding: 12px 30px;
@@ -138,13 +138,13 @@
     }
     
     .btn-back:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
         color: #fff;
         text-decoration: none;
     }
     
     .terms-section {
-        background: rgba(255, 255, 255, 0.05);
+        background:var(--cx-card);
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 30px;
@@ -157,7 +157,7 @@
     }
     
     .terms-list {
-        color: #b8c5d3;
+        color: var(--cx-muted);
         font-size: 0.95rem;
         line-height: 1.6;
     }

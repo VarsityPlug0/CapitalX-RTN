@@ -26,9 +26,9 @@
     }
     
     .form-clean {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
+        border:1px solid var(--cx-card-border);
+        background:var(--cx-card);
+        
         border-radius: 1rem;
     }
     
@@ -38,16 +38,16 @@
     }
     
     .form-floating-custom .form-control {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:var(--cx-card);
+        border:1px solid var(--cx-card-border);
         color: white;
         border-radius: 0.5rem;
         padding: 0.875rem 0.75rem;
     }
     
     .form-floating-custom .form-control:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: #3399ff;
+        background:var(--cx-card);
+        border-color: var(--cx-blue-light);
         box-shadow: 0 0 0 0.2rem rgba(51, 153, 255, 0.25);
         color: white;
     }
@@ -61,13 +61,13 @@
     input[type="tel"] {
         color: #ffffff !important;
         font-weight: 500 !important;
-        background: rgba(255, 255, 255, 0.1) !important;
+        background:var(--cx-card) !important;
     }
     
     input[type="number"]:focus,
     input[type="tel"]:focus {
         color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.15) !important;
+        background:var(--cx-card) !important;
     }
     
     .btn-register {
@@ -90,11 +90,11 @@
     }
     
     .checkbox-custom {
-        accent-color: #3399ff;
+        accent-color: var(--cx-blue-light);
     }
     
     .link-clean {
-        color: #3399ff;
+        color: var(--cx-blue-light);
         text-decoration: none;
         font-weight: 500;
     }
