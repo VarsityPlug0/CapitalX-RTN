@@ -103,6 +103,7 @@ urlpatterns = [
     path('debug/imports/', health_views.debug_imports, name='debug_imports'),
     path('test/', health_views.simple_test_page, name='simple_test_page'),
     path('test/lead-imports/', simple_lead_views.test_lead_imports, name='test_lead_imports'),
+    path('debug/test-email/', health_views.test_email, name='test_email'),
     path('debug/csrf/', views_debug.csrf_debug_view, name='csrf_debug'),
     path('test/csrf/', views.csrf_test_view, name='csrf_test'),
 ]

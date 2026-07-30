@@ -62,6 +62,62 @@ def simple_test_page(request):
 
 
 @csrf_exempt
+def test_email(request):
+    """Test email sending and return detailed error info."""
+    import smtplib
+    import ssl
+    from django.conf import settings
+
+    host = settings.EMAIL_HOST
+    port = settings.EMAIL_PORT
+    user = settings.EMAIL_HOST_USER
+    password = settings.EMAIL_HOST_PASSWORD
+
+    # Test raw SMTP first
+    smtp_result = {}
+    try:
+        context = ssl.create_default_context()
+        with smtplib.SMTP(host, port, timeout=10) as server:
+            server.ehlo()
+            server.starttls(context=context)
+            server.ehlo()
+            server.login(user, password)
+            smtp_result['status'] = 'ok'
+    except Exception as e:
+        smtp_result['status'] = 'failed'
+        smtp_result['error'] = str(e)
+        smtp_result['type'] = type(e).__name__
+
+    # Test Django send_mail
+    django_result = {}
+    to_email = request.GET.get('to', user)
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject='CapitalX Email Test',
+            message='This is a test email from CapitalX.',
+            from_email=user,
+            recipient_list=[to_email],
+            fail_silently=False,
+        )
+        django_result['status'] = 'ok'
+        django_result['sent_to'] = to_email
+    except Exception as e:
+        django_result['status'] = 'failed'
+        django_result['error'] = str(e)
+        django_result['type'] = type(e).__name__
+
+    return JsonResponse({
+        'smtp_host': host,
+        'smtp_port': port,
+        'email_user': user,
+        'password_set': bool(password),
+        'smtp_test': smtp_result,
+        'django_send_mail': django_result,
+    })
+
+
+@csrf_exempt
 def debug_imports(request):
     """
     Test all the imports that might be causing issues
