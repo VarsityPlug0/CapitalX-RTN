@@ -217,8 +217,10 @@ def dashboard_view(request):
         account_type__isnull=False,
         account_type__gt=''
     ).exists()
+    display_name = user.first_name or user.get_full_name() or user.email.split('@')[0]
     context = {
         'wallet': wallet,
+        'display_name': display_name,
         'total_earnings': total_earnings,
         'total_expected_return': total_expected_return,
         'max_waiting_time': max_waiting_time,
@@ -232,7 +234,6 @@ def dashboard_view(request):
         'total_invested': user.total_invested,
         'next_level_threshold': next_level_threshold,
         'progress_percentage': progress_percentage,
-
         'has_banking_details': has_banking_details,
         'has_verified_account': has_verified_account,
     }

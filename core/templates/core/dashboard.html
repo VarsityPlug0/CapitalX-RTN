@@ -10,9 +10,9 @@
   .db-welcome p { color: var(--cx-muted); margin: 0; font-size: .9rem; }
 
   /* Stats grid */
-  .db-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; margin-bottom: 1.75rem; }
+  .db-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; margin-bottom: 1.75rem; width: 100%; }
   @media(min-width:768px){ .db-stats { grid-template-columns: repeat(4,1fr); } }
-  .db-stat { background: var(--cx-card); border: 1px solid var(--cx-card-border); border-radius: 14px; padding: 1.125rem 1.25rem; }
+  .db-stat { background: var(--cx-card); border: 1px solid var(--cx-card-border); border-radius: 14px; padding: 1.125rem 1.25rem; min-width: 0; }
   .db-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.125rem; margin-bottom: .75rem; }
   .db-stat-icon.blue  { background: rgba(37,99,235,.15); color: var(--cx-blue-light); }
   .db-stat-icon.green { background: rgba(16,185,129,.15); color: var(--cx-green); }
@@ -64,7 +64,7 @@
   <div class="d-flex align-items-center gap-2 mb-1">
     <span class="db-badge active"><i class="bi bi-circle-fill" style="font-size:.5rem;"></i> Live</span>
   </div>
-  <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
+  <h1>Welcome back, {{ display_name }}!</h1>
   <p>Here's what's happening with your investments today.</p>
 </div>
 
