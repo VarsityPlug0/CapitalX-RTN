@@ -46,30 +46,20 @@ urlpatterns = [
     path('portfolio/', views.portfolio_view, name='portfolio'),
     path('tutorial/', views.tutorial_view, name='tutorial'),
     path('support/', views.support_view, name='support'),
-    path('figma-showcase/', views.figma_design_showcase, name='figma_showcase'),
-    path('contrast-test/', views.contrast_test_view, name='contrast_test'),
-    path('whitish-text/', views.whitish_text_test_view, name='whitish_text_test'),
     path('test/simple/', views.simple_test_view, name='simple_test'),
-    # OTP Email Verification URLs
+    path('send-verification-otp/', views.send_verification_otp, name='send_verification_otp'),
     path('send-verification-otp/', views.send_verification_otp, name='send_verification_otp'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('resend-otp/', views.resend_otp, name='resend_otp'),
-    
-    # Investment Plans URLs
     path('investment-plans/', views.investment_plans_view, name='investment_plans'),
     path('invest-plan/<int:plan_id>/', views.invest_in_plan_view, name='invest_in_plan'),
     path('my-plan-investments/', views.my_plan_investments_view, name='my_plan_investments'),
-
-    # User Financial Info API
     path('api/user/financial-info/', views.user_financial_info_api, name='user_financial_info_api'),
     path('api/generate-token/', views.generate_api_token, name='generate_api_token'),
 
-    # Admin action URLs for deposit management (legacy - redirects to new system)
     path('admin/deposit/<int:deposit_id>/approve/', views.admin_approve_deposit, name='legacy_admin_approve_deposit'),
     path('admin/deposit/<int:deposit_id>/reject/', views.admin_reject_deposit, name='legacy_admin_reject_deposit'),
     path('admin/deposit-dashboard/', views.deposit_dashboard_view, name='deposit_dashboard'),
-    
-    # Unified Admin Dashboard (new RBAC-based system)
     path('admin/', admin_views.admin_dashboard, name='admin_dashboard'),
     path('admin/deposits/', admin_views.admin_deposits, name='admin_deposits'),
     path('admin/deposits/<int:deposit_id>/approve/', admin_views.admin_approve_deposit, name='admin_approve_deposit'),
@@ -82,15 +72,10 @@ urlpatterns = [
     path('admin/investment-plans/', admin_views.admin_investment_plans, name='admin_investment_plans'),
     path('admin/leads-dashboard/', admin_views.admin_leads, name='admin_leads'),
     path('admin/campaigns-overview/', admin_views.admin_campaigns, name='admin_campaigns'),
-    
-    # Legacy Unified Admin Dashboard (redirect to new)
     path('admin/unified-dashboard/', views.unified_admin_dashboard, name='unified_admin_dashboard'),
     path('admin/manage-users/', views.manage_users_view, name='manage_users'),
     path('admin/manage-companies/', views.manage_companies_view, name='manage_companies'),
     path('admin/manage-investment-plans/', views.manage_investment_plans_view, name='manage_investment_plans'),
-
-
-    # Email Lead System URLs
     path('admin/leads/', lead_views.lead_dashboard, name='lead_dashboard'),
     path('admin/leads/analytics/', lead_views.lead_analytics, name='lead_analytics'),
     path('admin/leads/campaign/<int:campaign_id>/', lead_views.campaign_detail, name='campaign_detail'),
@@ -101,8 +86,6 @@ urlpatterns = [
     # Lead System API URLs
     path('api/leads/campaign/<int:campaign_id>/status/', lead_views.api_campaign_status, name='api_campaign_status'),
     path('api/leads/campaign/<int:campaign_id>/toggle/', lead_views.api_toggle_campaign, name='api_toggle_campaign'),
-    
-    # Lead Manager URLs (User-friendly interface) - Using simple version for now
     path('lead-manager/', simple_lead_views.simple_lead_dashboard, name='lead_manager_dashboard'),
     path('lead-manager-full/', lead_manager_views.lead_manager_dashboard, name='lead_manager_full'),
     path('simple-lead-manager/', simple_lead_views.simple_lead_dashboard, name='simple_lead_manager'),
@@ -113,43 +96,28 @@ urlpatterns = [
     path('lead-manager/campaign/<int:campaign_id>/generate/', lead_manager_views.generate_more_leads, name='generate_more_leads'),
     path('lead-manager/campaign/<int:campaign_id>/toggle/', lead_manager_views.toggle_campaign_status, name='toggle_campaign_status'),
     path('lead-manager/campaign/<int:campaign_id>/delete/', lead_manager_views.delete_campaign, name='delete_campaign'),
-    
-    # Progress tracking API
     path('api/leads/progress/<str:operation_id>/', lead_manager_views.get_processing_progress, name='get_processing_progress'),
-    
-    # Admin test URLs for debugging
     path('debug/admin-status/', admin_test_views.debug_admin_status, name='debug_admin_status'),
     path('test/lead-manager/', admin_test_views.simple_lead_manager, name='simple_lead_manager'),
-    path('test/admin-dashboard/', views.test_admin_dashboard_view, name='test_admin_dashboard'),
-    
-    # Health check URLs for deployment debugging
     path('health/', health_views.health_check, name='health_check'),
     path('debug/imports/', health_views.debug_imports, name='debug_imports'),
     path('test/', health_views.simple_test_page, name='simple_test_page'),
     path('test/lead-imports/', simple_lead_views.test_lead_imports, name='test_lead_imports'),
-    
-    # CSRF Debug URL
     path('debug/csrf/', views_debug.csrf_debug_view, name='csrf_debug'),
-    path('test/csrf/', views.csrf_test_view, name='csrf_test'),  # Add this line
-
-    # Test media file serving
-    path('test-media/', views.test_media_serving, name='test_media_serving'),
-    path('api/test/', views.test_api_view, name='test_api'),
+    path('test/csrf/', views.csrf_test_view, name='csrf_test'),
 ]
 
-# Only add the test view URL if the module is available
 if TEST_VIEWS_AVAILABLE:
     urlpatterns.append(path('api/simple-test/', test_views.simple_test_view, name='simple_test_api'))
 
-# Bot authentication URLs
 urlpatterns += [
     path('api/generate-bot-secret/', bot_views.generate_bot_secret, name='generate_bot_secret'),
     path('api/validate-bot-secret/', bot_views.validate_bot_secret, name='validate_bot_secret'),
     path('api/bot/financial-info/', bot_views.bot_get_financial_info, name='bot_financial_info'),
-    
-    # Password reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='core/password_reset.html'), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='core/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='core/password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='core/password_reset_complete.html'), name='password_reset_complete'),
+    path('companies/', views.companies_view, name='companies'),
+    path('chat/', views.chat_page_view, name='chat'),
 ]

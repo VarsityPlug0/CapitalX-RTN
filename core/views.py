@@ -1,60 +1,54 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .models import Company, Investment, Wallet, Referral, IPAddress, CustomUser, Deposit, ReferralReward, Withdrawal, DailySpecial, AdminActivityLog, ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.utils import timezone
-from django.core.files.storage import FileSystemStorage
+from django.db.models import Sum, Q, Count
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from datetime import timedelta, datetime
 from decimal import Decimal
-from django.db.models import Sum, Q
-from django.http import JsonResponse
-from django.urls import reverse
-import random
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count
-from .forms import VoucherDepositForm
-import logging
-import re
-# import openai  # Removed OpenAI import
-from django.views.decorators.csrf import csrf_exempt
-import os
-from django.views.decorators.http import require_POST
-from .email_utils import send_welcome_email, send_deposit_confirmation, send_withdrawal_confirmation, send_referral_bonus, send_security_alert, send_otp_email, send_admin_deposit_notification, send_admin_withdrawal_notification
-from .decorators import client_only
-
-# REST Framework imports
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import permission_classes
+from rest_framework.authtoken.models import Token
+import logging
+import random
+import re
+import secrets
 
-# Home view
-# Landing page for the application
+from .models import (
+    Company, Investment, Wallet, Referral, IPAddress, CustomUser,
+    Deposit, ReferralReward, Withdrawal, DailySpecial, AdminActivityLog,
+    ChatUsage, EmailOTP, InvestmentPlan, PlanInvestment, LeadCampaign, Lead,
+    EFTBankAccount,
+)
+from .email_utils import (
+    send_deposit_confirmation, send_withdrawal_confirmation,
+    send_otp_email, send_admin_deposit_notification, send_admin_withdrawal_notification,
+)
+from .decorators import client_only
+
+logger = logging.getLogger(__name__)
+
 def home_view(request):
-    # Get investment plans instead of companies
-    investment_plans = InvestmentPlan.objects.filter(is_active=True)[:3]  # Get first 3 active plans
-    
-    # Get platform stats
+    investment_plans = InvestmentPlan.objects.filter(is_active=True)[:3]
     total_investors = CustomUser.objects.count()
     total_payouts = Investment.objects.filter(is_active=False).aggregate(
         total=Sum('return_amount')
     )['total'] or 0
-    ai_strategies = 5  # Mock value for now
-    
-    # Get top referrers
+    ai_strategies = 5
     top_referrers = CustomUser.objects.annotate(
         total_earnings=Sum('rewards__reward_amount')
     ).filter(total_earnings__isnull=False).order_by('-total_earnings')[:3]
-    
-    # Generate referral link for authenticated users (using referral_code for privacy)
     referral_link = None
     if request.user.is_authenticated:
         referral_link = request.build_absolute_uri(
             reverse('register') + f'?ref={request.user.referral_code}'
         )
-    
-    # Mock testimonials (replace with real data later)
     testimonials = [
         {
             'name': 'John D.',
@@ -83,32 +77,6 @@ def home_view(request):
     return render(request, 'core/home.html', context)
 
 
-def test_media_serving(request):
-    """
-    Test view to verify media file serving is working
-    """
-    from django.conf import settings
-    import os
-    
-    # Test if we can access a known media file
-    test_file_path = os.path.join(settings.MEDIA_ROOT, 'vouchers', 'Screenshot_2025-10-01_193517.png')
-    if os.path.exists(test_file_path):
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Media file found',
-            'file_path': test_file_path,
-            'file_exists': True
-        })
-    else:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Media file not found',
-            'file_path': test_file_path,
-            'file_exists': False
-        })
-
-# Registration view
-# Handles user registration
 def register_view(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
@@ -138,7 +106,6 @@ def register_view(request):
             return redirect('register')
             
         try:
-            # Normalize email to lowercase
             email = email.lower()
             first_name, last_name = full_name.split(' ', 1) if ' ' in full_name else (full_name, '')
             user = CustomUser.objects.create_user(
@@ -148,30 +115,20 @@ def register_view(request):
                 phone=phone,
                 first_name=first_name,
                 last_name=last_name,
-                is_staff=False,  # Explicitly ensure regular user
-                is_superuser=False  # Explicitly ensure regular user
+                is_staff=False,
+                is_superuser=False,
             )
-            
-            # Create a wallet for the user
             Wallet.objects.create(user=user)
-            
-            # Handle referral code from form (lookup by referral_code, not username)
             if referral_code:
                 try:
                     referrer = CustomUser.objects.get(referral_code=referral_code)
                     Referral.objects.create(inviter=referrer, invitee=user)
                 except CustomUser.DoesNotExist:
-                    # If referral code is invalid, just continue without error
                     pass
-            
-            # Log the user in
             login(request, user)
-            
-            # Generate and send OTP for email verification instead of welcome email
             try:
                 otp = EmailOTP.generate_otp(user, purpose='email_verification')
                 success = send_otp_email(user, otp.otp_code, purpose='email_verification')
-                
                 if success:
                     messages.success(request, 'Registration successful! Please check your email for a verification code.')
                     return render(request, 'core/verify_otp.html', {
@@ -182,17 +139,12 @@ def register_view(request):
                     messages.error(request, 'Registration successful but failed to send verification email. Please request a new verification code.')
                     return redirect('send_verification_otp')
             except Exception as e:
-                print(f"Failed to send verification email: {e}")
+                logger.error(f"Failed to send verification email for {email}: {e}", exc_info=True)
                 messages.error(request, 'Registration successful but failed to send verification email. Please request a new verification code.')
                 return redirect('send_verification_otp')
         except Exception as e:
-            # Log the actual error for debugging
-            print(f"Registration error: {e}")
-            
-            # Provide specific error messages for common issues
-            if 'UNIQUE constraint failed: core_customuser.email' in str(e):
-                messages.error(request, 'An account with this email already exists. Please use a different email or try logging in.')
-            elif 'UNIQUE constraint failed: core_customuser.username' in str(e):
+            logger.error(f"Registration error for {email}: {e}", exc_info=True)
+            if 'UNIQUE constraint failed: core_customuser.email' in str(e) or 'UNIQUE constraint failed: core_customuser.username' in str(e):
                 messages.error(request, 'An account with this email already exists. Please use a different email or try logging in.')
             else:
                 messages.error(request, 'An error occurred during registration. Please try again.')
@@ -200,17 +152,13 @@ def register_view(request):
             
     return render(request, 'core/register.html')
 
-# Login view
-# Handles user login
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email').strip().lower() if request.POST.get('email') else ''
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
-            # Skip email verification for admin/staff users
             if not user.is_staff and not user.is_superuser:
-                # Check if email is verified (only for regular users)
                 if not user.is_email_verified:
                     messages.warning(request, 'Please verify your email before logging in.')
                     return render(request, 'core/verify_otp.html', {
@@ -218,13 +166,10 @@ def login_view(request):
                         'purpose': 'email_verification',
                         'show_resend': True
                     })
-            
             login(request, user)
-            
-            # Redirect admin users to Lead Manager, regular users to dashboard
             if user.is_staff or user.is_superuser:
                 messages.success(request, f'Welcome back, {user.first_name or user.username}! You have admin access.')
-                return redirect('admin_dashboard')  # Redirect to new unified admin dashboard
+                return redirect('admin_dashboard')
             else:
                 return redirect('dashboard')
         else:
@@ -232,54 +177,25 @@ def login_view(request):
     return render(request, 'core/login.html')
 
 
-# Dashboard view
-# Shows user balance, investments, and referral stats
 @login_required
 @client_only
 def dashboard_view(request):
     user = request.user
-    # Get or create wallet for the user
     wallet, created = Wallet.objects.get_or_create(user=user)
-    
-    # Optimize database queries by using select_related and prefetch_related
     investments = Investment.objects.filter(user=user).select_related('company')
     deposits = Deposit.objects.filter(user=user).order_by('-created_at')
-    referrals = Referral.objects.filter(inviter=user).select_related('invitee')
-    
-    # Get referral rewards with aggregation to reduce queries
-    referral_rewards = ReferralReward.objects.filter(referrer=user)
-    total_referral_earnings = referral_rewards.aggregate(total=Sum('reward_amount'))['total'] or 0
-    
-    # Calculate total earnings from investments
+    total_referral_earnings = ReferralReward.objects.filter(referrer=user).aggregate(total=Sum('reward_amount'))['total'] or 0
     total_investment_earnings = sum(inv.return_amount - inv.amount for inv in investments if not inv.is_active)
-    
-    # Calculate total earnings
     total_earnings = total_investment_earnings + total_referral_earnings
-    
-    # Calculate total expected return from active investments
     active_investments = investments.filter(is_active=True)
     total_expected_return = sum(inv.return_amount for inv in active_investments)
-    
-    # Calculate max waiting time (days until the furthest end date)
     max_waiting_time = 0
     if active_investments.exists():
         furthest_end_date = max(inv.end_date for inv in active_investments)
         max_waiting_time = (furthest_end_date - timezone.now()).days
-    
-    # Calculate total deposits
     total_deposits = sum(dep.amount for dep in deposits if dep.status == 'approved')
-    
-    # Calculate total bonus from referrals
-    total_bonus = total_referral_earnings
-    
-    # Get active and completed investments
-    active_investments = investments.filter(is_active=True)
     completed_investments = investments.filter(is_active=False)
-    
-    # Get available companies for user's level with optimization
     available_companies = Company.objects.filter(min_level__lte=user.level)
-    
-    # Calculate progress to next level
     next_level_threshold = user.get_next_level_threshold()
     progress_percentage = 0
     if next_level_threshold > 0:
@@ -287,14 +203,7 @@ def dashboard_view(request):
             progress_percentage = (user.total_invested / Decimal('10000')) * 100
         elif user.level == 2:
             progress_percentage = ((user.total_invested - Decimal('10000')) / Decimal('10000')) * 100
-    
-    # Check if user has verified their account (has an approved deposit)
-    has_verified_account = Deposit.objects.filter(
-        user=user,
-        status='approved'
-    ).exists()
-    
-    # Check if user has uploaded banking details (at least one withdrawal with all bank fields filled)
+    has_verified_account = Deposit.objects.filter(user=user, status='approved').exists()
     has_banking_details = Withdrawal.objects.filter(
         user=user,
         account_holder_name__isnull=False,
@@ -308,17 +217,13 @@ def dashboard_view(request):
         account_type__isnull=False,
         account_type__gt=''
     ).exists()
-    
-    # User account verification status (for dashboard display only)
-    # No bonus system - verification is for deposit processing only
-    
     context = {
         'wallet': wallet,
         'total_earnings': total_earnings,
         'total_expected_return': total_expected_return,
         'max_waiting_time': max_waiting_time,
         'total_deposits': total_deposits,
-        'total_bonus': total_bonus,
+        'total_bonus': total_referral_earnings,
         'active_investments': active_investments,
         'completed_investments': completed_investments,
         'deposits': deposits,
@@ -334,15 +239,11 @@ def dashboard_view(request):
     
     return render(request, 'core/dashboard.html', context)
 
-# Tiers view
-# Lists all available investment tiers
 @login_required
 @client_only
 def tiers_view(request):
     user = request.user
     tiers = Company.objects.all()
-    
-    # Get active daily special
     now = timezone.now()
     try:
         daily_special = DailySpecial.objects.filter(
@@ -352,15 +253,8 @@ def tiers_view(request):
         ).latest('start_time')
     except DailySpecial.DoesNotExist:
         daily_special = None
-    
-    # Calculate total invested from actual investments
     total_invested = sum(inv.amount for inv in Investment.objects.filter(user=user))
-    
-    # Get or create user's wallet
     wallet, created = Wallet.objects.get_or_create(user=user)
-    
-    # Get investment plans data - REMOVED to avoid duplication
-    # Add eligibility and lock status to each company
     for company in tiers:
         company.eligible = company.min_level <= user.level
         # Get active investment for this company if it exists
@@ -374,8 +268,6 @@ def tiers_view(request):
             
         company.is_active = investment is not None
         company.invested = company.is_active or Investment.objects.filter(user=user, company=company).exists()
-
-        # Display investment details (active or most recent completed)
         investment_to_display = investment or Investment.objects.filter(user=user, company=company).order_by('-end_date').first()
 
         company.has_sufficient_balance = wallet.balance >= company.share_price
@@ -383,7 +275,6 @@ def tiers_view(request):
             company.remaining_amount = company.share_price - wallet.balance
         
         if investment_to_display:
-            # Check if investment is complete
             if investment_to_display.is_complete() and investment_to_display.is_active:
                 investment_to_display.is_active = False
                 investment_to_display.save()
@@ -411,8 +302,6 @@ def tiers_view(request):
     }
     return render(request, 'core/tiers.html', context)
 
-# Invest view
-# Allows user to invest in a tier
 @login_required
 def invest_view(request, company_id):
     try:
@@ -453,12 +342,10 @@ def invest_view(request, company_id):
                     company=company,
                     amount=company.share_price,
                     return_amount=company.expected_return,
-                    start_date=start_date,  # Explicitly set start_date
+                    start_date=start_date,
                     end_date=end_date,
-                    expires_at=end_date  # Set expires_at to the same value as end_date
+                    expires_at=end_date,
                 )
-                
-                # Update wallet balance - ensure we're using a new query to get the latest data
                 wallet = Wallet.objects.get(user=user)
                 wallet.balance -= company.share_price
                 wallet.save()
@@ -466,52 +353,36 @@ def invest_view(request, company_id):
                 messages.success(request, f'Successfully invested R{company.share_price} in {company.name}.')
                 return redirect('dashboard')
             except Exception as e:
-                # Log the error for debugging
-                print(f"Error processing investment: {str(e)}")
+                logger.error(f"Error processing investment for user {request.user.email}: {e}", exc_info=True)
                 messages.error(request, f'An error occurred while processing your investment: {str(e)}')
                 return render(request, 'core/invest.html', {'company': company, 'error': str(e)})
-        
-        # For GET request, show the investment confirmation page
         return render(request, 'core/invest.html', {'company': company})
         
     except Company.DoesNotExist:
         messages.error(request, 'Invalid investment tier.')
         return redirect('tiers')
     except Exception as e:
-        # Catch any other exceptions
-        print(f"Unexpected error in invest_view: {str(e)}")
+        logger.error(f"Unexpected error in invest_view for user {request.user.email}: {e}", exc_info=True)
         messages.error(request, f'An unexpected error occurred: {str(e)}')
         return redirect('tiers')
 
-# Wallet view
-# Shows wallet balance and withdrawal option
 @login_required
 @client_only
 def wallet_view(request):
     try:
         user = request.user
         wallet, created = Wallet.objects.get_or_create(user=user)
-        
-        # Get all transactions
         deposits = Deposit.objects.filter(user=user).exclude(payment_method='voucher').order_by('-created_at')
         voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
         withdrawals = Withdrawal.objects.filter(user=user).order_by('-created_at')
         investments = Investment.objects.filter(user=user).order_by('-created_at')
-        
-        # Separate pending deposits for special display
         pending_deposits = deposits.filter(status='pending')
         approved_deposits = deposits.filter(status='approved')
         rejected_deposits = deposits.filter(status='rejected')
-        
-        # Calculate totals
         total_pending = sum(d.amount for d in pending_deposits)
         total_approved = sum(d.amount for d in approved_deposits)
         total_rejected = sum(d.amount for d in rejected_deposits)
-        
-        # Combine all transactions into a single list
         transactions = []
-        
-        # Add deposits
         for deposit in deposits:
             transactions.append({
                 'created_at': deposit.created_at,
@@ -522,7 +393,6 @@ def wallet_view(request):
                 'id': deposit.id
             })
         
-        # Add withdrawals
         for withdrawal in withdrawals:
             transactions.append({
                 'created_at': withdrawal.created_at,
@@ -533,7 +403,6 @@ def wallet_view(request):
                 'id': withdrawal.id
             })
         
-        # Add voucher deposits
         for voucher in voucher_deposits:
             transactions.append({
                 'created_at': voucher.created_at,
@@ -544,7 +413,6 @@ def wallet_view(request):
                 'id': voucher.id
             })
 
-        # Add investments
         for investment in investments:
             transactions.append({
                 'created_at': investment.created_at,
@@ -555,7 +423,6 @@ def wallet_view(request):
                 'id': investment.id
             })
             
-            # Add returns for completed investments
             if not investment.is_active and investment.end_date:
                 transactions.append({
                     'created_at': investment.end_date,
@@ -566,12 +433,9 @@ def wallet_view(request):
                     'id': investment.id
                 })
         
-        # Sort transactions by date (newest first)
         transactions.sort(key=lambda x: x['created_at'], reverse=True)
-        
-        # Add pagination
         from django.core.paginator import Paginator
-        paginator = Paginator(transactions, 10)  # Show 10 transactions per page (increased from 5)
+        paginator = Paginator(transactions, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -587,14 +451,9 @@ def wallet_view(request):
         }
         return render(request, 'core/wallet.html', context)
     except Exception as e:
-        logging.error(f"Error in wallet_view for user {request.user.email}: {e}", exc_info=True)
-        # Optionally, you can render an error page or return a generic error response
-        # For now, let's re-raise to see the error in production logs,
-        # but in a real-world scenario, you might handle it differently.
+        logger.error(f"Error in wallet_view for user {request.user.email}: {e}", exc_info=True)
         raise
 
-# Referral view
-# Shows referral link and stats
 @login_required
 @client_only
 def referral_view(request):
@@ -610,23 +469,19 @@ def referral_view(request):
     context = {
         'referrals': referrals,
         'total_bonus': total_bonus,
-        'referral_link': referral_link,  # Pass the full referral link
+        'referral_link': referral_link,
         'total_referrals': referrals.count(),
         'active_referrals': referrals.filter(status='active').count(),
         'total_earnings': total_bonus,
-        'referral_commission': 10,  # 10% commission rate
+        'referral_commission': 10,
     }
     return render(request, 'core/referral.html', context)
 
-# Profile view
-# Shows and allows editing of user profile
 @login_required
 def profile_view(request):
     if request.method == 'POST':
         user = request.user
         full_name = request.POST.get('full_name')
-        
-        # Split full_name into first_name and last_name
         if full_name:
             parts = full_name.split(' ', 1)
             user.first_name = parts[0]
@@ -636,7 +491,6 @@ def profile_view(request):
         user.phone = request.POST.get('phone')
         user.auto_reinvest = request.POST.get('auto_reinvest') == 'on'
         
-        # Handle profile picture upload
         if request.FILES.get('profile_picture'):
             user.profile_picture = request.FILES['profile_picture']
 
@@ -651,79 +505,45 @@ def change_password(request):
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
-        
-        # Verify current password
         if not request.user.check_password(current_password):
             messages.error(request, 'Current password is incorrect.')
             return redirect('profile')
-        
-        # Check if new passwords match
         if new_password != confirm_password:
             messages.error(request, 'New passwords do not match.')
             return redirect('profile')
-        
-        # Change password
         request.user.set_password(new_password)
         request.user.save()
-        
-        # Update session to prevent logout
         update_session_auth_hash(request, request.user)
-        
         messages.success(request, 'Password changed successfully.')
         return redirect('profile')
-    
     return redirect('profile')
 
-# Logout view
-# Handles user logout
 def logout_view(request):
-    # Clear all session data
     if request.user.is_authenticated:
         logout(request)
-    
-    # Clear any cached session data
     request.session.flush()
-    
-    # Add a message to confirm logout
     messages.success(request, 'You have been successfully logged out.')
-    
-    # Redirect to home page
     return redirect('home')
 
-# Deposit view
-# Handles deposit submissions from users
-# All deposits require admin approval for verification
 @login_required
 def deposit_view(request):
     if request.method == 'POST':
-        # Get deposit amount (handle different form field names)
         amount_str = request.POST.get('amount') or request.POST.get('eft_amount')
-        
-        # Validate and parse amount
         if not amount_str or amount_str.strip() == "":
             messages.error(request, 'Please enter a deposit amount.')
             return redirect('deposit')
-        
         try:
             amount = Decimal(amount_str.strip())
         except (ValueError, TypeError):
             messages.error(request, f'Invalid amount: {amount_str}')
             return redirect('deposit')
-        
-        # Enforce minimum deposit amount
         if amount < 50:
             messages.error(request, 'Minimum deposit amount is R50.')
             return redirect('deposit')
-        
-        # Get payment method
         payment_method = request.POST.get('payment_method', 'card')
-        
-        # Validate payment method
         if payment_method not in ['card', 'eft']:
             messages.error(request, 'Invalid payment method.')
             return redirect('deposit')
-        
-        # Prepare deposit data
         deposit_data = {
             'user': request.user,
             'amount': amount,
@@ -731,38 +551,25 @@ def deposit_view(request):
             'status': 'pending',
         }
         
-        # Add payment-specific details
         if payment_method == 'card':
-            # Get card details from the form
             card_number = request.POST.get('card_number', '').strip()
             expiry_date = request.POST.get('expiry_date', '').strip()
             cvv = request.POST.get('cvv', '').strip()
             cardholder_name = request.POST.get('cardholder_name', '').strip()
-            
-            # Basic validation for card details
             if not all([card_number, expiry_date, cvv, cardholder_name]):
                 messages.error(request, 'Please fill in all card details.')
                 return redirect('deposit')
-            
-            # Validate card number format (basic check)
             card_number_clean = card_number.replace(' ', '')
             if not card_number_clean.isdigit() or len(card_number_clean) < 13 or len(card_number_clean) > 19:
                 messages.error(request, 'Invalid card number format.')
                 return redirect('deposit')
-            
-            # Validate expiry date format
             if not re.match(r'^(0[1-9]|1[0-2])\/([0-9]{2})$', expiry_date):
                 messages.error(request, 'Invalid expiry date format. Use MM/YY.')
                 return redirect('deposit')
-            
-            # Validate CVV format
             if not cvv.isdigit() or len(cvv) not in [3, 4]:
                 messages.error(request, 'Invalid CVV format.')
                 return redirect('deposit')
-            
-            # Store only last 4 digits for security
             card_last4 = card_number_clean[-4:] if card_number_clean else ''
-            
             deposit_data.update({
                 'cardholder_name': cardholder_name,
                 'card_last4': card_last4,
@@ -773,24 +580,15 @@ def deposit_view(request):
             })
         
         elif payment_method == 'eft':
-            # Handle EFT specific fields
             eft_reference = request.POST.get('reference', '').strip()
             proof_image = request.FILES.get('proof_image')
-            
-            # Get rotated bank account for this user
-            from .models import EFTBankAccount
             bank_account = EFTBankAccount.get_rotated_account(request.user.id)
-            
-            # Add bank account info to admin notes
             bank_info = f"Bank: {bank_account['bank_name']}, Account Holder: {bank_account['account_holder']}"
             if 'account_number' in bank_account:
                 bank_info += f", Account: {bank_account['account_number']}"
-            
-            # Basic validation for EFT details
             if not eft_reference:
                 messages.error(request, 'Please provide a payment reference.')
                 return redirect('deposit')
-            
             if not proof_image:
                 messages.error(request, 'Please upload proof of payment.')
                 return redirect('deposit')
@@ -801,27 +599,19 @@ def deposit_view(request):
             })
         
         try:
-            # Create the deposit (pending admin approval)
             deposit = Deposit.objects.create(**deposit_data)
-            
-            # Send deposit confirmation email
             send_deposit_confirmation(request.user, deposit)
             
             messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
             return redirect('wallet')
         except Exception as e:
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error creating deposit: {str(e)}", exc_info=True)
+            logger.error(f"Error creating deposit for user {request.user.email}: {e}", exc_info=True)
             messages.error(request, 'An error occurred while processing your deposit. Please try again.')
             return redirect('deposit')
-    
-    # Handle GET request - check for payment method parameter
+
     selected_method = request.GET.get('method', 'card')
-    
-    # For EFT deposits, get the rotated bank account to display
     eft_bank_account = None
     if selected_method == 'eft':
-        from .models import EFTBankAccount
         eft_bank_account = EFTBankAccount.get_rotated_account(request.user.id)
     
     return render(request, 'core/deposit.html', {
@@ -829,8 +619,6 @@ def deposit_view(request):
         'eft_bank_account': eft_bank_account
     })
 
-# Bitcoin deposit view
-# Handles Bitcoin deposit submissions from users
 @login_required
 def bitcoin_deposit_view(request):
     if request.method == 'POST':
@@ -874,7 +662,6 @@ def bitcoin_deposit_view(request):
             messages.error(request, 'Invalid Bitcoin amount.')
             return redirect('bitcoin_deposit')
         
-        # Create the Bitcoin deposit (pending approval)
         deposit = Deposit.objects.create(
             user=request.user,
             amount=amount,
@@ -886,13 +673,11 @@ def bitcoin_deposit_view(request):
             admin_notes=f'Bitcoin deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
         )
         
-        # Send deposit confirmation email
         try:
             send_deposit_confirmation(request.user, deposit)
         except Exception as e:
-            print(f"Failed to send deposit confirmation email: {e}")
-            # Don't fail deposit if email fails
-        
+            logger.error(f"Failed to send deposit confirmation email: {e}")
+
         messages.success(request, 'Bitcoin deposit submitted successfully! It will be reviewed and approved within 24 hours.')
         return redirect('wallet')
     
@@ -938,7 +723,6 @@ def voucher_deposit_view(request):
             return redirect('voucher_deposit')
         
         try:
-            # Create the voucher deposit (pending approval)
             deposit = Deposit.objects.create(
                 user=request.user,
                 amount=amount,
@@ -946,16 +730,11 @@ def voucher_deposit_view(request):
                 voucher_code=voucher_code.strip(),
                 voucher_image=voucher_image,
             )
-            
-            # Send deposit confirmation email
             send_deposit_confirmation(request.user, deposit)
-            # Also send admin notification
             send_admin_deposit_notification(deposit)
-            
             messages.success(request, 'Voucher deposit submitted successfully! It will be reviewed and approved within 24 hours.')
             return redirect('wallet')
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.error(f"Error creating voucher deposit: {str(e)}", exc_info=True)
             messages.error(request, 'An error occurred while processing your voucher deposit. Please try again.')
             return redirect('voucher_deposit')
@@ -982,7 +761,6 @@ def withdrawal_view(request):
             messages.error(request, 'Minimum withdrawal amount is R50.')
             return redirect('withdraw')
         
-        # Check if user has sufficient balance (this check is also in the model)
         try:
             wallet = Wallet.objects.get(user=request.user)
             if amount > wallet.balance:
@@ -991,8 +769,7 @@ def withdrawal_view(request):
         except Wallet.DoesNotExist:
             messages.error(request, 'Wallet not found. Please contact support.')
             return redirect('withdraw')
-        
-        # Calculate total earnings (sum of all completed investment returns for the user)
+
         total_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
         total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')
         if total_earnings > 0 and total_deposits < (Decimal('0.5') * total_earnings):
@@ -1006,7 +783,6 @@ def withdrawal_view(request):
                 'payment_method': payment_method,
             }
             
-            # Add bank details if payment method is bank transfer
             if payment_method == 'bank':
                 withdrawal_data.update({
                     'account_holder_name': request.POST.get('account_holder_name', ''),
@@ -1016,22 +792,15 @@ def withdrawal_view(request):
                     'account_type': request.POST.get('account_type', ''),
                 })
             
-            # Create withdrawal (balance will be deducted in the model's save method)
             withdrawal = Withdrawal.objects.create(**withdrawal_data)
-            
-            # Send withdrawal confirmation email to user
             try:
                 send_withdrawal_confirmation(request.user, withdrawal)
             except Exception as e:
-                print(f"Failed to send withdrawal confirmation email: {e}")
-                # Don't fail withdrawal if email fails
-            
-            # Send withdrawal notification email to admin
+                logger.error(f"Failed to send withdrawal confirmation email: {e}")
             try:
                 send_admin_withdrawal_notification(withdrawal)
             except Exception as e:
-                print(f"Failed to send admin withdrawal notification email: {e}")
-                # Don't fail withdrawal if email fails
+                logger.error(f"Failed to send admin withdrawal notification email: {e}")
             
             messages.success(request, 'Withdrawal request submitted successfully. Please wait for approval.')
             return redirect('wallet')
@@ -1041,12 +810,9 @@ def withdrawal_view(request):
         
     return render(request, 'core/withdrawal.html')
 
-# Feed view
-# Shows real-time activity and AI investment updates
 @login_required
 def feed_view(request):
     try:
-        # --- 1. AI INVESTMENT UPDATES ---
         investment_updates = [
             {
                 'message': 'AI Trading Bot completed 5 successful trades',
@@ -1070,7 +836,6 @@ def feed_view(request):
             }
         ]
 
-        # --- 2. USER MILESTONES ---
         user_milestones = [
             {
                 'type': 'deposit',
@@ -1104,7 +869,6 @@ def feed_view(request):
             }
         ]
 
-        # --- 3. REFERRAL ACTIVITY ---
         referral_activities = [
             {
                 'referrer': 'MasterTrader',
@@ -1138,7 +902,6 @@ def feed_view(request):
             }
         ]
 
-        # --- 4. TIPS & SECURITY REMINDERS ---
         tips = [
             "💡 Tip: Reinvest to reach higher companies faster.",
             "💡 Tip: Refer friends to earn passive income.",
@@ -1154,8 +917,7 @@ def feed_view(request):
             "⚠️ Verify all transactions carefully.",
             "⚠️ Report suspicious activity immediately."
         ]
-        
-        # --- 5. DAILY STATS ---
+
         daily_stats = {
             'total_users': random.randint(1000, 1500),
             'active_investments': random.randint(800, 1000),
@@ -1178,11 +940,7 @@ def feed_view(request):
         return render(request, 'core/feed.html', context)
         
     except Exception as e:
-        # Log the error for debugging
-        logger = logging.getLogger(__name__)
         logger.error(f"Error in feed_view: {str(e)}", exc_info=True)
-        
-        # Return a user-friendly error context
         error_context = {
             'status': 'error',
             'error_message': 'Unable to load feed data. Please try again later.',
@@ -1205,26 +963,16 @@ def feed_view(request):
 def cash_out_view(request, investment_id):
     try:
         investment = Investment.objects.get(id=investment_id, user=request.user)
-        
-        # Check if investment is completed and ready for claiming
         if investment.is_active or investment.end_date > timezone.now():
             messages.error(request, 'This investment is not ready for claiming yet.')
             return redirect('portfolio')
-        
-        # Check if funds have already been claimed
         if investment.funds_claimed:
             messages.error(request, 'Funds for this investment have already been claimed.')
             return redirect('portfolio')
-        
-        # Get user's wallet
         wallet = Wallet.objects.get(user=request.user)
-        
-        # Add both the original investment amount and return amount to wallet balance
         total_amount = investment.amount + investment.return_amount
         wallet.balance += total_amount
         wallet.save()
-        
-        # Mark investment as claimed
         investment.funds_claimed = True
         investment.save()
         
@@ -1235,15 +983,8 @@ def cash_out_view(request, investment_id):
         messages.error(request, 'Invalid investment.')
         return redirect('portfolio')
 
-# API view to generate authentication token
-from rest_framework.authtoken.models import Token
-import secrets
-
 @login_required
 def generate_api_token(request):
-    """
-    Generate or retrieve an API token for the current user
-    """
     token, created = Token.objects.get_or_create(user=request.user)
     return JsonResponse({
         'success': True,
@@ -1256,13 +997,7 @@ def generate_api_token(request):
 
 @login_required
 def generate_bot_secret(request):
-    """
-    Generate a secret phrase for bot authentication
-    """
-    # Generate a random secret phrase
     secret = secrets.token_urlsafe(32)
-    
-    # Save it to the user's profile
     request.user.bot_secret = secret
     request.user.save()
     
@@ -1276,19 +1011,10 @@ def generate_bot_secret(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def validate_bot_secret(request):
-    """
-    Validate a bot secret phrase
-    """
     secret = request.data.get('secret')
-    
     if not secret:
-        return Response({
-            'success': False,
-            'error': 'No secret provided'
-        }, status=400)
-    
+        return Response({'success': False, 'error': 'No secret provided'}, status=400)
     try:
-        # Look for a user with this secret
         user = CustomUser.objects.get(bot_secret=secret)
         return Response({
             'success': True,
@@ -1331,25 +1057,16 @@ def check_cash_out_view(request, investment_id):
 def claim_investment_funds(request, investment_id):
     try:
         investment = Investment.objects.get(id=investment_id, user=request.user)
-        
-        # Check if investment is completed and ready for claiming
         if investment.is_active or investment.end_date > timezone.now():
             messages.error(request, 'This investment is not ready for claiming yet.')
             return redirect('portfolio')
-        # Check if funds have already been claimed
         if investment.funds_claimed:
             messages.error(request, 'Funds for this investment have already been claimed.')
             return redirect('portfolio')
-        
-        # Get user's wallet
         wallet = Wallet.objects.get(user=request.user)
-        
-        # Add both the original investment amount and return amount to wallet balance
         total_amount = investment.amount + investment.return_amount
         wallet.balance += total_amount
         wallet.save()
-        
-        # Mark investment as claimed
         investment.funds_claimed = True
         investment.save()
         
@@ -1364,26 +1081,16 @@ def claim_investment_funds(request, investment_id):
 def claim_plan_investment_funds(request, investment_id):
     try:
         investment = PlanInvestment.objects.get(id=investment_id, user=request.user)
-        
-        # Check if investment is completed and ready for claiming
         if investment.is_active or investment.end_date > timezone.now():
             messages.error(request, 'This investment is not ready for claiming yet.')
             return redirect('my_plan_investments')
-        
-        # Check if funds have already been claimed/paid
         if investment.profit_paid:
             messages.error(request, 'Funds for this investment have already been claimed.')
             return redirect('my_plan_investments')
-        
-        # Get user's wallet
         wallet = Wallet.objects.get(user=request.user)
-        
-        # Add both the original investment amount and return amount to wallet balance
         total_amount = investment.amount + investment.return_amount
         wallet.balance += total_amount
         wallet.save()
-        
-        # Mark investment as claimed/paid
         investment.profit_paid = True
         investment.is_active = False
         investment.is_completed = True
@@ -1406,8 +1113,6 @@ def newsletter_subscribe(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         if email:
-            # Here you would typically save the email to your newsletter subscribers list
-            # For now, we'll just show a success message
             messages.success(request, 'Thank you for subscribing to our newsletter!')
         else:
             messages.error(request, 'Please provide a valid email address.')
@@ -1421,8 +1126,6 @@ def privacy_view(request):
 
 def contact_view(request):
     if request.method == 'POST':
-        # Here you would typically handle the contact form submission
-        # For now, we'll just show a success message
         messages.success(request, 'Thank you for your message. We will get back to you soon!')
         return redirect('contact')
     return render(request, 'core/contact.html')
@@ -1433,22 +1136,11 @@ def tutorial_view(request):
 @staff_member_required
 def admin_dashboard_view(request):
     try:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info("Starting admin dashboard view processing")
-        
-        # Check for any session messages from middleware
         if 'admin_access_error' in request.session:
-            from django.contrib import messages
             messages.error(request, request.session['admin_access_error'])
             del request.session['admin_access_error']
-        
-        # Get all tiers
+
         tiers = Company.objects.all().order_by('share_price')
-        logger.info(f"Found {tiers.count()} tiers")
-        
-        # Get investment statistics for each tier with optimized queries
-        # Use a single query to get all investment data grouped by company
         investment_stats = Investment.objects.values('company_id').annotate(
             total_investments=Count('id'),
             total_invested=Sum('amount'),
@@ -1456,16 +1148,12 @@ def admin_dashboard_view(request):
             active_investments=Count('id', filter=Q(is_active=True))
         )
         
-        # Convert to a dictionary for easy lookup
         investment_stats_dict = {
             stat['company_id']: stat for stat in investment_stats
         }
-        
+
         tier_stats = []
-        for i, tier in enumerate(tiers):
-            logger.info(f"Processing tier {i+1}: {tier.name}")
-            
-            # Get statistics for this tier from the precomputed dictionary
+        for tier in tiers:
             stats = investment_stats_dict.get(tier.id, {})
             
             tier_stats.append({
@@ -1476,12 +1164,10 @@ def admin_dashboard_view(request):
                 'active_investments': stats.get('active_investments', 0),
             })
         
-        # Get overall statistics with optimized queries
         total_deposits = Deposit.objects.filter(status='approved').aggregate(
             total=Sum('amount')
         )['total'] or 0
-        
-        # Use a single query for investment statistics
+
         investment_overall_stats = Investment.objects.aggregate(
             total_count=Count('id'),
             total_returns=Sum('return_amount', filter=Q(is_active=False))
@@ -1491,71 +1177,52 @@ def admin_dashboard_view(request):
         total_returns = investment_overall_stats['total_returns'] or 0
         
         total_users = CustomUser.objects.count()
-        
-        # Get detailed user information with optimized queries
-        # First, get all users with their wallets using select_related
+
         users_with_wallets = CustomUser.objects.select_related('wallet').order_by('-date_joined')
-        
-        # Get all deposits grouped by user
+
         user_deposit_stats = Deposit.objects.values('user_id').annotate(
             total_deposited=Sum('amount', filter=Q(status='approved'))
         )
         
-        # Convert to dictionary for easy lookup
         user_deposit_dict = {
             stat['user_id']: stat['total_deposited'] or 0 for stat in user_deposit_stats
         }
-        
-        # Get all investments grouped by user
+
         user_investment_stats = Investment.objects.values('user_id').annotate(
             total_invested=Sum('amount'),
             total_returns=Sum('return_amount', filter=Q(is_active=False)),
             active_investments=Count('id', filter=Q(is_active=True))
         )
         
-        # Convert to dictionary for easy lookup
         user_investment_dict = {
             stat['user_id']: stat for stat in user_investment_stats
         }
-        
-        # Get referral rewards grouped by referrer
+
         user_referral_stats = ReferralReward.objects.values('referrer_id').annotate(
             total_earnings=Sum('reward_amount')
         )
         
-        # Convert to dictionary for easy lookup
         user_referral_dict = {
             stat['referrer_id']: stat['total_earnings'] or 0 for stat in user_referral_stats
         }
-        
-        # Get referral counts grouped by inviter
+
         user_referral_count_stats = Referral.objects.values('inviter_id').annotate(
             total_referrals=Count('id')
         )
         
-        # Convert to dictionary for easy lookup
         user_referral_count_dict = {
             stat['inviter_id']: stat['total_referrals'] for stat in user_referral_count_stats
         }
-        
-        # Build user details with minimal database queries
+
         user_details = []
         for user in users_with_wallets:
-            # Get user's deposit statistics
             total_deposited = user_deposit_dict.get(user.id, 0)
-            
-            # Get user's investment statistics
             investment_stats = user_investment_dict.get(user.id, {})
             total_invested = investment_stats.get('total_invested', 0) or 0
             total_returns_user = investment_stats.get('total_returns', 0) or 0
             active_investments_count = investment_stats.get('active_investments', 0)
-            
-            # Get user's referral earnings
             referral_earnings = user_referral_dict.get(user.id, 0)
-            
-            # Get user's referral count
             total_referrals = user_referral_count_dict.get(user.id, 0)
-            
             user_details.append({
                 'user': user,
                 'wallet': getattr(user, 'wallet', None),
@@ -1565,17 +1232,15 @@ def admin_dashboard_view(request):
                 'active_investments': active_investments_count,
                 'referral_earnings': referral_earnings,
                 'total_referrals': total_referrals,
-                'deposits': [],  # These are not used in the template, so we can leave them empty
-                'investments': [],  # These are not used in the template, so we can leave them empty
-                'referrals': [],  # These are not used in the template, so we can leave them empty
+                'deposits': [],
+                'investments': [],
+                'referrals': [],
             })
-        
-        # Get recent activities with select_related for better performance
+
         recent_deposits = Deposit.objects.select_related('user').order_by('-created_at')[:10]
         recent_investments = Investment.objects.select_related('user', 'company').order_by('-created_at')[:10]
         recent_returns = Investment.objects.filter(is_active=False).select_related('user', 'company').order_by('-end_date')[:10]
-        
-        # Get pending deposit statistics for additional context
+
         pending_deposit_stats = Deposit.objects.filter(status='pending').aggregate(
             count=Count('id'),
             total=Sum('amount')
@@ -1598,51 +1263,29 @@ def admin_dashboard_view(request):
             'pending_deposits_amount': pending_deposits_amount,
         }
         
-        logger.info("Rendering admin dashboard template")
-        response = render(request, 'core/admin_dashboard.html', context)
-        logger.info("Admin dashboard view completed successfully")
-        return response
+        return render(request, 'core/admin_dashboard.html', context)
     except Exception as e:
-        # Log the error for debugging
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Error in admin_dashboard_view: {str(e)}", exc_info=True)
-        
-        # Return a simple error response for debugging
-        from django.http import HttpResponse
         return HttpResponse(f"Error in admin dashboard view: {str(e)}", status=500)
 
 @staff_member_required
 def unified_admin_dashboard(request):
-    """
-    Unified admin dashboard with all management features
-    """
     try:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info("Starting unified admin dashboard view processing")
-        
-        # Check for any session messages from middleware
         if 'admin_access_error' in request.session:
-            from django.contrib import messages
             messages.error(request, request.session['admin_access_error'])
             del request.session['admin_access_error']
-        
-        # Get overall statistics with optimized queries
+
         total_users = CustomUser.objects.count()
-        
-        # Deposit statistics - optimize with a single query
+
         deposit_stats = Deposit.objects.values('status').annotate(
             count=Count('id'),
             total_amount=Sum('amount')
         ).order_by('status')
         
-        # Initialize deposit statistics
         pending_deposits_count = pending_deposits_amount = 0
         approved_deposits_count = approved_deposits_amount = 0
         rejected_deposits_count = rejected_deposits_amount = 0
-        
-        # Process deposit statistics
+
         for stat in deposit_stats:
             if stat['status'] == 'pending':
                 pending_deposits_count = stat['count']
@@ -1655,20 +1298,17 @@ def unified_admin_dashboard(request):
                 rejected_deposits_amount = stat['total_amount'] or 0
         
         total_deposits_amount = approved_deposits_amount
-        
-        # Investment statistics - optimize with a single query
+
         investment_stats = Investment.objects.values('is_active').annotate(
             count=Count('id'),
             total_amount=Sum('amount'),
             total_returns=Sum('return_amount')
         ).order_by('is_active')
         
-        # Initialize investment statistics
         total_investments = total_investments_amount = 0
         active_investments_count = active_investments_amount = 0
         completed_investments_count = completed_investments_amount = total_returns_amount = 0
-        
-        # Process investment statistics
+
         for stat in investment_stats:
             total_investments += stat['count']
             total_investments_amount += stat['total_amount'] or 0
@@ -1681,18 +1321,15 @@ def unified_admin_dashboard(request):
                 completed_investments_amount = stat['total_amount'] or 0
                 total_returns_amount = stat['total_returns'] or 0
         
-        # Withdrawal statistics - optimize with a single query
         withdrawal_stats = Withdrawal.objects.values('status').annotate(
             count=Count('id'),
             total_amount=Sum('amount')
         ).order_by('status')
         
-        # Initialize withdrawal statistics
         pending_withdrawals_count = pending_withdrawals_amount = 0
         approved_withdrawals_count = approved_withdrawals_amount = 0
         rejected_withdrawals_count = rejected_withdrawals_amount = 0
-        
-        # Process withdrawal statistics
+
         for stat in withdrawal_stats:
             if stat['status'] == 'pending':
                 pending_withdrawals_count = stat['count']
@@ -1704,18 +1341,14 @@ def unified_admin_dashboard(request):
                 rejected_withdrawals_count = stat['count']
                 rejected_withdrawals_amount = stat['total_amount'] or 0
         
-        # Company statistics
         companies_count = Company.objects.count()
-        
-        # User level distribution - optimize with a single query
+
         user_level_stats = CustomUser.objects.values('level').annotate(
             count=Count('id')
         ).order_by('level')
         
-        # Initialize user level statistics
         level_1_users = level_2_users = level_3_users = 0
-        
-        # Process user level statistics
+
         for stat in user_level_stats:
             if stat['level'] == 1:
                 level_1_users = stat['count']
@@ -1724,22 +1357,17 @@ def unified_admin_dashboard(request):
             elif stat['level'] == 3:
                 level_3_users = stat['count']
         
-        # Recent activities - optimize with select_related
         recent_deposits = Deposit.objects.select_related('user').order_by('-created_at')[:5]
         recent_withdrawals = Withdrawal.objects.select_related('user').order_by('-created_at')[:5]
         recent_investments = Investment.objects.select_related('user', 'company').order_by('-created_at')[:5]
         recent_users = CustomUser.objects.order_by('-date_joined')[:5]
-        
-        # Recent admin activity
         recent_activity = AdminActivityLog.objects.select_related('admin_user').order_by('-timestamp')[:10]
-        
-        # Lead statistics
+
         total_campaigns = LeadCampaign.objects.count()
         total_leads = Lead.objects.count()
         pending_leads = Lead.objects.filter(status='pending').count()
         processed_leads = Lead.objects.exclude(status='pending').count()
         
-        # Additional statistics
         investment_plans_count = InvestmentPlan.objects.count()
         active_users_count = CustomUser.objects.filter(is_active=True).count()
         pending_referrals_count = Referral.objects.filter(status='pending').count()
@@ -1748,7 +1376,6 @@ def unified_admin_dashboard(request):
         )['total'] or 0
         
         context = {
-            # Overall statistics
             'total_users': total_users,
             'companies_count': companies_count,
             'total_campaigns': total_campaigns,
@@ -1758,7 +1385,6 @@ def unified_admin_dashboard(request):
             'pending_referrals_count': pending_referrals_count,
             'total_referral_rewards': total_referral_rewards,
             
-            # Deposit statistics
             'pending_deposits_count': pending_deposits_count,
             'pending_deposits_amount': pending_deposits_amount,
             'approved_deposits_count': approved_deposits_count,
@@ -1767,7 +1393,6 @@ def unified_admin_dashboard(request):
             'rejected_deposits_amount': rejected_deposits_amount,
             'total_deposits_amount': total_deposits_amount,
             
-            # Investment statistics
             'total_investments': total_investments,
             'total_investments_amount': total_investments_amount,
             'active_investments_count': active_investments_count,
@@ -1776,7 +1401,6 @@ def unified_admin_dashboard(request):
             'completed_investments_amount': completed_investments_amount,
             'total_returns_amount': total_returns_amount,
             
-            # Withdrawal statistics
             'pending_withdrawals_count': pending_withdrawals_count,
             'pending_withdrawals_amount': pending_withdrawals_amount,
             'approved_withdrawals_count': approved_withdrawals_count,
@@ -1784,16 +1408,13 @@ def unified_admin_dashboard(request):
             'rejected_withdrawals_count': rejected_withdrawals_count,
             'rejected_withdrawals_amount': rejected_withdrawals_amount,
             
-            # User statistics
             'level_1_users': level_1_users,
             'level_2_users': level_2_users,
             'level_3_users': level_3_users,
             
-            # Lead statistics
             'pending_leads': pending_leads,
             'processed_leads': processed_leads,
             
-            # Recent activities
             'recent_deposits': recent_deposits,
             'recent_withdrawals': recent_withdrawals,
             'recent_investments': recent_investments,
@@ -1801,64 +1422,14 @@ def unified_admin_dashboard(request):
             'recent_activity': recent_activity,
         }
         
-        logger.info("Rendering unified admin dashboard template")
-        response = render(request, 'core/unified_admin_dashboard.html', context)
-        logger.info("Unified admin dashboard view completed successfully")
-        return response
+        return render(request, 'core/unified_admin_dashboard.html', context)
     except Exception as e:
-        # Log the error for debugging
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Error in unified_admin_dashboard: {str(e)}", exc_info=True)
-        
-        # Return a simple error response for debugging
-        from django.http import HttpResponse
         return HttpResponse(f"Error in unified admin dashboard: {str(e)}", status=500)
-
-def test_admin_dashboard_view(request):
-    """
-    Simple test view to debug admin dashboard issues
-    """
-    try:
-        # Test basic data retrieval
-        users = CustomUser.objects.all()
-        total_deposits = Deposit.objects.filter(status='approved').aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        # Create minimal user details
-        user_details = []
-        for user in users:
-            wallet = Wallet.objects.filter(user=user).first()
-            user_details.append({
-                'user': user,
-                'wallet': wallet,
-            })
-        
-        # Test context data creation
-        context = {
-            'users': users,
-            'companies': [],
-            'total_users': users.count(),
-            'total_deposits': total_deposits,
-            'user_details': user_details,
-            'test_message': 'Admin dashboard test view working correctly'
-        }
-        
-        return render(request, 'core/minimal_admin.html', context)
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in test_admin_dashboard_view: {str(e)}", exc_info=True)
-        
-        from django.http import HttpResponse
-        return HttpResponse(f"Error in test view: {str(e)}", status=500)
 
 @login_required
 def portfolio_view(request):
     user = request.user
-    
-    # Get user's active investments
     active_investments = Investment.objects.filter(
         user=user,
         is_active=True
@@ -1869,27 +1440,19 @@ def portfolio_view(request):
         user=user,
         is_active=False
     ).select_related('company').order_by('-end_date')
-    
-    # Add any other portfolio view logic here
-    
+
     return render(request, 'core/portfolio.html', {
         'active_investments': active_investments,
         'completed_investments': completed_investments,
     })
 
-# API view for user financial information
-# Returns balance, active investments, withdrawals, etc. (non-personal info)
 @login_required
 def user_financial_info_api(request):
-    """API endpoint that returns user's financial information."""
     try:
         user = request.user
-        
-        # Get wallet balance
         wallet, created = Wallet.objects.get_or_create(user=user)
         balance = float(wallet.balance)
-        
-        # Get active investments
+
         active_investments = Investment.objects.filter(
             user=user, 
             is_active=True
@@ -1906,8 +1469,7 @@ def user_financial_info_api(request):
                 'end_date': investment.end_date.isoformat(),
                 'days_remaining': (investment.end_date - timezone.now()).days if investment.end_date else None
             })
-        
-        # Get recent deposits (last 5 approved)
+
         recent_deposits = Deposit.objects.filter(
             user=user,
             status='approved'
@@ -1921,8 +1483,7 @@ def user_financial_info_api(request):
                 'payment_method': deposit.payment_method,
                 'created_at': deposit.created_at.isoformat()
             })
-        
-        # Get recent withdrawals (last 5)
+
         recent_withdrawals = Withdrawal.objects.filter(
             user=user
         ).order_by('-created_at')[:5]
@@ -1936,8 +1497,7 @@ def user_financial_info_api(request):
                 'status': withdrawal.status,
                 'created_at': withdrawal.created_at.isoformat()
             })
-        
-        # Get active plan investments
+
         active_plan_investments = PlanInvestment.objects.filter(
             user=user,
             is_active=True
@@ -1954,8 +1514,7 @@ def user_financial_info_api(request):
                 'end_date': investment.end_date.isoformat(),
                 'hours_remaining': (investment.end_date - timezone.now()).total_seconds() / 3600 if investment.end_date else None
             })
-        
-        # Calculate totals
+
         total_active_investments = sum(float(inv.amount) for inv in active_investments)
         total_plan_investments = sum(float(inv.amount) for inv in active_plan_investments)
         
@@ -1988,59 +1547,28 @@ def user_financial_info_api(request):
         return JsonResponse(data)
         
     except Exception as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Error in user_financial_info_api: {str(e)}", exc_info=True)
         return JsonResponse({
             'success': False,
             'error': 'An error occurred while fetching financial information'
         }, status=500)
 
-from django.views.decorators.csrf import csrf_exempt
-
-# Simple test API view
-@csrf_exempt
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def test_api_view(request):
-    """
-    Simple test API endpoint
-    """
-    data = {
-        'message': 'API is working!',
-        'status': 'success'
-    }
-    return Response(data)
-
 @login_required
 def delete_account(request):
     if request.method == 'POST':
         password = request.POST.get('password')
-        
-        # Verify password
         if not request.user.check_password(password):
             messages.error(request, 'Incorrect password.')
             return redirect('profile')
-        
-        # Delete user's wallet and related data
         try:
             wallet = Wallet.objects.get(user=request.user)
             wallet.delete()
         except Wallet.DoesNotExist:
             pass
-        
-        # Delete user's investments
         Investment.objects.filter(user=request.user).delete()
-        
-        # Delete user's deposits
         Deposit.objects.filter(user=request.user).delete()
-        
-        # Delete user's withdrawals
         Withdrawal.objects.filter(user=request.user).delete()
-        
-        # Delete user's referrals
         Referral.objects.filter(inviter=request.user).delete()
-        
-        # Delete the user
         user = request.user
         logout(request)
         user.delete()
@@ -2051,54 +1579,29 @@ def delete_account(request):
     return redirect('profile')
 
 def support_view(request):
-    pass
+    return render(request, 'core/support.html')
 
-
-def figma_design_showcase(request):
-    """Showcase page for Figma-like design system"""
-    return render(request, 'core/figma_design_showcase.html')
-
-def contrast_test_view(request):
-    """Test page for proper text/background contrast"""
-    return render(request, 'core/contrast_test.html')
-
-def whitish_text_test_view(request):
-    """Test page for all whitish text implementation"""
-    return render(request, 'core/whitish_text_test.html')
 
 # Admin action views for deposit management
 @staff_member_required
 def admin_approve_deposit(request, deposit_id):
-    """Quick approve a deposit from admin interface"""
     try:
         deposit = Deposit.objects.get(id=deposit_id)
-        
         if deposit.status != 'pending':
             messages.error(request, f'Deposit {deposit_id} is not pending approval.')
             return redirect('/capitalx_admin/core/deposit/')
-        
-        # Validate deposit before approval
-        # For card deposits, we don't require proof image
-        # For voucher deposits, check voucher_image instead of proof_image
-        # For other deposits, check proof_image
         if deposit.payment_method != 'card':
             if deposit.payment_method == 'voucher':
-                # For voucher deposits, check if voucher_image exists
                 if not deposit.voucher_image and not deposit.voucher_code:
                     messages.error(request, f'Deposit {deposit_id} has no voucher image or code - cannot approve.')
                     return redirect('/capitalx_admin/core/deposit/')
             else:
-                # For other deposits (EFT, etc.), check proof_image
                 if not deposit.proof_image:
                     messages.error(request, f'Deposit {deposit_id} has no proof image - cannot approve.')
                     return redirect('/capitalx_admin/core/deposit/')
-        
-        # Approve the deposit
         deposit.status = 'approved'
         deposit.admin_notes += f'\nQuick approved by {request.user.username} on {datetime.now().strftime("%Y-%m-%d %H:%M")}'
         deposit.save()
-        
-        # Log admin activity
         AdminActivityLog.objects.create(
             admin_user=request.user,
             action='Quick Approved Deposit',
@@ -2118,20 +1621,14 @@ def admin_approve_deposit(request, deposit_id):
 
 @staff_member_required
 def admin_reject_deposit(request, deposit_id):
-    """Quick reject a deposit from admin interface"""
     try:
         deposit = Deposit.objects.get(id=deposit_id)
-        
         if deposit.status != 'pending':
             messages.error(request, f'Deposit {deposit_id} is not pending approval.')
             return redirect('/capitalx_admin/core/deposit/')
-        
-        # Reject the deposit
         deposit.status = 'rejected'
         deposit.admin_notes += f'\nQuick rejected by {request.user.username} on {datetime.now().strftime("%Y-%m-%d %H:%M")}'
         deposit.save()
-        
-        # Log admin activity
         AdminActivityLog.objects.create(
             admin_user=request.user,
             action='Quick Rejected Deposit',
@@ -2151,16 +1648,10 @@ def admin_reject_deposit(request, deposit_id):
 
 @staff_member_required
 def deposit_dashboard_view(request):
-    """Admin dashboard for deposit management"""
-    # Get deposit statistics
     pending_deposits = Deposit.objects.filter(status='pending')
     approved_deposits = Deposit.objects.filter(status='approved')
     rejected_deposits = Deposit.objects.filter(status='rejected')
-    
-    # Calculate amounts
     pending_amount = sum(dep.amount for dep in pending_deposits)
-    
-    # Get recent admin activity
     recent_activity = AdminActivityLog.objects.filter(
         target_model='Deposit'
     ).order_by('-timestamp')[:10]
@@ -2181,17 +1672,13 @@ def chat_page_view(request):
 
 
 
-# Companies view
-# Lists all available companies to invest in
 def companies_view(request):
     user = request.user
     
     # Get or create wallet for the user
     wallet, created = Wallet.objects.get_or_create(user=user)
     
-    # Get all companies
     companies = Company.objects.all()
-    # Add eligibility and lock status to each company
     for company in companies:
         company.eligible = company.min_level <= user.level
         # Get active investment for this company if it exists
@@ -2204,7 +1691,6 @@ def companies_view(request):
             company.remaining_amount = company.share_price - wallet.balance
         
         if investment_to_display:
-            # Check if investment is complete
             if investment_to_display.is_complete() and investment_to_display.is_active:
                 investment_to_display.is_active = False
                 investment_to_display.save()
@@ -2246,27 +1732,18 @@ def companies_view(request):
 
 @staff_member_required
 def manage_users_view(request):
-    """
-    View for managing users
-    """
+    from django.core.paginator import Paginator
     users = CustomUser.objects.all().order_by('-date_joined')
-    
-    # Filter by level if specified
     level_filter = request.GET.get('level')
     if level_filter:
         users = users.filter(level=level_filter)
-    
-    # Search by email or username
     search_query = request.GET.get('search')
     if search_query:
         users = users.filter(
-            Q(email__icontains=search_query) | 
+            Q(email__icontains=search_query) |
             Q(username__icontains=search_query)
         )
-    
-    # Pagination
-    from django.core.paginator import Paginator
-    paginator = Paginator(users, 20)  # Show 20 users per page
+    paginator = Paginator(users, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -2280,9 +1757,6 @@ def manage_users_view(request):
 
 @staff_member_required
 def manage_companies_view(request):
-    """
-    View for managing investment companies
-    """
     companies = Company.objects.all().order_by('min_level', 'share_price')
     
     context = {
@@ -2293,9 +1767,6 @@ def manage_companies_view(request):
 
 @staff_member_required
 def manage_investment_plans_view(request):
-    """
-    View for managing investment plans
-    """
     plans = InvestmentPlan.objects.all().order_by('phase_order', 'plan_order')
     
     context = {
@@ -2304,10 +1775,7 @@ def manage_investment_plans_view(request):
     
     return render(request, 'core/manage_investment_plans.html', context)
 
-# OTP Email Verification Views
 def send_verification_otp(request):
-    """Send OTP for email verification"""
-    # Clear any error messages if this is a fresh GET request
     if request.method == 'GET' and 'clear' in request.GET:
         storage = messages.get_messages(request)
         storage.used = True
@@ -2318,15 +1786,11 @@ def send_verification_otp(request):
         if not email:
             messages.error(request, 'Please enter a valid email address.')
             return render(request, 'core/send_otp.html')
-        
         try:
             user = CustomUser.objects.get(email__iexact=email)
-            
             if user.is_email_verified:
                 messages.info(request, 'Your email is already verified. You can login now.')
                 return redirect('login')
-            
-            # Generate and send OTP
             otp = EmailOTP.generate_otp(user, purpose='email_verification')
             success = send_otp_email(user, otp.otp_code, purpose='email_verification')
             
@@ -2346,7 +1810,6 @@ def send_verification_otp(request):
     return render(request, 'core/send_otp.html')
 
 def verify_otp(request):
-    """Verify OTP code"""
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
         otp_code = request.POST.get('otp_code', '').strip()
@@ -2361,8 +1824,6 @@ def verify_otp(request):
         
         try:
             user = CustomUser.objects.get(email__iexact=email)
-            
-            # Get the latest OTP for this user and purpose
             otp_obj = EmailOTP.objects.filter(
                 user=user,
                 purpose=purpose,
@@ -2378,7 +1839,6 @@ def verify_otp(request):
                 return redirect('send_verification_otp')
             
             if otp_obj.verify(otp_code):
-                # OTP is valid
                 if purpose == 'email_verification':
                     user.is_email_verified = True
                     user.save()
@@ -2412,7 +1872,6 @@ def verify_otp(request):
     return redirect('send_verification_otp')
 
 def resend_otp(request):
-    """Resend OTP code"""
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
         purpose = request.POST.get('purpose', 'email_verification')
@@ -2423,12 +1882,9 @@ def resend_otp(request):
         
         try:
             user = CustomUser.objects.get(email__iexact=email)
-            
             if user.is_email_verified and purpose == 'email_verification':
                 messages.info(request, 'Your email is already verified. You can login now.')
                 return redirect('login')
-            
-            # Generate and send new OTP
             otp = EmailOTP.generate_otp(user, purpose=purpose)
             success = send_otp_email(user, otp.otp_code, purpose=purpose)
             
@@ -2451,25 +1907,15 @@ def resend_otp(request):
     
     return redirect('send_verification_otp')
 
-# Investment Plans Views
 @login_required
 def investment_plans_view(request):
-    """View all investment plans grouped by phases"""
     user = request.user
-    
-    # Get all active plans grouped by phase
     phase_1_plans = InvestmentPlan.objects.filter(phase_order=1, is_active=True).order_by('plan_order')
     phase_2_plans = InvestmentPlan.objects.filter(phase_order=2, is_active=True).order_by('plan_order')
     phase_3_plans = InvestmentPlan.objects.filter(phase_order=3, is_active=True).order_by('plan_order')
-    
-    # Get user's existing investments to check which plans they've already invested in
     user_investments = PlanInvestment.objects.filter(user=user).select_related('plan')
     invested_plan_ids = set(inv.plan.id for inv in user_investments)
-    
-    # Get user's wallet balance
     wallet, created = Wallet.objects.get_or_create(user=user)
-    
-    # Add investment status to each plan
     for phase_plans in [phase_1_plans, phase_2_plans, phase_3_plans]:
         for plan in phase_plans:
             plan.user_has_invested = plan.id in invested_plan_ids
@@ -2488,24 +1934,19 @@ def investment_plans_view(request):
 
 @login_required
 def invest_in_plan_view(request, plan_id):
-    """Invest in a specific plan"""
     try:
         plan = InvestmentPlan.objects.get(id=plan_id, is_active=True)
         user = request.user
-        
-        # Check if user has already invested in this plan
         if PlanInvestment.objects.filter(user=user, plan=plan).exists():
             messages.error(request, f'You have already invested in the {plan.name}. Each plan allows only one investment per user.')
             return redirect('investment_plans')
         
-        # Check if user has sufficient balance
         wallet, created = Wallet.objects.get_or_create(user=user)
         if wallet.balance < plan.min_amount:
             messages.error(request, f'Insufficient balance. You need R{plan.min_amount} to invest in {plan.name}.')
             return redirect('investment_plans')
         
         if request.method == 'POST':
-            # Create the investment
             investment = PlanInvestment.objects.create(
                 user=user,
                 plan=plan,
@@ -2513,7 +1954,6 @@ def invest_in_plan_view(request, plan_id):
                 return_amount=plan.return_amount
             )
             
-            # Deduct amount from wallet
             wallet.balance -= plan.min_amount
             wallet.save()
             
@@ -2533,17 +1973,10 @@ def invest_in_plan_view(request, plan_id):
 
 @login_required
 def my_plan_investments_view(request):
-    """View user's plan investments"""
     user = request.user
-    
-    # Get user's investments
     investments = PlanInvestment.objects.filter(user=user).select_related('plan').order_by('-created_at')
-    
-    # Categorize investments
     active_investments = investments.filter(is_active=True)
     completed_investments = investments.filter(is_completed=True)
-    
-    # Calculate totals
     total_invested = sum(inv.amount for inv in investments)
     total_returns = sum(inv.return_amount for inv in completed_investments.filter(profit_paid=True))
     pending_returns = sum(inv.return_amount for inv in completed_investments.filter(profit_paid=False))
@@ -2559,20 +1992,14 @@ def my_plan_investments_view(request):
     return render(request, 'core/my_plan_investments.html', context)
 
 def simple_test_view(request):
-    """Simple test view for styling verification"""
     return render(request, 'core/simple_test.html')
 
 def csrf_test_view(request):
-    """CSRF test view for debugging form submissions"""
     from django.middleware.csrf import get_token
-    
     if request.method == 'POST':
-        # Process the form submission
         test_field = request.POST.get('test_field', '')
         messages.success(request, f'Form submitted successfully! Value: {test_field}')
         return redirect('csrf_test')
-    
-    # For GET requests, prepare the context
     context = {
         'csrf_token': get_token(request),
         'has_csrf_cookie': 'csrftoken' in request.COOKIES,
