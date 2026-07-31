@@ -9,19 +9,11 @@ from django.contrib.auth import logout
 
 def client_only(view_func):
     """
-    Decorator to ensure only non-admin users can access client views
+    Allows all authenticated users (including admins) to access client views.
     """
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        # Check if user is authenticated and is admin
-        if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
-            # Instead of logging out, redirect admin users to the admin panel
-            messages.error(request, 'Admin accounts cannot access the client application. Please use the admin panel.')
-            return redirect('/capitalx_admin/')
-        
-        # Continue with normal view execution
         return view_func(request, *args, **kwargs)
-    
     return wrapper
 
 
