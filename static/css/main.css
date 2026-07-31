@@ -1,5 +1,5 @@
 /* CapitalX — Unified Dark Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
   --cx-bg:           #080b12;
@@ -33,7 +33,7 @@ html { font-size: 16px; scroll-behavior: smooth; }
 img  { max-width: 100%; height: auto; display: block; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--cx-bg);
   color: var(--cx-text);
   line-height: 1.6;
@@ -161,12 +161,15 @@ main { flex: 1; padding: 1.5rem 0; }
   gap: .375rem !important;
   font-weight: 600 !important;
   font-size: .875rem !important;
-  border-radius: var(--r-md) !important;
-  padding: .625rem 1.25rem !important;
+  border-radius: 100px !important;
+  padding: .625rem 1.5rem !important;
   transition: all var(--t) !important;
   cursor: pointer !important;
   line-height: 1.4 !important;
   white-space: nowrap !important;
+  letter-spacing: .01em !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 /* Primary */
 .btn-primary {
@@ -241,11 +244,16 @@ main { flex: 1; padding: 1.5rem 0; }
 /* ── CARDS ── */
 .card {
   background: var(--cx-card) !important;
-  border: 1px solid var(--cx-card-border) !important;
-  border-radius: var(--r-lg) !important;
+  border: none !important;
+  border-radius: var(--r-xl) !important;
   color: var(--cx-text) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.3) !important;
 }
-.card:hover { border-color: #2d3a50 !important; }
+.card:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,.4), 0 6px 16px rgba(0,0,0,.35) !important;
+  transform: translateY(-1px);
+  transition: all var(--t);
+}
 .card-header {
   background: transparent !important;
   border-bottom: 1px solid var(--cx-card-border) !important;
@@ -543,12 +551,16 @@ main { flex: 1; padding: 1.5rem 0; }
 
 .cx-card {
   background: var(--cx-card);
-  border: 1px solid var(--cx-card-border);
-  border-radius: var(--r-lg);
+  border: none;
+  border-radius: var(--r-xl);
   padding: 1.5rem;
-  transition: border-color var(--t);
+  box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.3);
+  transition: box-shadow var(--t), transform var(--t);
 }
-.cx-card:hover { border-color: #2d3a50; }
+.cx-card:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,.4), 0 6px 16px rgba(0,0,0,.35);
+  transform: translateY(-1px);
+}
 
 .cx-stat {
   display: flex; align-items: center; gap: 1rem;
@@ -597,4 +609,105 @@ html { overflow-x: hidden; }
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* ── MATERIAL / FLUTTER STYLES ── */
+
+/* Ripple effect */
+.mat-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  transform: scale(0);
+  animation: mat-ripple-anim 600ms linear;
+  pointer-events: none;
+}
+@keyframes mat-ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* btn-lg stays pill */
+.btn-lg { border-radius: 100px !important; }
+.btn-sm { border-radius: 100px !important; }
+
+/* Modal cards */
+.modal-content {
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6) !important;
+}
+
+/* Stat cards — elevation */
+.cx-stat {
+  border: none !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.3);
+  border-radius: var(--r-xl) !important;
+}
+
+/* ── MATERIAL BOTTOM NAV (mobile only) ── */
+.mat-bottom-nav {
+  display: none;
+}
+@media (max-width: 991px) {
+  .mat-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: var(--cx-bg-2);
+    border-top: 1px solid var(--cx-card-border);
+    align-items: stretch;
+    justify-content: space-around;
+    z-index: 1050;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  main { padding-bottom: 80px !important; }
+  .floating-telegram-btn { bottom: 80px !important; }
+}
+.mat-bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 3px;
+  color: var(--cx-muted);
+  font-size: .6875rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 6px 4px;
+  position: relative;
+  transition: color var(--t);
+  overflow: hidden;
+}
+.mat-bottom-nav__item i {
+  font-size: 1.375rem;
+  transition: transform var(--t);
+  position: relative;
+  z-index: 1;
+}
+.mat-bottom-nav__item span {
+  position: relative;
+  z-index: 1;
+}
+/* Active indicator pill behind icon */
+.mat-bottom-nav__item::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 56px;
+  height: 32px;
+  background: rgba(37,99,235,.15);
+  border-radius: 16px;
+  transition: transform var(--t);
+}
+.mat-bottom-nav__item.active {
+  color: var(--cx-blue-light);
+}
+.mat-bottom-nav__item.active::before {
+  transform: translateX(-50%) scaleX(1);
+}
+.mat-bottom-nav__item.active i {
+  transform: scale(1.1);
 }

@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from datetime import timedelta
+from decimal import Decimal
 
 from .models import (
     CustomUser, Investment, Deposit, Withdrawal, Wallet, 
@@ -416,3 +417,284 @@ def admin_campaigns(request):
     })
     
     return render(request, 'admin/campaigns.html', context)
+
+
+# ============================================================================
+# SINGLE-PAGE ADMIN CONSOLE
+# All admin functionality on ONE page with tab-based navigation.
+# Includes inline AJAX actions so nothing needs a page reload.
+# ============================================================================
+
+@admin_with_permission(['dashboard'])
+def admin_console(request):
+    """
+    Single-page admin console. Loads ALL management data into one context
+    and renders a single page with tabbed sections managed via JS.
+    """
+    context = get_admin_context(request, active_section='dashboard')
+
+    # ── Permissions (controls which tabs render) ──
+    user_perms = context.get('user_permissions', [])
+    can = lambda perm: 'all' in user_perms or perm in user_perms
+    context['can'] = can
+
+    # ── Dashboard stats ──
+    context['total_users'] = CustomUser.objects.filter(is_staff=False).count()
+    context['total_users_all'] = CustomUser.objects.count()
+
+    dep_stats = Deposit.objects.aggregate(
+        pending_count=Count('id', filter=Q(status='pending')),
+        pending_amount=Sum('amount', filter=Q(status='pending')),
+        approved_count=Count('id', filter=Q(status='approved')),
+        approved_amount=Sum('amount', filter=Q(status='approved')),
+    )
+    context['deposit_stats'] = dep_stats
+
+    wd_stats = Withdrawal.objects.aggregate(
+        pending_count=Count('id', filter=Q(status='pending')),
+        pending_amount=Sum('amount', filter=Q(status='pending')),
+        approved_count=Count('id', filter=Q(status='approved')),
+        approved_amount=Sum('amount', filter=Q(status='approved')),
+    )
+    context['withdrawal_stats'] = wd_stats
+
+    inv_stats = Investment.objects.aggregate(
+        total_count=Count('id'),
+        active_count=Count('id', filter=Q(is_active=True)),
+        total_amount=Sum('amount'),
+        active_amount=Sum('amount', filter=Q(is_active=True)),
+    )
+    context['investment_stats'] = inv_stats
+
+    # Wallet total across all users
+    wallet_total = Wallet.objects.aggregate(total=Sum('balance'))['total'] or 0
+    context['wallet_total'] = wallet_total
+
+    # ── DEPOSITS ──
+    if can('deposits'):
+        dep_filter = request.GET.get('dep_status', '')
+        deposits = Deposit.objects.select_related('user').order_by('-created_at')
+        if dep_filter:
+            deposits = deposits.filter(status=dep_filter)
+        context['deposits'] = deposits[:50]
+        context['dep_filter'] = dep_filter
+
+    # ── WITHDRAWALS ──
+    if can('withdrawals'):
+        wd_filter = request.GET.get('wd_status', '')
+        withdrawals = Withdrawal.objects.select_related('user').order_by('-created_at')
+        if wd_filter:
+            withdrawals = withdrawals.filter(status=wd_filter)
+        context['withdrawals'] = withdrawals[:50]
+        context['wd_filter'] = wd_filter
+
+    # ── INVESTMENTS ──
+    if can('investments'):
+        inv_filter = request.GET.get('inv_status', '')
+        investments = Investment.objects.select_related('user', 'company').order_by('-created_at')
+        if inv_filter == 'active':
+            investments = investments.filter(is_active=True)
+        elif inv_filter == 'completed':
+            investments = investments.filter(is_active=False)
+        context['investments'] = investments[:50]
+        context['inv_filter'] = inv_filter
+
+    # ── PLAN INVESTMENTS (phased system) ──
+    if can('investments'):
+        plan_investments = PlanInvestment.objects.select_related('user', 'plan').order_by('-created_at')[:50]
+        context['plan_investments'] = plan_investments
+
+    # ── USERS ──
+    if can('users'):
+        user_search = request.GET.get('user_search', '')
+        users = CustomUser.objects.filter(is_staff=False).select_related('wallet').order_by('-date_joined')
+        if user_search:
+            users = users.filter(
+                Q(email__icontains=user_search) | Q(username__icontains=user_search)
+            )
+        context['users'] = users[:50]
+        context['user_search'] = user_search
+        context['user_levels'] = {
+            'l1': CustomUser.objects.filter(is_staff=False, level=1).count(),
+            'l2': CustomUser.objects.filter(is_staff=False, level=2).count(),
+            'l3': CustomUser.objects.filter(is_staff=False, level=3).count(),
+        }
+
+    # ── COMPANIES (tiers) ──
+    if can('companies'):
+        context['companies'] = Company.objects.annotate(
+            investment_count=Count('investment'),
+            total_invested=Sum('investment__amount')
+        ).order_by('share_price')
+
+    # ── INVESTMENT PLANS ──
+    if can('investment_plans'):
+        context['plans'] = InvestmentPlan.objects.annotate(
+            investment_count=Count('planinvestment'),
+            total_invested=Sum('planinvestment__amount')
+        ).order_by('phase_order', 'plan_order')
+
+    # ── REFERRALS ──
+    if can('referrals'):
+        context['referrals'] = Referral.objects.select_related('inviter', 'invitee').order_by('-created_at')[:50]
+        context['referral_stats'] = {
+            'total': Referral.objects.count(),
+            'active': Referral.objects.filter(status='active').count(),
+            'rewards': ReferralReward.objects.aggregate(total=Sum('reward_amount'))['total'] or 0,
+        }
+
+    # ── LEADS OVERVIEW (compact) ──
+    if can('leads'):
+        context['leads_total'] = Lead.objects.count()
+        context['leads_pending'] = Lead.objects.filter(status='pending').count()
+        context['leads_completed'] = Lead.objects.filter(status='completed').count()
+        context['campaigns'] = LeadCampaign.objects.annotate(
+            lead_count=Count('leads')
+        ).order_by('-created_at')[:20]
+
+    # ── RECENT ACTIVITY ──
+    context['recent_activities'] = AdminActivityLog.objects.select_related('admin_user').order_by('-timestamp')[:10]
+
+    # Remember which tab was active (via URL hash) — default dashboard
+    context['active_tab'] = request.GET.get('tab', 'dashboard')
+
+    return render(request, 'admin/console.html', context)
+
+
+# ── Inline AJAX actions ──
+def ajax_approve_deposit(request, deposit_id):
+    """Approve a deposit via AJAX (no page reload)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    deposit = get_object_or_404(Deposit, id=deposit_id)
+    if deposit.status != 'pending':
+        return JsonResponse({'success': False, 'error': f'Already {deposit.status}'})
+    wallet, _ = Wallet.objects.get_or_create(user=deposit.user)
+    wallet.balance += deposit.amount
+    wallet.save()
+    deposit.status = 'approved'
+    deposit.admin_notes = (deposit.admin_notes or '') + f'\nApproved by {request.user.username} on {timezone.now().strftime("%Y-%m-%d %H:%M")}' 
+    deposit.save()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Approved Deposit',
+        target_model='Deposit', target_id=deposit.id,
+        details=f'Approved deposit of R{deposit.amount} for {deposit.user.email}'
+    )
+    wallet_total = Wallet.objects.aggregate(total=Sum('balance'))['total'] or 0
+    return JsonResponse({'success': True, 'wallet_total': float(wallet_total)})
+
+
+def ajax_reject_deposit(request, deposit_id):
+    """Reject a deposit via AJAX (no page reload)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    deposit = get_object_or_404(Deposit, id=deposit_id)
+    if deposit.status != 'pending':
+        return JsonResponse({'success': False, 'error': f'Already {deposit.status}'})
+    deposit.status = 'rejected'
+    deposit.admin_notes = (deposit.admin_notes or '') + f'\nRejected by {request.user.username} on {timezone.now().strftime("%Y-%m-%d %H:%M")}' 
+    deposit.save()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Rejected Deposit',
+        target_model='Deposit', target_id=deposit.id,
+        details=f'Rejected deposit of R{deposit.amount} for {deposit.user.email}'
+    )
+    return JsonResponse({'success': True})
+
+
+def ajax_approve_withdrawal(request, withdrawal_id):
+    """Approve a withdrawal via AJAX."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    wd = get_object_or_404(Withdrawal, id=withdrawal_id)
+    if wd.status != 'pending':
+        return JsonResponse({'success': False, 'error': f'Already {wd.status}'})
+    wd.status = 'approved'
+    wd.admin_notes = (wd.admin_notes or '') + f'\nApproved by {request.user.username} on {timezone.now().strftime("%Y-%m-%d %H:%M")}' 
+    wd.save()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Approved Withdrawal',
+        target_model='Withdrawal', target_id=wd.id,
+        details=f'Approved withdrawal of R{wd.amount} for {wd.user.email}'
+    )
+    return JsonResponse({'success': True})
+
+
+def ajax_reject_withdrawal(request, withdrawal_id):
+    """Reject a withdrawal via AJAX, refunding the wallet."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    wd = get_object_or_404(Withdrawal, id=withdrawal_id)
+    if wd.status != 'pending':
+        return JsonResponse({'success': False, 'error': f'Already {wd.status}'})
+    # Refund wallet on rejection
+    wallet, _ = Wallet.objects.get_or_create(user=wd.user)
+    wallet.balance += wd.amount
+    wallet.save()
+    wd.status = 'rejected'
+    wd.admin_notes = (wd.admin_notes or '') + f'\nRejected by {request.user.username} on {timezone.now().strftime("%Y-%m-%d %H:%M")}' 
+    wd.save()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Rejected Withdrawal',
+        target_model='Withdrawal', target_id=wd.id,
+        details=f'Rejected withdrawal of R{wd.amount} for {wd.user.email}'
+    )
+    return JsonResponse({'success': True})
+
+
+def ajax_toggle_user(request, user_id):
+    """Activate/deactivate a user via AJAX."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    user = get_object_or_404(CustomUser, id=user_id)
+    user.is_active = not user.is_active
+    user.save()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Toggled User',
+        target_model='CustomUser', target_id=user.id,
+        details=f"{'Activated' if user.is_active else 'Deactivated'} user {user.email}"
+    )
+    return JsonResponse({'success': True, 'is_active': user.is_active})
+
+
+def ajax_force_payout(request, investment_id):
+    """Force-payout a plan investment via AJAX (credit to wallet)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    pinv = get_object_or_404(PlanInvestment, id=investment_id)
+    if not pinv.profit_paid:
+        wallet, _ = Wallet.objects.get_or_create(user=pinv.user)
+        wallet.balance += pinv.amount + pinv.return_amount
+        wallet.save()
+        pinv.profit_paid = True
+        pinv.is_active = False
+        pinv.is_completed = True
+        pinv.save()
+        AdminActivityLog.objects.create(
+            admin_user=request.user, action='Force Payout',
+            target_model='PlanInvestment', target_id=pinv.id,
+            details=f'Manually paid out R{pinv.amount + pinv.return_amount} to {pinv.user.email}'
+        )
+    return JsonResponse({'success': True})
+
+
+def ajax_add_wallet_funds(request):
+    """Credit a user's wallet directly (manual adjustment)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    user_id = request.POST.get('user_id')
+    amount = request.POST.get('amount')
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        amount = Decimal(str(amount))
+        wallet, _ = Wallet.objects.get_or_create(user=user)
+        wallet.balance += amount
+        wallet.save()
+        AdminActivityLog.objects.create(
+            admin_user=request.user, action='Wallet Adjust',
+            target_model='CustomUser', target_id=user.id,
+            details=f'Credited R{amount} to {user.email}'
+        )
+        return JsonResponse({'success': True, 'new_balance': float(wallet.balance)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
