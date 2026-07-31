@@ -1083,9 +1083,9 @@ def claim_investment_funds(request, investment_id):
 def claim_plan_investment_funds(request, investment_id):
     try:
         investment = PlanInvestment.objects.get(id=investment_id, user=request.user)
-        if investment.is_active or investment.end_date > timezone.now():
+        if investment.end_date > timezone.now():
             messages.error(request, 'This investment is not ready for claiming yet.')
-            return redirect('my_plan_investments')
+            return redirect('portfolio')
         if investment.profit_paid:
             messages.error(request, 'Funds for this investment have already been claimed.')
             return redirect('my_plan_investments')
@@ -1099,11 +1099,11 @@ def claim_plan_investment_funds(request, investment_id):
         investment.save()
         
         messages.success(request, f'Successfully claimed R{total_amount} from your completed investment.')
-        return redirect('my_plan_investments')
-        
+        return redirect('portfolio')
+
     except PlanInvestment.DoesNotExist:
         messages.error(request, 'Invalid investment.')
-        return redirect('my_plan_investments')
+        return redirect('portfolio')
 
 @login_required
 def get_server_time_view(request):
@@ -1432,19 +1432,38 @@ def unified_admin_dashboard(request):
 @login_required
 def portfolio_view(request):
     user = request.user
+    now = timezone.now()
+
+    # Company investments
     active_investments = Investment.objects.filter(
-        user=user,
-        is_active=True
+        user=user, is_active=True
     ).select_related('company').order_by('-created_at')
 
     completed_investments = Investment.objects.filter(
-        user=user,
-        is_active=False
+        user=user, is_active=False
     ).select_related('company').order_by('-end_date')
 
+    # Plan investments — running (end_date in the future)
+    active_plan_investments = PlanInvestment.objects.filter(
+        user=user, profit_paid=False, end_date__gt=now
+    ).select_related('plan').order_by('-created_at')
+
+    # Plan investments — matured (end_date passed) but not yet claimed
+    matured_plan_investments = PlanInvestment.objects.filter(
+        user=user, profit_paid=False, end_date__lte=now
+    ).select_related('plan').order_by('-end_date')
+
+    # Plan investments — claimed/completed
+    completed_plan_investments = PlanInvestment.objects.filter(
+        user=user, profit_paid=True
+    ).select_related('plan').order_by('-end_date')
+
     total_invested = sum(inv.amount for inv in active_investments)
+    total_invested += sum(inv.amount for inv in active_plan_investments)
     total_expected_return = sum(inv.return_amount for inv in active_investments)
+    total_expected_return += sum(inv.return_amount for inv in active_plan_investments)
     total_earned = sum(inv.return_amount for inv in completed_investments if inv.profit_paid)
+    total_earned += sum(inv.return_amount for inv in completed_plan_investments)
 
     company_distribution = {}
     for inv in active_investments:
@@ -1453,10 +1472,14 @@ def portfolio_view(request):
     return render(request, 'core/portfolio.html', {
         'active_investments': active_investments,
         'completed_investments': completed_investments,
+        'active_plan_investments': active_plan_investments,
+        'matured_plan_investments': matured_plan_investments,
+        'completed_plan_investments': completed_plan_investments,
         'total_invested': total_invested,
         'total_expected_return': total_expected_return,
         'total_earned': total_earned,
         'company_distribution': company_distribution,
+        'now': now,
     })
 
 @login_required

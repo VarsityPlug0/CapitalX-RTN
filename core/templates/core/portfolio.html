@@ -3,152 +3,300 @@
 
 {% block title %}My Portfolio{% endblock %}
 
+{% block extra_css %}
+<style>
+  .portfolio-stat { border-radius: 10px; padding: 1.1rem 1.25rem; }
+  .plan-badge { font-size: .7rem; padding: .25em .55em; border-radius: 4px; }
+  .progress-bar-thin { height: 5px; border-radius: 3px; }
+  .claim-btn { min-width: 110px; }
+  .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,.1); padding-bottom: .5rem; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <!-- Portfolio Overview -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h4 mb-4">Portfolio Overview</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="border rounded p-3">
-                        <p class="text-muted small mb-1">Total Invested (Active)</p>
-                        <h3 class="h5 mb-0">R{{ total_invested|floatformat:2 }}</h3>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="border rounded p-3">
-                        <p class="text-muted small mb-1">Expected Return (Active)</p>
-                        <h3 class="h5 mb-0">R{{ total_expected_return|floatformat:2 }}</h3>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="border rounded p-3">
-                        <p class="text-muted small mb-1">Total Earned (Completed)</p>
-                        <h3 class="h5 mb-0 text-success">R{{ total_earned|floatformat:2 }}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container py-4">
 
-    <!-- Active Investments -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h4 mb-4">Active Investments</h2>
-            {% if active_investments %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Company</th>
-                            <th>Amount</th>
-                            <th>Expected Return</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for investment in active_investments %}
-                        <tr>
-                            <td>{{ investment.company.name }}</td>
-                            <td>R{{ investment.amount|floatformat:2 }}</td>
-                            <td>R{{ investment.return_amount|floatformat:2 }}</td>
-                            <td>{{ investment.start_date|date:"M d, Y" }}</td>
-                            <td>{{ investment.end_date|date:"M d, Y" }}</td>
-                            <td><span class="badge bg-warning">Active</span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-muted">No active investments.</p>
-            {% endif %}
-        </div>
+  {# ── Messages ── #}
+  {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    {% endfor %}
+  {% endif %}
 
-    <!-- Completed Investments -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h4 mb-4">Completed Investments</h2>
-            {% if completed_investments %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Company</th>
-                            <th>Amount</th>
-                            <th>Return</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for investment in completed_investments %}
-                        <tr>
-                            <td>{{ investment.company.name }}</td>
-                            <td>R{{ investment.amount|floatformat:2 }}</td>
-                            <td>R{{ investment.return_amount|floatformat:2 }}</td>
-                            <td>{{ investment.start_date|date:"M d, Y" }}</td>
-                            <td>{{ investment.end_date|date:"M d, Y" }}</td>
-                            <td>
-                                {% if investment.funds_claimed %}
-                                    <span class="badge bg-success">Claimed</span>
-                                {% else %}
-                                    <span class="badge bg-info">Completed</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if investment.funds_claimed %}
-                                    <button class="btn btn-sm btn-secondary" disabled>Funds Claimed</button>
-                                {% else %}
-                                    <a href="{% url 'claim_investment_funds' investment.id %}" 
-                                       class="btn btn-sm btn-success"
-                                       onclick="return confirm('Are you sure you want to claim R{{ investment.amount|add:investment.return_amount|floatformat:2 }} from this investment?')">
-                                        Claim Funds
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-muted">No completed investments.</p>
-            {% endif %}
-        </div>
+  {# ── Overview stats ── #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+      <div class="card portfolio-stat h-100">
+        <p class="text-muted small mb-1">Total Invested (Active)</p>
+        <h4 class="mb-0 fw-bold">R{{ total_invested|floatformat:2 }}</h4>
+      </div>
     </div>
+    <div class="col-6 col-md-4">
+      <div class="card portfolio-stat h-100">
+        <p class="text-muted small mb-1">Expected Return (Active)</p>
+        <h4 class="mb-0 fw-bold text-primary">R{{ total_expected_return|floatformat:2 }}</h4>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card portfolio-stat h-100">
+        <p class="text-muted small mb-1">Total Earned (Completed)</p>
+        <h4 class="mb-0 fw-bold text-success">R{{ total_earned|floatformat:2 }}</h4>
+      </div>
+    </div>
+  </div>
 
-    <!-- Investment Distribution -->
-    {% if company_distribution %}
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h4 mb-4">Investment Distribution</h2>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Company</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for company_name, amount in company_distribution.items %}
-                        <tr>
-                            <td>{{ company_name }}</td>
-                            <td>R{{ amount|floatformat:2 }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  {# ══════════════════════════════════════════════════════════
+     PLAN INVESTMENTS — MATURED (ready to claim)
+     ══════════════════════════════════════════════════════════ #}
+  {% if matured_plan_investments %}
+  <div class="card mb-4 border-warning">
+    <div class="card-body">
+      <h5 class="section-title text-warning"><i class="bi bi-gift-fill me-2"></i>Ready to Claim</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Invested</th>
+              <th>Return</th>
+              <th>Total Payout</th>
+              <th>Matured</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in matured_plan_investments %}
+            <tr>
+              <td>
+                <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
+                <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
+              </td>
+              <td>R{{ inv.amount|floatformat:2 }}</td>
+              <td class="text-success">+R{{ inv.return_amount|floatformat:2 }}</td>
+              <td class="fw-bold text-warning">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td>
+                <a href="{% url 'claim_plan_investment_funds' inv.id %}"
+                   class="btn btn-warning btn-sm claim-btn fw-bold"
+                   onclick="return confirm('Claim R{{ inv.amount|add:inv.return_amount|floatformat:2 }} to your wallet?')">
+                  <i class="bi bi-wallet2 me-1"></i>Claim Funds
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════
+     PLAN INVESTMENTS — ACTIVE (running)
+     ══════════════════════════════════════════════════════════ #}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="section-title"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Active Plan Investments</h5>
+      {% if active_plan_investments %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Phase</th>
+              <th>Invested</th>
+              <th>Return</th>
+              <th>Matures</th>
+              <th>Time Left</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in active_plan_investments %}
+            {% with remaining=inv.end_date|timeuntil %}
+            <tr>
+              <td>
+                <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
+                <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
+              </td>
+              <td><span class="badge bg-secondary plan-badge">{{ inv.plan.phase|title }}</span></td>
+              <td class="fw-medium">R{{ inv.amount|floatformat:2 }}</td>
+              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ inv.end_date|date:"M d, Y H:i" }}</td>
+              <td>
+                <span class="badge bg-primary plan-badge">{{ remaining }}</span>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No active plan investments.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════════
+     COMPANY INVESTMENTS — ACTIVE
+     ══════════════════════════════════════════════════════════ #}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="section-title"><i class="bi bi-building me-2 text-primary"></i>Active Company Investments</h5>
+      {% if active_investments %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Amount</th>
+              <th>Expected Return</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in active_investments %}
+            <tr>
+              <td class="fw-medium">{{ inv.company.name }}</td>
+              <td>R{{ inv.amount|floatformat:2 }}</td>
+              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ inv.start_date|date:"M d, Y" }}</td>
+              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td><span class="badge bg-warning text-dark">Active</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No active company investments.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════════
+     COMPLETED PLAN INVESTMENTS
+     ══════════════════════════════════════════════════════════ #}
+  {% if completed_plan_investments %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="section-title"><i class="bi bi-check2-circle me-2 text-success"></i>Completed Plan Investments</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Invested</th>
+              <th>Return</th>
+              <th>Total Paid</th>
+              <th>Completed</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in completed_plan_investments %}
+            <tr>
+              <td>
+                <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
+                <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
+              </td>
+              <td>R{{ inv.amount|floatformat:2 }}</td>
+              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td class="fw-bold">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td><span class="badge bg-success">Claimed</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════
+     COMPANY INVESTMENTS — COMPLETED
+     ══════════════════════════════════════════════════════════ #}
+  {% if completed_investments %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="section-title"><i class="bi bi-building me-2 text-success"></i>Completed Company Investments</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Amount</th>
+              <th>Return</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in completed_investments %}
+            <tr>
+              <td class="fw-medium">{{ inv.company.name }}</td>
+              <td>R{{ inv.amount|floatformat:2 }}</td>
+              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ inv.start_date|date:"M d, Y" }}</td>
+              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td>
+                {% if inv.funds_claimed %}
+                  <span class="badge bg-success">Claimed</span>
+                {% else %}
+                  <span class="badge bg-info">Completed</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if inv.funds_claimed %}
+                  <button class="btn btn-sm btn-secondary" disabled>Claimed</button>
+                {% else %}
+                  <a href="{% url 'claim_investment_funds' inv.id %}"
+                     class="btn btn-sm btn-success"
+                     onclick="return confirm('Claim R{{ inv.amount|add:inv.return_amount|floatformat:2 }}?')">
+                    Claim Funds
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Investment distribution ── #}
+  {% if company_distribution %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="section-title"><i class="bi bi-pie-chart me-2"></i>Investment Distribution</h5>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr><th>Company</th><th>Amount</th></tr>
+          </thead>
+          <tbody>
+            {% for company_name, amount in company_distribution.items %}
+            <tr>
+              <td>{{ company_name }}</td>
+              <td>R{{ amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
 </div>
 {% endblock %}
