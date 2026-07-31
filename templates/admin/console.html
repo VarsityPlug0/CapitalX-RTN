@@ -182,6 +182,30 @@
     .cx-toast.error   { border-left: 3px solid var(--red); }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
+    /* ── PROOF THUMBNAILS ── */
+    .proof-thumb {
+      width: 48px; height: 48px; object-fit: cover;
+      border-radius: 8px; border: 1px solid var(--border);
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
+    .proof-thumb:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,.5); }
+    .proof-none { color: var(--muted); font-size: .75rem; }
+    .proof-text { font-size: .75rem; color: var(--text2); background: var(--bg2); border-radius: 6px; padding: 2px 8px; font-family: monospace; }
+
+    /* ── LIGHTBOX ── */
+    #lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,.9); align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 90vw; max-height: 80vh; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,.8); }
+    #lightbox-close {
+      position: absolute; top: 1rem; right: 1.5rem;
+      background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;
+    }
+    #lightbox-label { color: var(--text2); font-size: .875rem; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       #sidebar { width: 0; position: fixed; z-index: 1000; height: 100vh; }
@@ -373,7 +397,7 @@
           <table class="table">
             <thead>
               <tr>
-                <th>#</th><th>User</th><th>Amount</th><th>Status</th><th>Method</th><th>Date</th><th>Actions</th>
+                <th>#</th><th>User</th><th>Amount</th><th>Status</th><th>Method</th><th>Proof</th><th>Date</th><th>Actions</th>
               </tr>
             </thead>
             <tbody id="dep-tbody">
@@ -384,6 +408,23 @@
                 <td><strong>R{{ d.amount }}</strong></td>
                 <td><span class="badge-status badge-{{ d.status }}">{{ d.status }}</span></td>
                 <td>{{ d.payment_method|default:"—" }}</td>
+                <td>
+                  {% if d.proof_image %}
+                    <img src="{{ d.proof_image.url }}" class="proof-thumb"
+                         onclick="openLightbox('{{ d.proof_image.url }}', 'Proof — {{ d.user.email }} · R{{ d.amount }}')"
+                         title="View proof of payment">
+                  {% elif d.voucher_image %}
+                    <img src="{{ d.voucher_image.url }}" class="proof-thumb"
+                         onclick="openLightbox('{{ d.voucher_image.url }}', 'Voucher — {{ d.user.email }} · R{{ d.amount }}')"
+                         title="View voucher">
+                  {% elif d.voucher_code %}
+                    <span class="proof-text" title="Voucher code">{{ d.voucher_code }}</span>
+                  {% elif d.bitcoin_txid %}
+                    <span class="proof-text" title="Bitcoin TXID">{{ d.bitcoin_txid|truncatechars:14 }}</span>
+                  {% else %}
+                    <span class="proof-none">—</span>
+                  {% endif %}
+                </td>
                 <td>{{ d.created_at|date:"d M Y H:i" }}</td>
                 <td>
                   {% if d.status == 'pending' %}
@@ -399,7 +440,7 @@
                 </td>
               </tr>
               {% empty %}
-              <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:2rem;">No deposits found.</td></tr>
+              <tr><td colspan="8" style="text-align:center; color:var(--muted); padding:2rem;">No deposits found.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -790,6 +831,13 @@
   </div>
 </div>
 
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="Proof of payment">
+  <div id="lightbox-label"></div>
+</div>
+
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
@@ -907,6 +955,19 @@
       toast(`Wallet credited. New balance: R${data.new_balance}`);
     } else { toast(data.error || 'Failed', 'error'); }
   }
+
+  // ── Lightbox ──
+  function openLightbox(url, label) {
+    document.getElementById('lightbox-img').src = url;
+    document.getElementById('lightbox-label').textContent = label;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox(e) {
+    if (!e || e.target === document.getElementById('lightbox') || e.target === document.getElementById('lightbox-close')) {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox') }); });
 
   // ── Client-side table filter ──
   function filterTable(tbodyId, inputEl, colIdx) {
