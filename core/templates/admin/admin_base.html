@@ -457,6 +457,7 @@
             % endblock %
         }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -506,7 +507,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Sidebar -->
-    <aside class="admin-sidebar" id="adminSidebar">
+    {% block sidebar %}<aside class="admin-sidebar" id="adminSidebar">
         <nav class="sidebar-nav">
             {% for section in admin_nav_sections %}
             <div class="nav-section">
@@ -545,7 +546,7 @@
             </div>
             {% endfor %}
         </nav>
-    </aside>
+    </aside>{% endblock %}
 
 
     <!-- Main Content -->

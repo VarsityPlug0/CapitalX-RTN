@@ -1,0 +1,1815 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Admin Console{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Tab panes ─────────────────────────────────────── */
+  .tab-pane { display: none; animation: fadein .18s ease; }
+  .tab-pane.active { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* ── Sidebar tab-nav overrides ─────────────────────── */
+  .tab-nav-link { cursor: pointer; }
+  .tab-nav-link.active,
+  .tab-nav-link.active:hover {
+    background: rgba(13,110,253,.12);
+    border-left-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+  }
+  .tab-nav-section-header.has-active-child {
+    background: rgba(13,110,253,.07);
+    border-left-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  /* ── Buttons ───────────────────────────────────────── */
+  .btn-xs { padding: .2rem .45rem; font-size: .75rem; line-height: 1.2; border-radius: 4px; }
+
+  /* ── Proof thumbnail ───────────────────────────────── */
+  .proof-thumb {
+    width: 56px; height: 38px; object-fit: cover;
+    border-radius: 4px; cursor: pointer; border: 1px solid var(--border-color);
+    transition: opacity .15s;
+  }
+  .proof-thumb:hover { opacity: .8; }
+
+  /* ── Filter bar ────────────────────────────────────── */
+  .filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: 1rem; }
+  .filter-bar .form-control,
+  .filter-bar .form-select { max-width: 200px; background: var(--card-bg); border-color: var(--border-color); color: var(--text-light); }
+  .filter-bar .form-control:focus,
+  .filter-bar .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 .2rem rgba(13,110,253,.25); }
+
+  /* ── Pagination footer ─────────────────────────────── */
+  .pag-info { font-size: .85rem; }
+
+  /* ── Section heading ───────────────────────────────── */
+  .section-heading { font-size: 1.65rem; font-weight: 600; margin-bottom: 1.25rem; }
+  .section-heading .badge { font-size: .6rem; vertical-align: middle; }
+
+  /* ── Mini stat bar ─────────────────────────────────── */
+  .mini-stat { display: inline-flex; flex-direction: column; padding: .55rem 1rem;
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; }
+  .mini-stat .label { font-size: .72rem; color: var(--text-muted); }
+  .mini-stat .value { font-size: 1rem; font-weight: 600; }
+
+  /* ── Empty state ───────────────────────────────────── */
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+  .empty-state i { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
+
+  /* ── Form modal ────────────────────────────────────── */
+  .modal-content { background: var(--card-bg); border: 1px solid var(--border-color); }
+  .modal-header { border-bottom-color: var(--border-color); }
+  .modal-footer { border-top-color: var(--border-color); }
+  .form-label { color: var(--text-light); font-size: .875rem; }
+  .form-control, .form-select {
+    background: var(--darker-bg); border-color: var(--border-color);
+    color: var(--text-light);
+  }
+  .form-control:focus, .form-select:focus {
+    background: var(--darker-bg); color: var(--text-light);
+    border-color: var(--primary-color);
+  }
+  .form-check-input:checked { background-color: var(--primary-color); border-color: var(--primary-color); }
+
+  /* ── Level badges ──────────────────────────────────── */
+  .level-badge { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center;
+    justify-content: center; font-size: .7rem; font-weight: 700; }
+  .level-1 { background: rgba(108,117,125,.25); color: #adb5bd; }
+  .level-2 { background: rgba(13,110,253,.2); color: #6ea8fe; }
+  .level-3 { background: rgba(255,193,7,.2); color: var(--gold-accent); }
+
+  /* ── Sub-tab switcher (inside investments) ─────────── */
+  .sub-tab-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted);
+    padding: .3rem .85rem; border-radius: 6px; font-size: .85rem; cursor: pointer; }
+  .sub-tab-btn.active { background: rgba(13,110,253,.15); border-color: var(--primary-color); color: var(--primary-color); }
+
+  /* ── Activity log time ─────────────────────────────── */
+  .log-time { font-size: .75rem; color: var(--text-muted); white-space: nowrap; }
+
+  @media (max-width: 768px) {
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .filter-bar .form-control, .filter-bar .form-select { max-width: 100%; }
+    .section-heading { font-size: 1.25rem; }
+  }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<aside class="admin-sidebar" id="adminSidebar">
+  <nav class="sidebar-nav">
+
+    {# ── Dashboard ── #}
+    <div class="nav-section">
+      <a href="#" class="nav-section-header tab-nav-link {% if active_tab == 'dashboard' %}active{% endif %}"
+         data-tab="dashboard">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    {# ── Financial ── #}
+    {% if 'all' in user_permissions or 'deposits' in user_permissions or 'withdrawals' in user_permissions or 'investments' in user_permissions %}
+    <div class="nav-section">
+      <div class="nav-section-header tab-nav-section-header {% if active_tab in 'deposits,withdrawals,investments' %}has-active-child{% endif %}"
+           data-bs-toggle="collapse" data-bs-target="#nav-financial" style="cursor:pointer">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Financial</span>
+        <i class="fas fa-chevron-down chevron ms-auto"></i>
+      </div>
+      <div class="collapse {% if active_tab == 'deposits' or active_tab == 'withdrawals' or active_tab == 'investments' %}show{% endif %}" id="nav-financial">
+        <div class="nav-children">
+          {% if 'all' in user_permissions or 'deposits' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'deposits' %}active{% endif %}"
+             data-tab="deposits">
+            <i class="fas fa-file-invoice-dollar"></i><span>Deposits</span>
+          </a>
+          {% endif %}
+          {% if 'all' in user_permissions or 'withdrawals' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'withdrawals' %}active{% endif %}"
+             data-tab="withdrawals">
+            <i class="fas fa-money-check-alt"></i><span>Withdrawals</span>
+          </a>
+          {% endif %}
+          {% if 'all' in user_permissions or 'investments' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'investments' %}active{% endif %}"
+             data-tab="investments">
+            <i class="fas fa-chart-line"></i><span>Investments</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Users ── #}
+    {% if 'all' in user_permissions or 'users' in user_permissions or 'referrals' in user_permissions %}
+    <div class="nav-section">
+      <div class="nav-section-header tab-nav-section-header {% if active_tab == 'users' or active_tab == 'referrals' %}has-active-child{% endif %}"
+           data-bs-toggle="collapse" data-bs-target="#nav-users" style="cursor:pointer">
+        <i class="fas fa-users"></i>
+        <span>User Management</span>
+        <i class="fas fa-chevron-down chevron ms-auto"></i>
+      </div>
+      <div class="collapse {% if active_tab == 'users' or active_tab == 'referrals' %}show{% endif %}" id="nav-users">
+        <div class="nav-children">
+          {% if 'all' in user_permissions or 'users' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'users' %}active{% endif %}"
+             data-tab="users">
+            <i class="fas fa-user"></i><span>Users</span>
+          </a>
+          {% endif %}
+          {% if 'all' in user_permissions or 'referrals' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'referrals' %}active{% endif %}"
+             data-tab="referrals">
+            <i class="fas fa-user-friends"></i><span>Referrals</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Content ── #}
+    {% if 'all' in user_permissions or 'companies' in user_permissions or 'investment_plans' in user_permissions %}
+    <div class="nav-section">
+      <div class="nav-section-header tab-nav-section-header {% if active_tab == 'companies' or active_tab == 'plans' %}has-active-child{% endif %}"
+           data-bs-toggle="collapse" data-bs-target="#nav-content" style="cursor:pointer">
+        <i class="fas fa-building"></i>
+        <span>Content</span>
+        <i class="fas fa-chevron-down chevron ms-auto"></i>
+      </div>
+      <div class="collapse {% if active_tab == 'companies' or active_tab == 'plans' %}show{% endif %}" id="nav-content">
+        <div class="nav-children">
+          {% if 'all' in user_permissions or 'companies' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'companies' %}active{% endif %}"
+             data-tab="companies">
+            <i class="fas fa-building"></i><span>Companies</span>
+          </a>
+          {% endif %}
+          {% if 'all' in user_permissions or 'investment_plans' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'plans' %}active{% endif %}"
+             data-tab="plans">
+            <i class="fas fa-chart-bar"></i><span>Investment Plans</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Marketing ── #}
+    {% if 'all' in user_permissions or 'leads' in user_permissions or 'campaigns' in user_permissions %}
+    <div class="nav-section">
+      <div class="nav-section-header tab-nav-section-header {% if active_tab == 'leads' or active_tab == 'campaigns' %}has-active-child{% endif %}"
+           data-bs-toggle="collapse" data-bs-target="#nav-marketing" style="cursor:pointer">
+        <i class="fas fa-bullhorn"></i>
+        <span>Marketing</span>
+        <i class="fas fa-chevron-down chevron ms-auto"></i>
+      </div>
+      <div class="collapse {% if active_tab == 'leads' or active_tab == 'campaigns' %}show{% endif %}" id="nav-marketing">
+        <div class="nav-children">
+          {% if 'all' in user_permissions or 'leads' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'leads' %}active{% endif %}"
+             data-tab="leads">
+            <i class="fas fa-envelope"></i><span>Leads</span>
+          </a>
+          {% endif %}
+          {% if 'all' in user_permissions or 'campaigns' in user_permissions %}
+          <a href="#" class="nav-child-item tab-nav-link {% if active_tab == 'campaigns' %}active{% endif %}"
+             data-tab="campaigns">
+            <i class="fas fa-paper-plane"></i><span>Campaigns</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── System (super admin only) ── #}
+    {% if is_super_admin %}
+    <div class="nav-section">
+      <a href="/capitalx_admin/" class="nav-section-header" target="_blank" rel="noopener">
+        <i class="fas fa-database"></i>
+        <span>DB Admin</span>
+        <i class="fas fa-external-link-alt ms-auto" style="font-size:.7rem"></i>
+      </a>
+    </div>
+    {% endif %}
+
+  </nav>
+</aside>
+{% endblock %}
+
+
+{% block content %}
+<input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
+{# ── Toast container ─────────────────────────────────────────────────────── #}
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+  <div id="mainToast" class="toast align-items-center text-white border-0 bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body fw-medium" id="toastMsg"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+{# ── All tab panes ───────────────────────────────────────────────────────── #}
+<div id="adminTabContent">
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   DASHBOARD TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+<div id="tab-dashboard" class="tab-pane {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}">
+
+  <div class="section-heading"><i class="fas fa-tachometer-alt me-2 text-warning"></i>Dashboard</div>
+
+  {# Stat cards row 1 #}
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="stat-card primary">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-value" id="stat-total-users">{{ total_users|default:0 }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card success">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-value">R<span id="stat-approved-deposits">{{ deposit_stats.approved_amount|default:0|floatformat:0 }}</span></div>
+        <div class="stat-label">Approved Deposits</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card warning">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-value" id="stat-pending-deposits">{{ deposit_stats.pending_count|default:0 }}</div>
+        <div class="stat-label">Pending Deposits</div>
+        <small class="text-muted">R<span id="stat-pending-deposits-amount">{{ deposit_stats.pending_amount|default:0|floatformat:2 }}</span></small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card danger">
+        <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="stat-value" id="stat-pending-withdrawals">{{ withdrawal_stats.pending_count|default:0 }}</div>
+        <div class="stat-label">Pending Withdrawals</div>
+        <small class="text-muted">R<span id="stat-pending-withdrawals-amount">{{ withdrawal_stats.pending_amount|default:0|floatformat:2 }}</span></small>
+      </div>
+    </div>
+  </div>
+
+  {# Stat cards row 2 #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card primary">
+        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="stat-value" id="stat-active-investments">{{ investment_stats.active_count|default:0 }}</div>
+        <div class="stat-label">Active Investments</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card success">
+        <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+        <div class="stat-value">R<span id="stat-wallet-total">{{ wallet_total|default:0|floatformat:0 }}</span></div>
+        <div class="stat-label">Total Wallet Balances</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card warning">
+        <div class="stat-icon"><i class="fas fa-building"></i></div>
+        <div class="stat-value">{{ companies|length|default:0 }}</div>
+        <div class="stat-label">Companies</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card primary">
+        <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+        <div class="stat-value">{{ plans|length|default:0 }}</div>
+        <div class="stat-label">Investment Plans</div>
+      </div>
+    </div>
+  </div>
+
+  {# Recent activity log #}
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0"><i class="fas fa-history me-2 text-warning"></i>Recent Admin Activity</h5>
+      <button class="btn btn-sm btn-outline-secondary" onclick="refreshStats()">
+        <i class="fas fa-sync-alt me-1"></i>Refresh Stats
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="activity-log-tbody">
+            {% for log in recent_activities %}
+            <tr>
+              <td class="fw-medium">{{ log.admin_user.username }}</td>
+              <td><span class="badge bg-secondary">{{ log.action }}</span></td>
+              <td class="text-muted small">{{ log.target_model }} #{{ log.target_id }}</td>
+              <td class="text-muted small">{{ log.details|truncatechars:70 }}</td>
+              <td class="log-time">{{ log.timestamp|date:"M d, H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">No activity yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-dashboard #}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   DEPOSITS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'deposits' in user_permissions %}
+<div id="tab-deposits" class="tab-pane {% if active_tab == 'deposits' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-file-invoice-dollar me-2 text-warning"></i>Deposits</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="mini-stat">
+        <span class="label">Pending</span>
+        <span class="value text-warning">{{ deposit_stats.pending_count|default:0 }} &middot; R{{ deposit_stats.pending_amount|default:0|floatformat:2 }}</span>
+      </span>
+      <span class="mini-stat">
+        <span class="label">Approved</span>
+        <span class="value text-success">{{ deposit_stats.approved_count|default:0 }} &middot; R{{ deposit_stats.approved_amount|default:0|floatformat:2 }}</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <select id="dep-filter-status" class="form-select form-select-sm" onchange="filterDeposits()">
+      <option value="">All Statuses</option>
+      <option value="pending">Pending</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <select id="dep-filter-method" class="form-select form-select-sm" onchange="filterDeposits()">
+      <option value="">All Methods</option>
+      <option value="eft">EFT</option>
+      <option value="cash">Cash</option>
+      <option value="card">Card</option>
+      <option value="bitcoin">Bitcoin</option>
+      <option value="voucher">Voucher</option>
+    </select>
+    <input id="dep-search" type="search" class="form-control form-control-sm" placeholder="Search email / username…" oninput="filterDeposits()" style="max-width:240px">
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0" id="deposits-table">
+          <thead>
+            <tr>
+              <th>#</th><th>User</th><th>Amount</th><th>Method</th>
+              <th>Payment Details</th><th>Proof</th><th>Status</th>
+              <th>Date</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deposits-tbody">
+            {% for dep in deposits %}
+            <tr data-deposit="{{ dep.id }}"
+                data-status="{{ dep.status }}"
+                data-method="{{ dep.payment_method }}"
+                data-user="{{ dep.user.email|lower }} {{ dep.user.username|lower }}">
+              <td class="text-muted small">#{{ dep.id }}</td>
+              <td>
+                <div class="fw-medium">{{ dep.user.username }}</div>
+                <small class="text-muted">{{ dep.user.email }}</small>
+              </td>
+              <td class="fw-bold text-success">R{{ dep.amount|floatformat:2 }}</td>
+              <td><span class="badge bg-secondary">{{ dep.get_payment_method_display }}</span></td>
+              <td class="small" style="max-width:160px">
+                {% if dep.payment_method == 'card' %}
+                  {% if dep.card_last4 %}<div class="font-monospace">****&nbsp;{{ dep.card_last4 }}</div>{% endif %}
+                  {% if dep.cardholder_name %}<div class="text-muted">{{ dep.cardholder_name }}</div>{% endif %}
+                {% elif dep.payment_method == 'bitcoin' %}
+                  {% if dep.bitcoin_address %}
+                  <div class="font-monospace text-muted" title="{{ dep.bitcoin_address }}">{{ dep.bitcoin_address|truncatechars:18 }}</div>
+                  {% endif %}
+                  {% if dep.bitcoin_txid %}<div class="text-muted">TXID: {{ dep.bitcoin_txid|truncatechars:12 }}</div>{% endif %}
+                {% elif dep.payment_method == 'voucher' %}
+                  {% if dep.voucher_code %}<span class="badge bg-info text-dark">{{ dep.voucher_code }}</span>{% endif %}
+                {% endif %}
+                {% if dep.admin_notes %}<div class="text-muted mt-1" style="font-size:.72rem">{{ dep.admin_notes|truncatechars:55 }}</div>{% endif %}
+              </td>
+              <td>
+                {% if dep.proof_image %}
+                <img src="{{ dep.proof_image.url }}" class="proof-thumb"
+                     data-img="{{ dep.proof_image.url }}" data-caption="Deposit #{{ dep.id }} proof"
+                     alt="Proof" title="View proof">
+                {% elif dep.voucher_image %}
+                <img src="{{ dep.voucher_image.url }}" class="proof-thumb"
+                     data-img="{{ dep.voucher_image.url }}" data-caption="Voucher #{{ dep.id }}"
+                     alt="Voucher" title="View voucher">
+                {% else %}
+                <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge status-badge {% if dep.status == 'approved' %}bg-success{% elif dep.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                  {{ dep.status|capfirst }}
+                </span>
+              </td>
+              <td class="text-muted small">{{ dep.created_at|date:"M d, Y" }}<br>{{ dep.created_at|date:"H:i" }}</td>
+              <td class="action-btns">
+                {% if dep.status == 'pending' %}
+                <button class="btn btn-xs btn-success me-1" onclick="depositAction({{ dep.id }}, 'approve')" title="Approve">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn btn-xs btn-danger" onclick="depositAction({{ dep.id }}, 'reject')" title="Reject">
+                  <i class="fas fa-times"></i>
+                </button>
+                {% else %}
+                <button class="btn btn-xs btn-outline-secondary" onclick="depositAction({{ dep.id }}, 'pending')" title="Reset to pending">
+                  <i class="fas fa-undo"></i>
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9"><div class="empty-state"><i class="fas fa-inbox"></i>No deposits found</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <span class="pag-info text-muted" id="dep-pagination-info"></span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="dep-prev" onclick="paginate('dep',-1)">
+          <i class="fas fa-chevron-left"></i> Prev
+        </button>
+        <button class="btn btn-outline-secondary" id="dep-next" onclick="paginate('dep',1)">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-deposits #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   WITHDRAWALS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'withdrawals' in user_permissions %}
+<div id="tab-withdrawals" class="tab-pane {% if active_tab == 'withdrawals' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-money-check-alt me-2 text-warning"></i>Withdrawals</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="mini-stat">
+        <span class="label">Pending</span>
+        <span class="value text-warning">{{ withdrawal_stats.pending_count|default:0 }} &middot; R{{ withdrawal_stats.pending_amount|default:0|floatformat:2 }}</span>
+      </span>
+      <span class="mini-stat">
+        <span class="label">Approved</span>
+        <span class="value text-success">{{ withdrawal_stats.approved_count|default:0 }} &middot; R{{ withdrawal_stats.approved_amount|default:0|floatformat:2 }}</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <select id="wd-filter-status" class="form-select form-select-sm" onchange="filterWithdrawals()">
+      <option value="">All Statuses</option>
+      <option value="pending">Pending</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <input id="wd-search" type="search" class="form-control form-control-sm" placeholder="Search email / username…" oninput="filterWithdrawals()" style="max-width:240px">
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>User</th><th>Amount</th><th>Method</th>
+              <th>Bank Details</th><th>Status</th><th>Date</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="withdrawals-tbody">
+            {% for wd in withdrawals %}
+            <tr data-withdrawal="{{ wd.id }}"
+                data-status="{{ wd.status }}"
+                data-user="{{ wd.user.email|lower }} {{ wd.user.username|lower }}">
+              <td class="text-muted small">#{{ wd.id }}</td>
+              <td>
+                <div class="fw-medium">{{ wd.user.username }}</div>
+                <small class="text-muted">{{ wd.user.email }}</small>
+              </td>
+              <td class="fw-bold text-danger">R{{ wd.amount|floatformat:2 }}</td>
+              <td><span class="badge bg-secondary">{{ wd.get_payment_method_display }}</span></td>
+              <td class="small" style="max-width:180px">
+                {% if wd.account_holder_name %}<div class="fw-medium">{{ wd.account_holder_name }}</div>{% endif %}
+                {% if wd.bank_name %}<div class="text-muted">{{ wd.get_bank_name_display|default:wd.bank_name }}</div>{% endif %}
+                {% if wd.account_number %}<div class="font-monospace text-muted">{{ wd.account_number }}</div>{% endif %}
+                {% if wd.account_type %}<div class="text-muted">{{ wd.account_type }}</div>{% endif %}
+                {% if wd.admin_notes %}<div class="text-muted mt-1" style="font-size:.72rem">{{ wd.admin_notes|truncatechars:55 }}</div>{% endif %}
+              </td>
+              <td>
+                <span class="badge status-badge {% if wd.status == 'approved' %}bg-success{% elif wd.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                  {{ wd.status|capfirst }}
+                </span>
+              </td>
+              <td class="text-muted small">{{ wd.created_at|date:"M d, Y" }}<br>{{ wd.created_at|date:"H:i" }}</td>
+              <td class="action-btns">
+                {% if wd.status == 'pending' %}
+                <button class="btn btn-xs btn-success me-1" onclick="withdrawalAction({{ wd.id }}, 'approve')" title="Approve">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn btn-xs btn-danger" onclick="withdrawalAction({{ wd.id }}, 'reject')" title="Reject">
+                  <i class="fas fa-times"></i>
+                </button>
+                {% else %}
+                <button class="btn btn-xs btn-outline-secondary" onclick="withdrawalAction({{ wd.id }}, 'pending')" title="Reset to pending">
+                  <i class="fas fa-undo"></i>
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>No withdrawals found</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <span class="pag-info text-muted" id="wd-pagination-info"></span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="wd-prev" onclick="paginate('wd',-1)"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-outline-secondary" id="wd-next" onclick="paginate('wd',1)">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-withdrawals #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   INVESTMENTS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'investments' in user_permissions %}
+<div id="tab-investments" class="tab-pane {% if active_tab == 'investments' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-chart-line me-2 text-warning"></i>Investments</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="mini-stat">
+        <span class="label">Active</span>
+        <span class="value text-success">{{ investment_stats.active_count|default:0 }}</span>
+      </span>
+      <span class="mini-stat">
+        <span class="label">Total</span>
+        <span class="value">{{ investment_stats.total_count|default:0 }}</span>
+      </span>
+    </div>
+  </div>
+
+  {# Sub-tab switcher #}
+  <div class="d-flex gap-2 mb-3">
+    <button class="sub-tab-btn active" id="subtab-company-btn" onclick="switchSubTab('company')">
+      <i class="fas fa-building me-1"></i>Company Investments
+    </button>
+    <button class="sub-tab-btn" id="subtab-plan-btn" onclick="switchSubTab('plan')">
+      <i class="fas fa-chart-bar me-1"></i>Plan Investments
+    </button>
+  </div>
+
+  {# Company investments #}
+  <div id="subtab-company" class="card mb-3">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>User</th><th>Company</th><th>Amount</th>
+              <th>Return</th><th>Started</th><th>Expires</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="investments-tbody">
+            {% for inv in investments %}
+            <tr data-investment="{{ inv.id }}">
+              <td class="text-muted small">#{{ inv.id }}</td>
+              <td>
+                <div class="fw-medium">{{ inv.user.username }}</div>
+                <small class="text-muted">{{ inv.user.email }}</small>
+              </td>
+              <td>{{ inv.company.name }}</td>
+              <td class="fw-bold">R{{ inv.amount|floatformat:2 }}</td>
+              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ inv.start_date|date:"M d, Y" }}</td>
+              <td class="text-muted small">{% if inv.end_date %}{{ inv.end_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+              <td>
+                {% if inv.is_active %}
+                <span class="badge bg-success">Active</span>
+                {% elif inv.profit_paid %}
+                <span class="badge bg-secondary">Paid out</span>
+                {% else %}
+                <span class="badge bg-warning text-dark">Completed</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8"><div class="empty-state"><i class="fas fa-chart-line"></i>No company investments</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <span class="pag-info text-muted" id="inv-pagination-info"></span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="inv-prev" onclick="paginate('inv',-1)"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-outline-secondary" id="inv-next" onclick="paginate('inv',1)">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  {# Plan investments #}
+  <div id="subtab-plan" class="card" style="display:none">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>User</th><th>Plan</th><th>Amount</th>
+              <th>Return</th><th>End Date</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="planinvestments-tbody">
+            {% for pi in plan_investments %}
+            <tr data-planinvestment="{{ pi.id }}">
+              <td class="text-muted small">#{{ pi.id }}</td>
+              <td>
+                <div class="fw-medium">{{ pi.user.username }}</div>
+                <small class="text-muted">{{ pi.user.email }}</small>
+              </td>
+              <td>{{ pi.plan.emoji }} {{ pi.plan.name }}</td>
+              <td class="fw-bold">R{{ pi.amount|floatformat:2 }}</td>
+              <td class="text-success">R{{ pi.return_amount|floatformat:2 }}</td>
+              <td class="text-muted small">{{ pi.end_date|date:"M d, Y H:i" }}</td>
+              <td>
+                {% if pi.profit_paid %}
+                <span class="badge bg-secondary plan-status">Paid</span>
+                {% elif not pi.is_active and pi.is_completed %}
+                <span class="badge bg-warning text-dark plan-status">Completed</span>
+                {% elif pi.is_active %}
+                <span class="badge bg-success plan-status">Active</span>
+                {% else %}
+                <span class="badge bg-secondary plan-status">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="plan-action">
+                {% if not pi.profit_paid %}
+                <button class="btn btn-xs btn-outline-warning" onclick="forcePayout({{ pi.id }})" title="Force payout">
+                  <i class="fas fa-bolt"></i> Payout
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8"><div class="empty-state"><i class="fas fa-chart-bar"></i>No plan investments</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <span class="pag-info text-muted" id="pi-pagination-info"></span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="pi-prev" onclick="paginate('pi',-1)"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-outline-secondary" id="pi-next" onclick="paginate('pi',1)">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-investments #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   USERS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'users' in user_permissions %}
+<div id="tab-users" class="tab-pane {% if active_tab == 'users' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-users me-2 text-warning"></i>Users</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="mini-stat"><span class="label">Total</span><span class="value">{{ user_levels.l1|add:user_levels.l2|add:user_levels.l3 }}</span></span>
+      <span class="mini-stat"><span class="label">Level 1</span><span class="value text-muted">{{ user_levels.l1 }}</span></span>
+      <span class="mini-stat"><span class="label">Level 2</span><span class="value" style="color:#6ea8fe">{{ user_levels.l2 }}</span></span>
+      <span class="mini-stat"><span class="label">Level 3</span><span class="value text-warning">{{ user_levels.l3 }}</span></span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input id="usr-search" type="search" class="form-control form-control-sm" placeholder="Search email / username / phone…" oninput="filterUsers()" style="max-width:260px">
+    <select id="usr-filter-level" class="form-select form-select-sm" onchange="filterUsers()">
+      <option value="">All Levels</option>
+      <option value="1">Level 1</option>
+      <option value="2">Level 2</option>
+      <option value="3">Level 3</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>User</th><th>Phone</th><th>Level</th>
+              <th>Wallet</th><th>Invested</th><th>Joined</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            {% for u in users %}
+            <tr data-user-id="{{ u.id }}"
+                data-level="{{ u.level }}"
+                data-user="{{ u.email|lower }} {{ u.username|lower }} {{ u.phone|lower }}">
+              <td class="text-muted small">#{{ u.id }}</td>
+              <td>
+                <div class="fw-medium">{{ u.username }}</div>
+                <small class="text-muted">{{ u.email }}</small>
+              </td>
+              <td class="text-muted small">{{ u.phone|default:"—" }}</td>
+              <td>
+                <span class="level-badge level-{{ u.level }}">{{ u.level }}</span>
+              </td>
+              <td class="wallet-balance fw-medium">
+                R{% if u.wallet %}{{ u.wallet.balance|floatformat:2 }}{% else %}0.00{% endif %}
+              </td>
+              <td class="text-muted small">R{{ u.total_invested|floatformat:2 }}</td>
+              <td class="text-muted small">{{ u.date_joined|date:"M d, Y" }}</td>
+              <td>
+                <span class="badge user-status-badge {% if u.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                  {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+              </td>
+              <td style="white-space:nowrap">
+                <div class="form-check form-switch d-inline-block me-1 mb-0" title="Toggle active">
+                  <input class="form-check-input" type="checkbox" {% if u.is_active %}checked{% endif %}
+                         onchange="toggleUser({{ u.id }}, this)" style="cursor:pointer">
+                </div>
+                <button class="btn btn-xs btn-outline-primary" title="Adjust wallet"
+                        onclick="openWalletModal({{ u.id }}, '{{ u.username|escapejs }}', '{% if u.wallet %}{{ u.wallet.balance }}{% else %}0{% endif %}')">
+                  <i class="fas fa-wallet"></i>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9"><div class="empty-state"><i class="fas fa-users"></i>No users found</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <span class="pag-info text-muted" id="usr-pagination-info"></span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="usr-prev" onclick="paginate('usr',-1)"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-outline-secondary" id="usr-next" onclick="paginate('usr',1)">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-users #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   COMPANIES TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'companies' in user_permissions %}
+<div id="tab-companies" class="tab-pane {% if active_tab == 'companies' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-building me-2 text-warning"></i>Companies</div>
+    {% if is_super_admin or 'companies' in user_permissions %}
+    <button class="btn btn-primary btn-sm" onclick="openCompanyModal()">
+      <i class="fas fa-plus me-1"></i>Add Company
+    </button>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Share Price</th><th>Expected Return</th>
+              <th>Duration</th><th>Min Level</th><th>Investments</th><th>Total Invested</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for co in companies %}
+            <tr data-company="{{ co.id }}"
+                data-name="{{ co.name }}"
+                data-share-price="{{ co.share_price }}"
+                data-expected-return="{{ co.expected_return }}"
+                data-duration="{{ co.duration_days }}"
+                data-min-level="{{ co.min_level }}"
+                data-description="{{ co.description }}">
+              <td class="text-muted small">#{{ co.id }}</td>
+              <td class="fw-medium">{{ co.name }}</td>
+              <td class="text-warning fw-bold">R{{ co.share_price|floatformat:2 }}</td>
+              <td class="text-success">R{{ co.expected_return|floatformat:2 }}</td>
+              <td>{{ co.duration_days }} days</td>
+              <td><span class="level-badge level-{{ co.min_level }}">{{ co.min_level }}</span></td>
+              <td>{{ co.investment_count|default:0 }}</td>
+              <td>R{{ co.total_invested|default:0|floatformat:2 }}</td>
+              <td style="white-space:nowrap">
+                <button class="btn btn-xs btn-outline-secondary me-1"
+                        onclick="editCompany({{ co.id }})" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-xs btn-outline-danger"
+                        onclick="deleteCompany({{ co.id }}, '{{ co.name|escapejs }}')" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9"><div class="empty-state"><i class="fas fa-building"></i>No companies yet</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-companies #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   INVESTMENT PLANS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'investment_plans' in user_permissions %}
+<div id="tab-plans" class="tab-pane {% if active_tab == 'plans' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-chart-bar me-2 text-warning"></i>Investment Plans</div>
+    {% if is_super_admin or 'investment_plans' in user_permissions %}
+    <button class="btn btn-primary btn-sm" onclick="openPlanModal()">
+      <i class="fas fa-plus me-1"></i>Add Plan
+    </button>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>Plan</th><th>Phase</th><th>Min → Max</th><th>Return</th>
+              <th>Duration</th><th>Active</th><th>Investments</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for plan in plans %}
+            <tr data-plan="{{ plan.id }}"
+                data-name="{{ plan.name }}"
+                data-emoji="{{ plan.emoji }}"
+                data-phase="{{ plan.phase }}"
+                data-min-amount="{{ plan.min_amount }}"
+                data-max-amount="{{ plan.max_amount }}"
+                data-return-amount="{{ plan.return_amount }}"
+                data-duration-hours="{{ plan.duration_hours }}"
+                data-phase-order="{{ plan.phase_order }}"
+                data-plan-order="{{ plan.plan_order }}"
+                data-is-active="{{ plan.is_active|yesno:'true,false' }}"
+                data-description="{{ plan.description }}">
+              <td>
+                <span style="font-size:1.2rem">{{ plan.emoji }}</span>
+                <span class="fw-medium ms-1">{{ plan.name }}</span>
+              </td>
+              <td><span class="badge bg-secondary">{{ plan.get_phase_display|default:plan.phase }}</span></td>
+              <td class="fw-medium">R{{ plan.min_amount|floatformat:0 }} → R{{ plan.max_amount|floatformat:0 }}</td>
+              <td class="text-success fw-bold">R{{ plan.return_amount|floatformat:2 }}</td>
+              <td>{{ plan.get_duration_display }}</td>
+              <td>
+                {% if plan.is_active %}
+                <span class="badge bg-success">Yes</span>
+                {% else %}
+                <span class="badge bg-danger">No</span>
+                {% endif %}
+              </td>
+              <td>{{ plan.investment_count|default:0 }}</td>
+              <td style="white-space:nowrap">
+                <button class="btn btn-xs btn-outline-secondary me-1" onclick="editPlan({{ plan.id }})" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-xs btn-outline-danger" onclick="deletePlan({{ plan.id }}, '{{ plan.name|escapejs }}')" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8"><div class="empty-state"><i class="fas fa-chart-bar"></i>No investment plans yet</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-plans #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   REFERRALS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'referrals' in user_permissions %}
+<div id="tab-referrals" class="tab-pane {% if active_tab == 'referrals' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-user-friends me-2 text-warning"></i>Referrals</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="mini-stat"><span class="label">Total</span><span class="value">{{ referral_stats.total|default:0 }}</span></span>
+      <span class="mini-stat"><span class="label">Active</span><span class="value text-success">{{ referral_stats.active|default:0 }}</span></span>
+      <span class="mini-stat"><span class="label">Rewards Paid</span><span class="value text-warning">R{{ referral_stats.rewards|default:0|floatformat:2 }}</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>Inviter</th><th>Invitee</th><th>Bonus</th><th>Status</th><th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="referrals-tbody">
+            {% for ref in referrals %}
+            <tr data-referral="{{ ref.id }}">
+              <td class="text-muted small">#{{ ref.id }}</td>
+              <td>
+                <div class="fw-medium">{{ ref.inviter.username }}</div>
+                <small class="text-muted">{{ ref.inviter.email }}</small>
+              </td>
+              <td>
+                <div class="fw-medium">{{ ref.invitee.username }}</div>
+                <small class="text-muted">{{ ref.invitee.email }}</small>
+              </td>
+              <td class="text-success fw-bold">R{{ ref.bonus_amount|floatformat:2 }}</td>
+              <td>
+                <span class="badge {% if ref.status == 'active' %}bg-success{% elif ref.status == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                  {{ ref.status|capfirst }}
+                </span>
+              </td>
+              <td class="text-muted small">{{ ref.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6"><div class="empty-state"><i class="fas fa-user-friends"></i>No referrals yet</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <span class="pag-info text-muted" id="ref-pagination-info"></span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" id="ref-prev" onclick="paginate('ref',-1)"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-outline-secondary" id="ref-next" onclick="paginate('ref',1)">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /tab-referrals #}
+{% endif %}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   LEADS TAB
+   ════════════════════════════════════════════════════════════════════════════ #}
+{% if 'all' in user_permissions or 'leads' in user_permissions %}
+<div id="tab-leads" class="tab-pane {% if active_tab == 'leads' %}active{% endif %}">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div class="section-heading mb-0"><i class="fas fa-envelope me-2 text-warning"></i>Leads</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="mini-stat"><span class="label">Total</span><span class="value">{{ leads_total|default:0 }}</span></span>
+      <span class="mini-stat"><span class="label">Pending</span><span class="value text-warning">{{ leads_pending|default:0 }}</span></span>
+      <span class="mini-stat"><span class="label">Completed</span><span class="value text-success">{{ leads_completed|default:0 }}</span></span>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <h6 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Campaigns</h6>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>Campaign Name</th><th>Leads</th><th>Emails Sent</th>
+              <th>Success Rate</th><th>Active</th><th>Created</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for camp in campaigns %}
+            <tr>
+              <td class="text-muted small">#{{ camp.id }}</td>
+              <td class="fw-medium">{{ camp.name }}</td>
+              <td>{{ camp.lead_count|default:0 }}</td>
+              <td>{{ camp.emails_sent }}</td>
+              <td>{{ camp.success_rate|floatformat:1 }}%</td>
+              <td>
+                {% if camp.is_active %}
+                <span class="badge bg-success">Active</span>
+                {% else %}
+                <span class="badge bg-secondary">Paused</span>
+                {% endif %}
+              </td>
+              <td class="text-muted small">{{ camp.created_at|date:"M d, Y" }}</td>
+              <td>
+                <a href="{% url 'campaign_detail' camp.id %}" class="btn btn-xs btn-outline-secondary" target="_blank">
+                  <i class="fas fa-external-link-alt me-1"></i>View
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8"><div class="empty-state"><i class="fas fa-paper-plane"></i>No campaigns yet</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="{% url 'lead_dashboard' %}" class="btn btn-outline-primary" target="_blank">
+      <i class="fas fa-external-link-alt me-2"></i>Open Full Lead Manager
+    </a>
+  </div>
+
+</div>{# /tab-leads #}
+{% endif %}
+
+
+</div>{# /adminTabContent #}
+
+
+{# ════════════════════════════════════════════════════════════════════════════
+   MODALS
+   ════════════════════════════════════════════════════════════════════════════ #}
+
+{# ── Lightbox / proof image modal ─────────────────────────────────────────── #}
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lightboxCaption"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-2">
+        <img id="lightboxImg" src="" alt="Proof" class="img-fluid rounded" style="max-height:80vh">
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Wallet adjust modal ───────────────────────────────────────────────────── #}
+<div class="modal fade" id="walletModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:400px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-wallet me-2 text-warning"></i>Adjust Wallet Balance</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-1">User: <strong id="walletModalUsername"></strong></p>
+        <p class="text-muted mb-3">Current balance: <strong id="walletModalBalance"></strong></p>
+        <div class="mb-3">
+          <label class="form-label">Amount to Credit (R)</label>
+          <input type="number" id="walletAdjustAmount" class="form-control" step="0.01" min="0" placeholder="e.g. 500.00">
+          <div class="form-text text-muted">Positive = credit. Negative amounts are not supported.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveWalletAdjust()">
+          <i class="fas fa-save me-1"></i>Credit Wallet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Company create/edit modal ─────────────────────────────────────────────── #}
+<div class="modal fade" id="companyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:520px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="companyModalTitle">Add Company</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Company Name *</label>
+            <input type="text" id="companyName" class="form-control" placeholder="e.g. CapitalX Gold Tier">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Share Price (R) *</label>
+            <input type="number" id="companySharePrice" class="form-control" step="0.01" min="0">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Expected Return (R) *</label>
+            <input type="number" id="companyExpectedReturn" class="form-control" step="0.01" min="0">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Duration (Days) *</label>
+            <input type="number" id="companyDurationDays" class="form-control" min="1">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Minimum Level</label>
+            <select id="companyMinLevel" class="form-select">
+              <option value="1">Level 1</option>
+              <option value="2">Level 2</option>
+              <option value="3">Level 3</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea id="companyDescription" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveCompany()">
+          <i class="fas fa-save me-1"></i>Save Company
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Investment Plan create/edit modal ────────────────────────────────────── #}
+<div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="planModalTitle">Add Investment Plan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-8">
+            <label class="form-label">Plan Name *</label>
+            <input type="text" id="planName" class="form-control">
+          </div>
+          <div class="col-4">
+            <label class="form-label">Emoji</label>
+            <input type="text" id="planEmoji" class="form-control" maxlength="4" placeholder="💼">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Phase</label>
+            <select id="planPhase" class="form-select">
+              <option value="phase_1">Phase 1 (Short-Term)</option>
+              <option value="phase_2">Phase 2 (Mid-Term)</option>
+              <option value="phase_3">Phase 3 (Long-Term)</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label class="form-label">Phase Order</label>
+            <input type="number" id="planPhaseOrder" class="form-control" min="1" value="1">
+          </div>
+          <div class="col-3">
+            <label class="form-label">Plan Order</label>
+            <input type="number" id="planPlanOrder" class="form-control" min="1" value="1">
+          </div>
+          <div class="col-4">
+            <label class="form-label">Min Amount (R) *</label>
+            <input type="number" id="planMinAmount" class="form-control" step="0.01" min="0">
+          </div>
+          <div class="col-4">
+            <label class="form-label">Max Amount (R) *</label>
+            <input type="number" id="planMaxAmount" class="form-control" step="0.01" min="0">
+          </div>
+          <div class="col-4">
+            <label class="form-label">Return Amount (R) *</label>
+            <input type="number" id="planReturnAmount" class="form-control" step="0.01" min="0">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Duration (Hours) *</label>
+            <input type="number" id="planDurationHours" class="form-control" min="1">
+          </div>
+          <div class="col-6 d-flex align-items-end">
+            <div class="form-check form-switch ms-2 mb-2">
+              <input class="form-check-input" type="checkbox" id="planIsActive" checked>
+              <label class="form-check-label" for="planIsActive">Active</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea id="planDescription" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="savePlan()">
+          <i class="fas fa-save me-1"></i>Save Plan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+"use strict";
+
+const CSRF = document.getElementById('csrfToken').value;
+const PAGE_SIZE = 20;
+
+// ─── Pagination state ───────────────────────────────────────────────────────
+const pag = {};  // { prefix: { rows: [], filtered: [], page: 0 } }
+
+function initPag(prefix, selector) {
+  const rows = Array.from(document.querySelectorAll(selector));
+  pag[prefix] = { rows, filtered: rows, page: 0 };
+  renderPag(prefix);
+}
+
+function renderPag(prefix) {
+  const s = pag[prefix];
+  if (!s) return;
+  const start = s.page * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  s.rows.forEach(r => r.style.display = 'none');
+  s.filtered.slice(start, end).forEach(r => r.style.display = '');
+  const info = document.getElementById(prefix + '-pagination-info');
+  if (info) {
+    info.textContent = s.filtered.length
+      ? `Showing ${start + 1}–${Math.min(end, s.filtered.length)} of ${s.filtered.length}`
+      : 'No records found';
+  }
+  const prev = document.getElementById(prefix + '-prev');
+  const next = document.getElementById(prefix + '-next');
+  if (prev) prev.disabled = s.page === 0;
+  if (next) next.disabled = end >= s.filtered.length;
+}
+
+function paginate(prefix, dir) {
+  const s = pag[prefix];
+  if (!s) return;
+  const np = s.page + dir;
+  if (np < 0 || np * PAGE_SIZE >= s.filtered.length) return;
+  s.page = np;
+  renderPag(prefix);
+}
+
+// ─── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.tab-nav-section-header').forEach(h => h.classList.remove('has-active-child'));
+
+  const pane = document.getElementById('tab-' + tabId);
+  if (pane) pane.classList.add('active');
+
+  const link = document.querySelector(`.tab-nav-link[data-tab="${tabId}"]`);
+  if (link) {
+    link.classList.add('active');
+    const navSection = link.closest('.nav-section');
+    if (navSection) {
+      const hdr = navSection.querySelector('.tab-nav-section-header');
+      if (hdr) hdr.classList.add('has-active-child');
+      const collapse = navSection.querySelector('.collapse');
+      if (collapse) collapse.classList.add('show');
+    }
+  }
+
+  history.replaceState(null, '', '?tab=' + tabId);
+}
+
+// ─── Filtering ──────────────────────────────────────────────────────────────
+function filterDeposits() {
+  const status = document.getElementById('dep-filter-status')?.value || '';
+  const method = document.getElementById('dep-filter-method')?.value || '';
+  const q = (document.getElementById('dep-search')?.value || '').trim().toLowerCase();
+  const s = pag['dep'];
+  if (!s) return;
+  s.filtered = s.rows.filter(r => {
+    if (status && r.dataset.status !== status) return false;
+    if (method && r.dataset.method !== method) return false;
+    if (q && !r.dataset.user.includes(q)) return false;
+    return true;
+  });
+  s.page = 0;
+  renderPag('dep');
+}
+
+function filterWithdrawals() {
+  const status = document.getElementById('wd-filter-status')?.value || '';
+  const q = (document.getElementById('wd-search')?.value || '').trim().toLowerCase();
+  const s = pag['wd'];
+  if (!s) return;
+  s.filtered = s.rows.filter(r => {
+    if (status && r.dataset.status !== status) return false;
+    if (q && !r.dataset.user.includes(q)) return false;
+    return true;
+  });
+  s.page = 0;
+  renderPag('wd');
+}
+
+function filterUsers() {
+  const q = (document.getElementById('usr-search')?.value || '').trim().toLowerCase();
+  const level = document.getElementById('usr-filter-level')?.value || '';
+  const s = pag['usr'];
+  if (!s) return;
+  s.filtered = s.rows.filter(r => {
+    if (level && r.dataset.level !== level) return false;
+    if (q && !r.dataset.user.includes(q)) return false;
+    return true;
+  });
+  s.page = 0;
+  renderPag('usr');
+}
+
+// ─── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const el = document.getElementById('mainToast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.className = `toast align-items-center text-white border-0 bg-${
+    type === 'success' ? 'success' : type === 'danger' ? 'danger' : 'warning'
+  }`;
+  bootstrap.Toast.getOrCreateInstance(el, { delay: 3500 }).show();
+}
+
+// ─── Stats refresh ──────────────────────────────────────────────────────────
+async function refreshStats() {
+  try {
+    const r = await fetch('/admin/ajax/stats/');
+    if (!r.ok) return;
+    const d = await r.json();
+    setT('stat-total-users', d.total_users);
+    setT('stat-pending-deposits', d.deposit_pending_count);
+    setT('stat-pending-deposits-amount', fmtR(d.deposit_pending_amount));
+    setT('stat-approved-deposits', fmtR(d.deposit_approved_amount, 0));
+    setT('stat-pending-withdrawals', d.withdrawal_pending_count);
+    setT('stat-pending-withdrawals-amount', fmtR(d.withdrawal_pending_amount));
+    setT('stat-active-investments', d.active_investments);
+    setT('stat-wallet-total', fmtR(d.wallet_total, 0));
+  } catch(_) {}
+}
+
+function setT(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function fmtR(n, decimals = 2) {
+  return Number(n).toLocaleString('en-ZA', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+// ─── Deposit actions ────────────────────────────────────────────────────────
+async function depositAction(id, action) {
+  const url = action === 'approve'
+    ? `/admin/ajax/approve-deposit/${id}/`
+    : action === 'reject'
+    ? `/admin/ajax/reject-deposit/${id}/`
+    : `/admin/ajax/set-deposit-pending/${id}/`;
+
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    const d = await r.json();
+    if (d.success) {
+      const ns = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'pending';
+      updateDepRow(id, ns);
+      refreshStats();
+      showToast(`Deposit #${id} ${ns}`);
+    } else {
+      showToast(d.error || 'Action failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+function updateDepRow(id, status) {
+  const row = document.querySelector(`tr[data-deposit="${id}"]`);
+  if (!row) return;
+  row.dataset.status = status;
+  const badge = row.querySelector('.status-badge');
+  if (badge) {
+    badge.className = `badge status-badge ${status === 'approved' ? 'bg-success' : status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark'}`;
+    badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+  }
+  const acts = row.querySelector('.action-btns');
+  if (acts) {
+    acts.innerHTML = status === 'pending'
+      ? `<button class="btn btn-xs btn-success me-1" onclick="depositAction(${id},'approve')" title="Approve"><i class="fas fa-check"></i></button>
+         <button class="btn btn-xs btn-danger" onclick="depositAction(${id},'reject')" title="Reject"><i class="fas fa-times"></i></button>`
+      : `<button class="btn btn-xs btn-outline-secondary" onclick="depositAction(${id},'pending')" title="Reset to pending"><i class="fas fa-undo"></i></button>`;
+  }
+  filterDeposits();
+}
+
+// ─── Withdrawal actions ─────────────────────────────────────────────────────
+async function withdrawalAction(id, action) {
+  const url = action === 'approve'
+    ? `/admin/ajax/approve-withdrawal/${id}/`
+    : action === 'reject'
+    ? `/admin/ajax/reject-withdrawal/${id}/`
+    : `/admin/ajax/set-withdrawal-pending/${id}/`;
+
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    const d = await r.json();
+    if (d.success) {
+      const ns = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'pending';
+      updateWdRow(id, ns);
+      refreshStats();
+      showToast(`Withdrawal #${id} ${ns}`);
+    } else {
+      showToast(d.error || 'Action failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+function updateWdRow(id, status) {
+  const row = document.querySelector(`tr[data-withdrawal="${id}"]`);
+  if (!row) return;
+  row.dataset.status = status;
+  const badge = row.querySelector('.status-badge');
+  if (badge) {
+    badge.className = `badge status-badge ${status === 'approved' ? 'bg-success' : status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark'}`;
+    badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+  }
+  const acts = row.querySelector('.action-btns');
+  if (acts) {
+    acts.innerHTML = status === 'pending'
+      ? `<button class="btn btn-xs btn-success me-1" onclick="withdrawalAction(${id},'approve')" title="Approve"><i class="fas fa-check"></i></button>
+         <button class="btn btn-xs btn-danger" onclick="withdrawalAction(${id},'reject')" title="Reject"><i class="fas fa-times"></i></button>`
+      : `<button class="btn btn-xs btn-outline-secondary" onclick="withdrawalAction(${id},'pending')" title="Reset to pending"><i class="fas fa-undo"></i></button>`;
+  }
+  filterWithdrawals();
+}
+
+// ─── User: toggle active ────────────────────────────────────────────────────
+async function toggleUser(id, checkbox) {
+  try {
+    const r = await fetch(`/admin/ajax/toggle-user/${id}/`, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    const d = await r.json();
+    if (d.success) {
+      checkbox.checked = d.is_active;
+      const row = checkbox.closest('tr');
+      if (row) {
+        const badge = row.querySelector('.user-status-badge');
+        if (badge) {
+          badge.className = `badge user-status-badge ${d.is_active ? 'bg-success' : 'bg-danger'}`;
+          badge.textContent = d.is_active ? 'Active' : 'Inactive';
+        }
+      }
+      showToast(`User ${d.is_active ? 'activated' : 'deactivated'}`);
+    } else {
+      checkbox.checked = !checkbox.checked;
+      showToast(d.error || 'Failed', 'danger');
+    }
+  } catch(_) {
+    checkbox.checked = !checkbox.checked;
+    showToast('Network error', 'danger');
+  }
+}
+
+// ─── Wallet modal ───────────────────────────────────────────────────────────
+let _walletUserId = null;
+
+function openWalletModal(userId, username, balance) {
+  _walletUserId = userId;
+  document.getElementById('walletModalUsername').textContent = username;
+  document.getElementById('walletModalBalance').textContent = 'R' + parseFloat(balance).toFixed(2);
+  document.getElementById('walletAdjustAmount').value = '';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('walletModal')).show();
+}
+
+async function saveWalletAdjust() {
+  const amount = document.getElementById('walletAdjustAmount').value;
+  if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+    showToast('Enter a valid positive amount', 'warning');
+    return;
+  }
+  const fd = new FormData();
+  fd.append('user_id', _walletUserId);
+  fd.append('amount', amount);
+  try {
+    const r = await fetch('/admin/ajax/add-wallet-funds/', { method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd });
+    const d = await r.json();
+    if (d.success) {
+      const row = document.querySelector(`tr[data-user-id="${_walletUserId}"]`);
+      if (row) {
+        const el = row.querySelector('.wallet-balance');
+        if (el) el.textContent = 'R' + parseFloat(d.new_balance).toFixed(2);
+      }
+      document.getElementById('walletModalBalance').textContent = 'R' + parseFloat(d.new_balance).toFixed(2);
+      bootstrap.Modal.getInstance(document.getElementById('walletModal'))?.hide();
+      refreshStats();
+      showToast(`Credited R${parseFloat(amount).toFixed(2)} to wallet`);
+    } else {
+      showToast(d.error || 'Failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+// ─── Company CRUD ───────────────────────────────────────────────────────────
+let _editingCompanyId = null;
+
+function openCompanyModal() {
+  _editingCompanyId = null;
+  document.getElementById('companyModalTitle').textContent = 'Add Company';
+  ['companyName','companySharePrice','companyExpectedReturn','companyDurationDays','companyDescription']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('companyMinLevel').value = '1';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('companyModal')).show();
+}
+
+function editCompany(id) {
+  const row = document.querySelector(`tr[data-company="${id}"]`);
+  if (!row) return;
+  _editingCompanyId = id;
+  document.getElementById('companyModalTitle').textContent = 'Edit Company';
+  document.getElementById('companyName').value = row.dataset.name || '';
+  document.getElementById('companySharePrice').value = row.dataset.sharePrice || '';
+  document.getElementById('companyExpectedReturn').value = row.dataset.expectedReturn || '';
+  document.getElementById('companyDurationDays').value = row.dataset.duration || '';
+  document.getElementById('companyMinLevel').value = row.dataset.minLevel || '1';
+  document.getElementById('companyDescription').value = row.dataset.description || '';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('companyModal')).show();
+}
+
+async function saveCompany() {
+  const fd = new FormData();
+  fd.append('name', document.getElementById('companyName').value);
+  fd.append('share_price', document.getElementById('companySharePrice').value);
+  fd.append('expected_return', document.getElementById('companyExpectedReturn').value);
+  fd.append('duration_days', document.getElementById('companyDurationDays').value);
+  fd.append('min_level', document.getElementById('companyMinLevel').value);
+  fd.append('description', document.getElementById('companyDescription').value);
+
+  const url = _editingCompanyId
+    ? `/admin/ajax/company/${_editingCompanyId}/save/`
+    : '/admin/ajax/company/save/';
+
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd });
+    const d = await r.json();
+    if (d.success) {
+      bootstrap.Modal.getInstance(document.getElementById('companyModal'))?.hide();
+      showToast(`Company ${_editingCompanyId ? 'updated' : 'created'} — reloading…`);
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showToast(d.error || 'Failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+async function deleteCompany(id, name) {
+  if (!confirm(`Delete company "${name}"?\n\nThis may break existing investments referencing this tier.`)) return;
+  try {
+    const r = await fetch(`/admin/ajax/company/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    const d = await r.json();
+    if (d.success) {
+      document.querySelector(`tr[data-company="${id}"]`)?.remove();
+      showToast(`Company "${name}" deleted`);
+    } else {
+      showToast(d.error || 'Failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+// ─── Investment Plan CRUD ───────────────────────────────────────────────────
+let _editingPlanId = null;
+
+function openPlanModal() {
+  _editingPlanId = null;
+  document.getElementById('planModalTitle').textContent = 'Add Investment Plan';
+  ['planName','planMinAmount','planMaxAmount','planReturnAmount','planDurationHours','planDescription']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('planEmoji').value = '💼';
+  document.getElementById('planPhase').value = 'phase_1';
+  document.getElementById('planPhaseOrder').value = '1';
+  document.getElementById('planPlanOrder').value = '1';
+  document.getElementById('planIsActive').checked = true;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('planModal')).show();
+}
+
+function editPlan(id) {
+  const row = document.querySelector(`tr[data-plan="${id}"]`);
+  if (!row) return;
+  _editingPlanId = id;
+  document.getElementById('planModalTitle').textContent = 'Edit Investment Plan';
+  document.getElementById('planName').value = row.dataset.name || '';
+  document.getElementById('planEmoji').value = row.dataset.emoji || '💼';
+  document.getElementById('planPhase').value = row.dataset.phase || 'phase_1';
+  document.getElementById('planMinAmount').value = row.dataset.minAmount || '';
+  document.getElementById('planMaxAmount').value = row.dataset.maxAmount || '';
+  document.getElementById('planReturnAmount').value = row.dataset.returnAmount || '';
+  document.getElementById('planDurationHours').value = row.dataset.durationHours || '';
+  document.getElementById('planPhaseOrder').value = row.dataset.phaseOrder || '1';
+  document.getElementById('planPlanOrder').value = row.dataset.planOrder || '1';
+  document.getElementById('planIsActive').checked = row.dataset.isActive === 'true';
+  document.getElementById('planDescription').value = row.dataset.description || '';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('planModal')).show();
+}
+
+async function savePlan() {
+  const fd = new FormData();
+  ['planName','planEmoji','planPhase','planMinAmount','planMaxAmount',
+   'planReturnAmount','planDurationHours','planPhaseOrder','planPlanOrder','planDescription']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) fd.append(id.replace('plan','').replace(/^./, c => c.toLowerCase()).replace(/[A-Z]/g, c => '_' + c.toLowerCase()), el.value);
+    });
+  // Fix key names to match server expectations
+  const keys = ['name','emoji','phase','min_amount','max_amount','return_amount','duration_hours','phase_order','plan_order','description'];
+  const fd2 = new FormData();
+  ['planName','planEmoji','planPhase','planMinAmount','planMaxAmount',
+   'planReturnAmount','planDurationHours','planPhaseOrder','planPlanOrder','planDescription']
+    .forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el) fd2.append(keys[i], el.value);
+    });
+  fd2.append('is_active', document.getElementById('planIsActive').checked ? 'true' : 'false');
+
+  const url = _editingPlanId
+    ? `/admin/ajax/plan/${_editingPlanId}/save/`
+    : '/admin/ajax/plan/save/';
+
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd2 });
+    const d = await r.json();
+    if (d.success) {
+      bootstrap.Modal.getInstance(document.getElementById('planModal'))?.hide();
+      showToast(`Plan ${_editingPlanId ? 'updated' : 'created'} — reloading…`);
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showToast(d.error || 'Failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+async function deletePlan(id, name) {
+  if (!confirm(`Delete plan "${name}"?`)) return;
+  try {
+    const r = await fetch(`/admin/ajax/plan/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    const d = await r.json();
+    if (d.success) {
+      document.querySelector(`tr[data-plan="${id}"]`)?.remove();
+      showToast(`Plan "${name}" deleted`);
+    } else {
+      showToast(d.error || 'Failed', 'danger');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+// ─── Force payout ───────────────────────────────────────────────────────────
+async function forcePayout(id) {
+  if (!confirm('Force payout for this plan investment? Funds will be credited to user\'s wallet.')) return;
+  try {
+    const r = await fetch(`/admin/ajax/force-payout/${id}/`, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    const d = await r.json();
+    if (d.success) {
+      const row = document.querySelector(`tr[data-planinvestment="${id}"]`);
+      if (row) {
+        const badge = row.querySelector('.plan-status');
+        if (badge) { badge.className = 'badge bg-secondary plan-status'; badge.textContent = 'Paid'; }
+        const act = row.querySelector('.plan-action');
+        if (act) act.innerHTML = '';
+      }
+      refreshStats();
+      showToast('Payout credited to wallet');
+    } else {
+      showToast(d.error || 'Already paid or failed', 'warning');
+    }
+  } catch(_) { showToast('Network error', 'danger'); }
+}
+
+// ─── Investments sub-tab switcher ───────────────────────────────────────────
+function switchSubTab(which) {
+  const companyPane = document.getElementById('subtab-company');
+  const planPane = document.getElementById('subtab-plan');
+  const companyBtn = document.getElementById('subtab-company-btn');
+  const planBtn = document.getElementById('subtab-plan-btn');
+  if (which === 'company') {
+    companyPane && (companyPane.style.display = '');
+    planPane && (planPane.style.display = 'none');
+    companyBtn && companyBtn.classList.add('active');
+    planBtn && planBtn.classList.remove('active');
+  } else {
+    companyPane && (companyPane.style.display = 'none');
+    planPane && (planPane.style.display = '');
+    planBtn && planBtn.classList.add('active');
+    companyBtn && companyBtn.classList.remove('active');
+    if (!pag['pi']) initPag('pi', '#planinvestments-tbody tr[data-planinvestment]');
+  }
+}
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+  // Sidebar tab links
+  document.querySelectorAll('.tab-nav-link').forEach(link => {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      switchTab(this.dataset.tab);
+    });
+  });
+
+  // Proof image lightbox
+  document.querySelectorAll('.proof-thumb').forEach(img => {
+    img.addEventListener('click', function () {
+      document.getElementById('lightboxImg').src = this.dataset.img;
+      document.getElementById('lightboxCaption').textContent = this.dataset.caption || 'Image';
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('lightboxModal')).show();
+    });
+  });
+
+  // Pagination init (visible tab data only; lazy init for hidden tabs)
+  initPag('dep', '#deposits-tbody tr[data-deposit]');
+  initPag('wd',  '#withdrawals-tbody tr[data-withdrawal]');
+  initPag('inv', '#investments-tbody tr[data-investment]');
+  initPag('usr', '#users-tbody tr[data-user-id]');
+  initPag('ref', '#referrals-tbody tr[data-referral]');
+
+  // Ensure active tab from URL is shown (already applied via server-side class,
+  // but re-apply to correctly set sidebar state)
+  const tab = new URLSearchParams(window.location.search).get('tab') || 'dashboard';
+  switchTab(tab);
+});
+</script>
+{% endblock %}

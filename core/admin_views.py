@@ -476,7 +476,7 @@ def admin_console(request):
         deposits = Deposit.objects.select_related('user').order_by('-created_at')
         if dep_filter:
             deposits = deposits.filter(status=dep_filter)
-        context['deposits'] = deposits[:50]
+        context['deposits'] = deposits[:200]
         context['dep_filter'] = dep_filter
 
     # ── WITHDRAWALS ──
@@ -485,7 +485,7 @@ def admin_console(request):
         withdrawals = Withdrawal.objects.select_related('user').order_by('-created_at')
         if wd_filter:
             withdrawals = withdrawals.filter(status=wd_filter)
-        context['withdrawals'] = withdrawals[:50]
+        context['withdrawals'] = withdrawals[:200]
         context['wd_filter'] = wd_filter
 
     # ── INVESTMENTS ──
@@ -496,12 +496,12 @@ def admin_console(request):
             investments = investments.filter(is_active=True)
         elif inv_filter == 'completed':
             investments = investments.filter(is_active=False)
-        context['investments'] = investments[:50]
+        context['investments'] = investments[:200]
         context['inv_filter'] = inv_filter
 
     # ── PLAN INVESTMENTS (phased system) ──
     if can('investments'):
-        plan_investments = PlanInvestment.objects.select_related('user', 'plan').order_by('-created_at')[:50]
+        plan_investments = PlanInvestment.objects.select_related('user', 'plan').order_by('-created_at')[:200]
         context['plan_investments'] = plan_investments
 
     # ── USERS ──
@@ -512,7 +512,7 @@ def admin_console(request):
             users = users.filter(
                 Q(email__icontains=user_search) | Q(username__icontains=user_search)
             )
-        context['users'] = users[:50]
+        context['users'] = users[:200]
         context['user_search'] = user_search
         context['user_levels'] = {
             'l1': CustomUser.objects.filter(is_staff=False, level=1).count(),
@@ -536,7 +536,7 @@ def admin_console(request):
 
     # ── REFERRALS ──
     if can('referrals'):
-        context['referrals'] = Referral.objects.select_related('inviter', 'invitee').order_by('-created_at')[:50]
+        context['referrals'] = Referral.objects.select_related('inviter', 'invitee').order_by('-created_at')[:200]
         context['referral_stats'] = {
             'total': Referral.objects.count(),
             'active': Referral.objects.filter(status='active').count(),
@@ -698,3 +698,222 @@ def ajax_add_wallet_funds(request):
         return JsonResponse({'success': True, 'new_balance': float(wallet.balance)})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ── Stats endpoint ──────────────────────────────────────────────────────────
+
+def ajax_stats(request):
+    """Return fresh aggregate stats JSON for dashboard card live-updates."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    dep = Deposit.objects.aggregate(
+        pending_count=Count('id', filter=Q(status='pending')),
+        pending_amount=Sum('amount', filter=Q(status='pending')),
+        approved_count=Count('id', filter=Q(status='approved')),
+        approved_amount=Sum('amount', filter=Q(status='approved')),
+    )
+    wd = Withdrawal.objects.aggregate(
+        pending_count=Count('id', filter=Q(status='pending')),
+        pending_amount=Sum('amount', filter=Q(status='pending')),
+    )
+    return JsonResponse({
+        'success': True,
+        'total_users': CustomUser.objects.filter(is_staff=False).count(),
+        'deposit_pending_count': dep['pending_count'] or 0,
+        'deposit_pending_amount': float(dep['pending_amount'] or 0),
+        'deposit_approved_amount': float(dep['approved_amount'] or 0),
+        'withdrawal_pending_count': wd['pending_count'] or 0,
+        'withdrawal_pending_amount': float(wd['pending_amount'] or 0),
+        'active_investments': Investment.objects.filter(is_active=True).count(),
+        'wallet_total': float(Wallet.objects.aggregate(t=Sum('balance'))['t'] or 0),
+    })
+
+
+# ── Deposit / Withdrawal status reset ──────────────────────────────────────
+
+def ajax_set_deposit_pending(request, deposit_id):
+    """Reset a deposit status back to pending (bypasses model save to avoid wallet double-ops)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    deposit = get_object_or_404(Deposit, id=deposit_id)
+    note = f'\nReset to pending by {request.user.username} on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
+    Deposit.objects.filter(pk=deposit.pk).update(
+        status='pending',
+        admin_notes=(deposit.admin_notes or '') + note,
+    )
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Reset Deposit to Pending',
+        target_model='Deposit', target_id=deposit.id,
+        details=f'Reset deposit #{deposit.id} (R{deposit.amount}) to pending for {deposit.user.email}'
+    )
+    return JsonResponse({'success': True})
+
+
+def ajax_set_withdrawal_pending(request, withdrawal_id):
+    """Reset a withdrawal status back to pending (bypasses model save to avoid wallet double-ops)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    wd = get_object_or_404(Withdrawal, id=withdrawal_id)
+    Withdrawal.objects.filter(pk=wd.pk).update(status='pending')
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Reset Withdrawal to Pending',
+        target_model='Withdrawal', target_id=wd.id,
+        details=f'Reset withdrawal #{wd.id} (R{wd.amount}) to pending for {wd.user.email}'
+    )
+    return JsonResponse({'success': True})
+
+
+# ── Company CRUD ────────────────────────────────────────────────────────────
+
+def ajax_company_save(request, company_id=None):
+    """Create or update a Company tier via AJAX POST."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    try:
+        name = request.POST.get('name', '').strip()
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Name is required'})
+        share_price = Decimal(str(request.POST.get('share_price', '0')))
+        expected_return = Decimal(str(request.POST.get('expected_return', '0')))
+        duration_days = int(request.POST.get('duration_days', '0'))
+        min_level = int(request.POST.get('min_level', '1'))
+        description = request.POST.get('description', '')
+
+        if company_id:
+            company = get_object_or_404(Company, id=company_id)
+            action_str = 'Updated Company'
+        else:
+            company = Company()
+            action_str = 'Created Company'
+
+        company.name = name
+        company.share_price = share_price
+        company.expected_return = expected_return
+        company.duration_days = duration_days
+        company.min_level = min_level
+        company.description = description
+        company.save()
+
+        AdminActivityLog.objects.create(
+            admin_user=request.user, action=action_str,
+            target_model='Company', target_id=company.id,
+            details=f'{action_str}: {name} (R{share_price})'
+        )
+        return JsonResponse({
+            'success': True,
+            'company': {
+                'id': company.id,
+                'name': company.name,
+                'share_price': float(company.share_price),
+                'expected_return': float(company.expected_return),
+                'duration_days': company.duration_days,
+                'min_level': company.min_level,
+                'description': company.description,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def ajax_company_delete(request, company_id):
+    """Delete a Company tier."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    company = get_object_or_404(Company, id=company_id)
+    name = company.name
+    company.delete()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Deleted Company',
+        target_model='Company', target_id=company_id,
+        details=f'Deleted company: {name}'
+    )
+    return JsonResponse({'success': True})
+
+
+# ── Investment Plan CRUD ────────────────────────────────────────────────────
+
+def ajax_plan_save(request, plan_id=None):
+    """Create or update an InvestmentPlan via AJAX POST."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    try:
+        name = request.POST.get('name', '').strip()
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Name is required'})
+        phase = request.POST.get('phase', 'phase_1')
+        emoji = request.POST.get('emoji', '💼')
+        min_amount = Decimal(str(request.POST.get('min_amount', '0')))
+        max_amount = Decimal(str(request.POST.get('max_amount', '0')))
+        return_amount = Decimal(str(request.POST.get('return_amount', '0')))
+        duration_hours = int(request.POST.get('duration_hours', '24'))
+        phase_order = int(request.POST.get('phase_order', '1'))
+        plan_order = int(request.POST.get('plan_order', '1'))
+        description = request.POST.get('description', '')
+        is_active = request.POST.get('is_active', 'true').lower() in ('true', '1', 'on')
+
+        if plan_id:
+            plan = get_object_or_404(InvestmentPlan, id=plan_id)
+            action_str = 'Updated Plan'
+        else:
+            plan = InvestmentPlan()
+            action_str = 'Created Plan'
+
+        plan.name = name
+        plan.phase = phase
+        plan.emoji = emoji
+        plan.min_amount = min_amount
+        plan.max_amount = max_amount
+        plan.return_amount = return_amount
+        plan.duration_hours = duration_hours
+        plan.phase_order = phase_order
+        plan.plan_order = plan_order
+        plan.description = description
+        plan.is_active = is_active
+        plan.save()
+
+        AdminActivityLog.objects.create(
+            admin_user=request.user, action=action_str,
+            target_model='InvestmentPlan', target_id=plan.id,
+            details=f'{action_str}: {emoji} {name}'
+        )
+        return JsonResponse({
+            'success': True,
+            'plan': {
+                'id': plan.id,
+                'name': plan.name,
+                'emoji': plan.emoji,
+                'phase': plan.phase,
+                'min_amount': float(plan.min_amount),
+                'max_amount': float(plan.max_amount),
+                'return_amount': float(plan.return_amount),
+                'duration_hours': plan.duration_hours,
+                'phase_order': plan.phase_order,
+                'plan_order': plan.plan_order,
+                'is_active': plan.is_active,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def ajax_plan_delete(request, plan_id):
+    """Delete an InvestmentPlan."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    name = f'{plan.emoji} {plan.name}'
+    plan.delete()
+    AdminActivityLog.objects.create(
+        admin_user=request.user, action='Deleted Plan',
+        target_model='InvestmentPlan', target_id=plan_id,
+        details=f'Deleted investment plan: {name}'
+    )
+    return JsonResponse({'success': True})
