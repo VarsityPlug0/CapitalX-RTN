@@ -1436,16 +1436,27 @@ def portfolio_view(request):
         user=user,
         is_active=True
     ).select_related('company').order_by('-created_at')
-    
-    # Get user's completed investments
+
     completed_investments = Investment.objects.filter(
         user=user,
         is_active=False
     ).select_related('company').order_by('-end_date')
 
+    total_invested = sum(inv.amount for inv in active_investments)
+    total_expected_return = sum(inv.return_amount for inv in active_investments)
+    total_earned = sum(inv.return_amount for inv in completed_investments if inv.profit_paid)
+
+    company_distribution = {}
+    for inv in active_investments:
+        company_distribution[inv.company.name] = company_distribution.get(inv.company.name, 0) + inv.amount
+
     return render(request, 'core/portfolio.html', {
         'active_investments': active_investments,
         'completed_investments': completed_investments,
+        'total_invested': total_invested,
+        'total_expected_return': total_expected_return,
+        'total_earned': total_earned,
+        'company_distribution': company_distribution,
     })
 
 @login_required
