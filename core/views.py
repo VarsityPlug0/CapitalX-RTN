@@ -72,6 +72,7 @@ def home_view(request):
         'top_referrers': top_referrers,
         'referral_link': referral_link,
         'testimonials': testimonials,
+        'hide_base_footer': True,
     }
     
     return render(request, 'core/home.html', context)
