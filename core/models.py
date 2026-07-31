@@ -315,7 +315,7 @@ class Withdrawal(models.Model):
     
     PAYMENT_METHODS = [
         ('bank', 'Bank Transfer'),
-        ('cash', 'Cash Withdrawal'),
+        ('cash', 'Cash Send'),
     ]
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
