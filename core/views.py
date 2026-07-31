@@ -2044,3 +2044,44 @@ def csrf_test_view(request):
     
     return render(request, 'core/test_csrf_form.html', context)
 
+
+
+# ── Sentry Webhook → Telegram ──────────────────────────────────────────────
+import json as _json
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
+@csrf_exempt
+def sentry_webhook(request):
+    """Receives Sentry error alerts and forwards them to Telegram."""
+    if request.method != 'POST':
+        return HttpResponse('OK')
+    try:
+        data = _json.loads(request.body)
+        event = data.get('event', {})
+        title = event.get('title', data.get('message', 'Unknown error'))
+        level = event.get('level', 'error').upper()
+        culprit = event.get('culprit', '')
+        url = data.get('url', '')
+        project = data.get('project_name', 'CapitalX')
+
+        msg = (
+            f"🚨 <b>{level} — {project}</b>\n"
+            f"<b>{title}</b>\n"
+            f"{f'Where: {culprit}' if culprit else ''}\n"
+            f"{f'View in Sentry: {url}' if url else ''}"
+        ).strip()
+
+        import os as _os
+        import requests as _req
+        token = _os.getenv('TELEGRAM_BOT_TOKEN', '')
+        chat  = _os.getenv('TELEGRAM_CHAT_ID', '')
+        if token and chat:
+            _req.post(
+                f'https://api.telegram.org/bot{token}/sendMessage',
+                json={'chat_id': chat, 'text': msg, 'parse_mode': 'HTML'},
+                timeout=8,
+            )
+    except Exception:
+        pass
+    return HttpResponse('OK')
