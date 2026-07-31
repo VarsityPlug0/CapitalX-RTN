@@ -10,6 +10,12 @@
   .progress-bar-thin { height: 5px; border-radius: 3px; }
   .claim-btn { min-width: 110px; }
   .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,.1); padding-bottom: .5rem; }
+  .table td, .table th { color: #e0e0e0; }
+  .table td.fw-medium, .table td.fw-bold { color: #ffffff; }
+  .table td.text-success { color: #4ade80 !important; }
+  .table td.text-muted { color: #9ca3af !important; }
+  .table td.text-warning { color: #facc15 !important; }
+  .table thead th { color: #d1d5db; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; border-bottom-color: rgba(255,255,255,.15); }
 </style>
 {% endblock %}
 
@@ -115,10 +121,10 @@
             <tr>
               <td>
                 <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
-                <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
+                <span class="fw-medium ms-1" style="color:#fff">{{ inv.plan.name }}</span>
               </td>
               <td><span class="badge bg-secondary plan-badge">{{ inv.plan.phase|title }}</span></td>
-              <td class="fw-medium">R{{ inv.amount|floatformat:2 }}</td>
+              <td class="fw-medium" style="color:#fff">R{{ inv.amount|floatformat:2 }}</td>
               <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
               <td class="text-muted small">{{ inv.end_date|date:"M d, Y H:i" }}</td>
               <td>
