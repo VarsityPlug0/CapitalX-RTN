@@ -5,7 +5,35 @@
 
 {% block extra_css %}
 <style>
-  .portfolio-stat { border-radius: 10px; padding: 1.1rem 1.25rem; }
+  .portfolio-stat {
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    position: relative;
+    background: var(--bs-body-bg);
+    z-index: 1;
+  }
+  .portfolio-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    padding: 2px;
+    background: linear-gradient(45deg, #4ade80, #3b82f6, #9333ea);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: gradient-border 4s ease infinite;
+    background-size: 200% 200%;
+    z-index: -1;
+  }
+  @keyframes gradient-border {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
   .plan-badge { font-size: .7rem; padding: .25em .55em; border-radius: 4px; }
   .progress-bar-thin { height: 5px; border-radius: 3px; }
   .claim-btn { min-width: 110px; }
@@ -207,84 +235,7 @@
               <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
               <td class="fw-bold">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
               <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
-              <td><span class="badge bg-success">Claimed</span></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {# COMPANY INVESTMENTS - COMPLETED #}
-  {% if completed_investments %}
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="section-title"><i class="bi bi-building me-2 text-success"></i>Completed Company Investments</h5>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Amount</th>
-              <th>Return</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for inv in completed_investments %}
-            <tr>
-              <td class="fw-medium">{{ inv.company.name }}</td>
-              <td>R{{ inv.amount|floatformat:2 }}</td>
-              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
-              <td class="text-muted small">{{ inv.start_date|date:"M d, Y" }}</td>
-              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
-              <td>
-                {% if inv.funds_claimed %}
-                  <span class="badge bg-success">Claimed</span>
-                {% else %}
-                  <span class="badge bg-info">Completed</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if inv.funds_claimed %}
-                  <button class="btn btn-sm btn-secondary" disabled>Claimed</button>
-                {% else %}
-                  <a href="{% url 'claim_investment_funds' inv.id %}"
-                     class="btn btn-sm btn-success"
-                     onclick="return confirm('Claim R{{ inv.amount|add:inv.return_amount|floatformat:2 }}?')">
-                    Claim Funds
-                  </a>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {# ── Investment distribution ── #}
-  {% if company_distribution %}
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="section-title"><i class="bi bi-pie-chart me-2"></i>Investment Distribution</h5>
-      <div class="table-responsive">
-        <table class="table mb-0">
-          <thead>
-            <tr><th>Company</th><th>Amount</th></tr>
-          </thead>
-          <tbody>
-            {% for company_name, amount in company_distribution.items %}
-            <tr>
-              <td>{{ company_name }}</td>
-              <td>R{{ amount|floatformat:2 }}</td>
+              <td><span class="badge bg-success">Completed</span></td>
             </tr>
             {% endfor %}
           </tbody>
