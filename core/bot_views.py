@@ -219,3 +219,70 @@ def bot_get_financial_info(request):
             'success': False,
             'error': 'Internal server error'
         }, status=500)
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def bot_get_plans(request):
+    """Return all active investment plans for the client bot."""
+    from .models import InvestmentPlan
+    plans = InvestmentPlan.objects.filter(is_active=True).order_by('phase_order', 'plan_order')
+    data = []
+    for p in plans:
+        data.append({
+            'id': p.id,
+            'name': p.name,
+            'emoji': p.emoji,
+            'phase': p.phase,
+            'min_amount': float(p.min_amount),
+            'max_amount': float(p.max_amount),
+            'return_amount': float(p.return_amount),
+            'duration': p.get_duration_display(),
+            'roi': round(float(p.get_roi_percentage()), 1),
+        })
+    return Response({'success': True, 'plans': data})
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def bot_get_deposits(request):
+    """Return all deposits (all statuses) for a user."""
+    secret = request.data.get('secret')
+    if not secret:
+        return Response({'success': False, 'error': 'No secret'}, status=400)
+    try:
+        user = CustomUser.objects.get(bot_secret=secret)
+    except CustomUser.DoesNotExist:
+        return Response({'success': False, 'error': 'Invalid secret'}, status=401)
+
+    deposits = Deposit.objects.filter(user=user).order_by('-created_at')[:10]
+    data = [{'id': d.id, 'amount': float(d.amount), 'method': d.payment_method,
+             'status': d.status, 'date': d.created_at.strftime('%Y-%m-%d %H:%M')} for d in deposits]
+    return Response({'success': True, 'deposits': data})
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def bot_get_referrals(request):
+    """Return referral stats for a user."""
+    secret = request.data.get('secret')
+    if not secret:
+        return Response({'success': False, 'error': 'No secret'}, status=400)
+    try:
+        user = CustomUser.objects.get(bot_secret=secret)
+    except CustomUser.DoesNotExist:
+        return Response({'success': False, 'error': 'Invalid secret'}, status=401)
+
+    from .models import Referral, ReferralReward
+    referrals = Referral.objects.filter(inviter=user)
+    rewards = ReferralReward.objects.filter(referrer=user)
+    total_earned = sum(float(r.reward_amount) for r in rewards)
+    return Response({
+        'success': True,
+        'referral_code': user.referral_code,
+        'total_referrals': referrals.count(),
+        'active_referrals': referrals.filter(status='active').count(),
+        'total_earned': total_earned,
+    })
