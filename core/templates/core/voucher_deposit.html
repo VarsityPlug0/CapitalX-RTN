@@ -5,271 +5,205 @@
 
 {% block extra_css %}
 <style>
-    .voucher-card {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        border: none;
-        color: white;
-    }
-    .voucher-icon {
-        font-size: 3rem;
-        color: #28a745;
-    }
-    .form-control-lg {
-        padding: 1rem 1.25rem;
-        font-size: 1.25rem;
-    }
-    .upload-area {
-        border: 2px dashed #dee2e6;
-        border-radius: 10px;
-        padding: 40px 20px;
-        text-align: center;
-        background: #f8f9fa;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-    .upload-area:hover {
-        border-color: #28a745;
-        background: rgba(40, 167, 69, 0.05);
-    }
-    .upload-area.dragover {
-        border-color: #28a745;
-        background: rgba(40, 167, 69, 0.1);
-    }
-    .file-preview {
-        max-width: 200px;
-        max-height: 200px;
-        border-radius: 8px;
-        margin-top: 15px;
-    }
-    .instructions-card {
-        background-color: rgba(40, 167, 69, 0.1);
-        border-left: 3px solid #28a745;
-    }
+  .vd-header { padding: 1.75rem 0 1.25rem; border-bottom: 1px solid var(--cx-card-border); margin-bottom: 1.75rem; }
+  .vd-header h1 { font-size: clamp(1.375rem,4vw,1.875rem); font-weight: 800; color: #fff; margin: 0 0 .25rem; }
+  .vd-header p { color: var(--cx-muted); margin: 0; font-size: .9rem; }
+
+  .vd-card { background: var(--cx-card); border: 1px solid var(--cx-card-border); border-radius: 16px; overflow: hidden; margin-bottom: 1rem; }
+  .vd-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--cx-card-border); display: flex; align-items: center; gap: .5rem; }
+  .vd-card-title { font-size: .9375rem; font-weight: 700; color: #fff; margin: 0; }
+  .vd-card-body { padding: 1.25rem; }
+
+  /* Upload area */
+  .vd-upload { border: 2px dashed var(--cx-card-border); border-radius: 12px; padding: 2rem 1rem; text-align: center; background: var(--cx-bg-2); cursor: pointer; transition: all .15s; position: relative; }
+  .vd-upload:hover, .vd-upload.dragover { border-color: var(--cx-blue); background: rgba(37,99,235,.06); }
+  .vd-upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .vd-upload i { font-size: 2rem; color: var(--cx-blue-light); margin-bottom: .5rem; display: block; }
+  .vd-upload p { color: var(--cx-muted); font-size: .875rem; margin: 0; }
+  .vd-upload .vd-upload-name { color: var(--cx-green); font-size: .8125rem; margin-top: .5rem; display: none; }
+
+  .vd-preview { max-width: 100%; max-height: 200px; border-radius: 10px; margin-top: 1rem; display: none; border: 1px solid var(--cx-card-border); }
+
+  /* Info list */
+  .vd-info-item { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 0; border-bottom: 1px solid var(--cx-card-border); }
+  .vd-info-item:last-child { border-bottom: none; }
+  .vd-info-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .875rem; }
+  .vd-info-icon.green  { background: rgba(16,185,129,.15); color: var(--cx-green); }
+  .vd-info-icon.blue   { background: rgba(37,99,235,.15); color: var(--cx-blue-light); }
+  .vd-info-icon.yellow { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .vd-info-label { font-size: .8125rem; color: var(--cx-muted); margin-bottom: .125rem; }
+  .vd-info-value { font-size: .875rem; color: var(--cx-text-2); font-weight: 500; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Header -->
-            <div class="text-center mb-5">
-                <h1 class="display-4 mb-3">
-                    <i class="bi bi-ticket-perforated-fill voucher-icon"></i>
-                    Voucher Deposit
-                </h1>
-                <p class="lead text-muted">Redeem vouchers and gift cards to fund your account</p>
-            </div>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+<div class="vd-header">
+  <h1><i class="bi bi-ticket-perforated-fill me-2" style="color:var(--cx-green);"></i>Voucher Deposit</h1>
+  <p>Redeem vouchers and gift cards to fund your account.</p>
+</div>
 
-            <div class="row">
-                <!-- Voucher Deposit Form -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm">
-                        <div class="card-header voucher-card">
-                            <h5 class="mb-0 text-white">
-                                <i class="bi bi-credit-card me-2"></i>Voucher Details
-                            </h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <form method="post" enctype="multipart/form-data" id="voucher-deposit-form">
-                                {% csrf_token %}
-                                
-                                <!-- Voucher Amount -->
-                                <div class="form-floating mb-3">
-                                    <input type="number" name="amount" id="amount" class="form-control form-control-lg" 
-                                           placeholder="Amount" min="50" step="0.01" required>
-                                    <label for="amount">Voucher Amount (R)</label>
-                                    <div class="form-text">Minimum: R50</div>
-                                </div>
-
-                                <!-- Voucher Code -->
-                                <div class="form-floating mb-3">
-                                    <input type="text" name="voucher_code" id="voucher_code" class="form-control form-control-lg" 
-                                           placeholder="Voucher Code" required>
-                                    <label for="voucher_code">Voucher Code</label>
-                                    <div class="form-text">Enter the code printed on your voucher</div>
-                                </div>
-
-                                <!-- Voucher Image Upload -->
-                                <div class="mb-4">
-                                    <label class="form-label">Voucher Image (Optional)</label>
-                                    <div class="upload-area" id="upload-area" onclick="document.getElementById('voucher_image').click()">
-                                        <i class="bi bi-cloud-upload voucher-icon mb-3"></i>
-                                        <p class="mb-2">Click to upload voucher image</p>
-                                        <p class="text-muted small mb-0">or drag and drop here</p>
-                                        <input type="file" name="voucher_image" id="voucher_image" 
-                                               accept="image/*" style="display: none;">
-                                    </div>
-                                    <div id="file-preview" style="display: none;"></div>
-                                </div>
-
-                                <!-- Submit Button -->
-                                <button type="submit" class="btn btn-success btn-lg w-100">
-                                    <i class="bi bi-ticket-perforated me-2"></i>Submit Voucher
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Voucher Information -->
-                <div class="col-lg-6">
-                    <!-- Accepted Vouchers -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-check-circle me-2"></i>Accepted Vouchers
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-2">
-                                    <i class="bi bi-check text-success me-2"></i>
-                                    <strong>Gift Cards:</strong> Checkers, Pick n Pay, Woolworths
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check text-success me-2"></i>
-                                    <strong>Vouchers:</strong> Takealot, Game, Clicks
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check text-success me-2"></i>
-                                    <strong>Prepaid Cards:</strong> Visa, MasterCard
-                                </li>
-                                <li class="mb-0">
-                                    <i class="bi bi-check text-success me-2"></i>
-                                    <strong>Digital Vouchers:</strong> Online codes, e-vouchers
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Instructions -->
-                    <div class="card">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-info-circle me-2"></i>How to Redeem
-                            </h6>
-                        </div>
-                        <div class="card-body instructions-card">
-                            <ol class="mb-0">
-                                <li class="mb-2">Enter the voucher amount in Rands</li>
-                                <li class="mb-2">Input the voucher code from your card</li>
-                                <li class="mb-2">Upload a photo of your voucher (optional)</li>
-                                <li class="mb-2">Submit the form for verification</li>
-                                <li class="mb-0">We'll credit your account within 2 hours</li>
-                            </ol>
-                        </div>
-                    </div>
-
-                    <!-- Benefits -->
-                    <div class="card mt-4">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0">
-                                <i class="bi bi-star me-2"></i>Benefits
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-2">
-                                    <i class="bi bi-gift text-warning me-2"></i>
-                                    <strong>Instant Processing:</strong> No waiting for bank transfers
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-shield-check text-warning me-2"></i>
-                                    <strong>Secure:</strong> Your voucher details are protected
-                                </li>
-                                <li class="mb-0">
-                                    <i class="bi bi-clock text-warning me-2"></i>
-                                    <strong>Fast Approval:</strong> Usually processed within 2 hours
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+  {% endfor %}
+{% endif %}
+
+<div class="row g-3">
+
+  <!-- Form -->
+  <div class="col-lg-7">
+    <div class="vd-card">
+      <div class="vd-card-header">
+        <i class="bi bi-ticket-perforated" style="color:var(--cx-green);"></i>
+        <span class="vd-card-title">Voucher Details</span>
+      </div>
+      <div class="vd-card-body">
+        <form method="post" enctype="multipart/form-data" id="voucher-form">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="amount" class="form-label">Voucher Amount (R) <span style="color:var(--cx-red);">*</span></label>
+            <input type="number" name="amount" id="amount" class="form-control" placeholder="e.g. 200" min="50" step="0.01" required>
+            <div class="form-text">Minimum: R50</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="voucher_code" class="form-label">Voucher Code <span style="color:var(--cx-red);">*</span></label>
+            <input type="text" name="voucher_code" id="voucher_code" class="form-control" placeholder="Enter voucher code" required>
+            <div class="form-text">The code printed on your voucher card.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Voucher Image <span style="color:var(--cx-red);">*</span></label>
+            <div class="vd-upload" id="upload-area">
+              <input type="file" name="voucher_image" id="voucher_image" accept="image/*" required>
+              <i class="bi bi-cloud-arrow-up"></i>
+              <p>Click or drag &amp; drop your voucher image here</p>
+              <div class="vd-upload-name" id="file-name"></div>
+            </div>
+            <img id="img-preview" class="vd-preview" alt="Voucher preview">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-ticket-perforated me-2"></i>Submit Voucher
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info panel -->
+  <div class="col-lg-5">
+    <div class="vd-card mb-3">
+      <div class="vd-card-header">
+        <i class="bi bi-check-circle" style="color:var(--cx-green);"></i>
+        <span class="vd-card-title">Accepted Vouchers</span>
+      </div>
+      <div class="vd-card-body">
+        <div class="vd-info-item">
+          <div class="vd-info-icon green"><i class="bi bi-gift"></i></div>
+          <div><div class="vd-info-label">Gift Cards</div><div class="vd-info-value">Checkers, Pick n Pay, Woolworths</div></div>
+        </div>
+        <div class="vd-info-item">
+          <div class="vd-info-icon blue"><i class="bi bi-tag"></i></div>
+          <div><div class="vd-info-label">Vouchers</div><div class="vd-info-value">Takealot, Game, Clicks</div></div>
+        </div>
+        <div class="vd-info-item">
+          <div class="vd-info-icon yellow"><i class="bi bi-credit-card"></i></div>
+          <div><div class="vd-info-label">Prepaid Cards</div><div class="vd-info-value">Visa, MasterCard prepaid</div></div>
+        </div>
+        <div class="vd-info-item">
+          <div class="vd-info-icon green"><i class="bi bi-envelope-open"></i></div>
+          <div><div class="vd-info-label">Digital</div><div class="vd-info-value">Online codes, e-vouchers</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vd-card">
+      <div class="vd-card-header">
+        <i class="bi bi-info-circle" style="color:var(--cx-blue-light);"></i>
+        <span class="vd-card-title">How It Works</span>
+      </div>
+      <div class="vd-card-body">
+        <div class="vd-info-item">
+          <div class="vd-info-icon blue"><i class="bi bi-1-circle-fill"></i></div>
+          <div><div class="vd-info-value">Enter the voucher amount in Rands</div></div>
+        </div>
+        <div class="vd-info-item">
+          <div class="vd-info-icon blue"><i class="bi bi-2-circle-fill"></i></div>
+          <div><div class="vd-info-value">Input the voucher code from your card</div></div>
+        </div>
+        <div class="vd-info-item">
+          <div class="vd-info-icon blue"><i class="bi bi-3-circle-fill"></i></div>
+          <div><div class="vd-info-value">Upload a clear photo of your voucher</div></div>
+        </div>
+        <div class="vd-info-item">
+          <div class="vd-info-icon green"><i class="bi bi-clock"></i></div>
+          <div><div class="vd-info-value">We'll credit your account within 2 hours</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // File upload handling
-    const uploadArea = document.getElementById('upload-area');
-    const fileInput = document.getElementById('voucher_image');
-    const filePreview = document.getElementById('file-preview');
+  const fileInput = document.getElementById('voucher_image');
+  const uploadArea = document.getElementById('upload-area');
+  const fileName = document.getElementById('file-name');
+  const imgPreview = document.getElementById('img-preview');
 
-    // Click to upload
-    uploadArea.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', function() {
+    if (this.files.length > 0) showFile(this.files[0]);
+  });
 
-    // Drag and drop
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            fileInput.files = files;
-            handleFileSelect(files[0]);
-        }
-    });
-
-    // File selection
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            handleFileSelect(e.target.files[0]);
-        }
-    });
-
-    function handleFileSelect(file) {
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                filePreview.innerHTML = `
-                    <img src="${e.target.result}" alt="Voucher Preview" class="file-preview">
-                    <p class="text-muted small mt-2">${file.name}</p>
-                `;
-                filePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        } else {
-            alert('Please select an image file.');
-        }
+  uploadArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+  });
+  uploadArea.addEventListener('dragleave', function() {
+    this.classList.remove('dragover');
+  });
+  uploadArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      // Transfer files to the input
+      const dt = new DataTransfer();
+      dt.items.add(files[0]);
+      fileInput.files = dt.files;
+      showFile(files[0]);
     }
+  });
 
-    // Form validation
-    document.getElementById('voucher-deposit-form').addEventListener('submit', function(e) {
-        const amount = document.getElementById('amount').value;
-        const code = document.getElementById('voucher_code').value;
-        
-        if (!amount || !code) {
-            e.preventDefault();
-            alert('Please fill in all required fields.');
-            return;
-        }
-        
-        if (parseFloat(amount) < 50) {
-            e.preventDefault();
-            alert('Minimum voucher amount is R50.');
-            return;
-        }
-    });
+  function showFile(file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      return;
+    }
+    fileName.textContent = file.name;
+    fileName.style.display = 'block';
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imgPreview.src = e.target.result;
+      imgPreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('voucher-form').addEventListener('submit', function(e) {
+    const amount = parseFloat(document.getElementById('amount').value);
+    const code = document.getElementById('voucher_code').value.trim();
+    if (!amount || amount < 50) { e.preventDefault(); alert('Minimum voucher amount is R50.'); return; }
+    if (!code || code.length < 5) { e.preventDefault(); alert('Please enter a valid voucher code.'); return; }
+    if (!fileInput.files.length) { e.preventDefault(); alert('Please upload a voucher image.'); return; }
+  });
 </script>
-{% endblock %} 
+{% endblock %}
