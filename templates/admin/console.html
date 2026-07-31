@@ -1,0 +1,929 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CapitalX Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080b12; --bg2: #0d1117; --card: #111520; --border: #1e2538;
+      --blue: #2563eb; --blue-l: #3b82f6; --green: #10b981; --red: #ef4444;
+      --yellow: #f59e0b; --text: #f1f5f9; --text2: #cbd5e1; --muted: #8b9cb3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Roboto', 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transition: width .2s;
+      overflow: hidden;
+    }
+    .sidebar-brand {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      font-weight: 800; font-size: 1.1rem; color: var(--text);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .sidebar-brand .cx { color: var(--blue-l); }
+    .sidebar-brand .badge-admin {
+      font-size: .6rem; background: var(--blue); color: #fff;
+      padding: 2px 6px; border-radius: 4px; font-weight: 600; letter-spacing: .05em;
+    }
+    .nav-section { padding: .5rem 0; border-bottom: 1px solid var(--border); }
+    .nav-section-label {
+      font-size: .65rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
+      padding: .5rem 1.25rem .25rem;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: .625rem;
+      padding: .5rem 1.25rem;
+      color: var(--muted); font-size: .875rem; font-weight: 500;
+      text-decoration: none; cursor: pointer; border: none; background: none;
+      width: 100%; text-align: left;
+      transition: color .15s, background .15s;
+      border-radius: 0;
+    }
+    .sidebar-link i { font-size: 1rem; width: 18px; text-align: center; }
+    .sidebar-link:hover { color: var(--text); background: rgba(255,255,255,.04); }
+    .sidebar-link.active { color: var(--blue-l); background: rgba(37,99,235,.12); }
+    .sidebar-link .badge {
+      margin-left: auto; font-size: .65rem; padding: 2px 6px;
+      border-radius: 4px; font-weight: 700;
+    }
+    .sidebar-footer {
+      margin-top: auto; padding: 1rem 1.25rem; border-top: 1px solid var(--border);
+      font-size: .8rem; color: var(--muted);
+    }
+
+    /* ── MAIN AREA ── */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #topbar {
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: .75rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-shrink: 0;
+    }
+    #topbar h5 { font-size: 1rem; font-weight: 700; margin: 0; flex: 1; }
+    #topbar .user-pill {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 100px; padding: .375rem .875rem;
+      font-size: .8125rem; color: var(--text2); display: flex; align-items: center; gap: .375rem;
+    }
+    #content { flex: 1; overflow-y: auto; padding: 1.5rem; }
+
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── STAT CARDS ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--card); border-radius: 16px;
+      padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.35);
+    }
+    .stat-card .label { font-size: .75rem; color: var(--muted); font-weight: 500; margin-bottom: .25rem; }
+    .stat-card .value { font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-card .sub { font-size: .75rem; color: var(--green); margin-top: .25rem; }
+    .stat-card .icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; margin-bottom: .75rem;
+    }
+    .icon-blue { background: rgba(37,99,235,.15); color: var(--blue-l); }
+    .icon-green { background: rgba(16,185,129,.15); color: var(--green); }
+    .icon-red { background: rgba(239,68,68,.15); color: var(--red); }
+    .icon-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
+
+    /* ── TABLES ── */
+    .cx-table-wrap { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+    .cx-table-head {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+    }
+    .cx-table-head h6 { margin: 0; font-weight: 700; font-size: .9375rem; flex: 1; }
+    .table { margin: 0; color: var(--text2); }
+    .table th {
+      background: rgba(255,255,255,.025); color: var(--muted);
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+      border-color: var(--border); padding: .75rem 1rem;
+    }
+    .table td { border-color: var(--border); padding: .75rem 1rem; vertical-align: middle; font-size: .875rem; }
+    .table tbody tr:hover td { background: rgba(255,255,255,.025); }
+
+    /* ── BADGES ── */
+    .badge-status { padding: .3em .7em; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+    .badge-pending  { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .badge-approved { background: rgba(16,185,129,.15); color: var(--green); }
+    .badge-rejected { background: rgba(239,68,68,.15); color: var(--red); }
+    .badge-active   { background: rgba(37,99,235,.15); color: var(--blue-l); }
+    .badge-completed{ background: rgba(16,185,129,.15); color: var(--green); }
+
+    /* ── BUTTONS ── */
+    .btn { border-radius: 100px; font-weight: 600; font-size: .8125rem; }
+    .btn-approve { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
+    .btn-approve:hover { background: var(--green); color: #fff; border-color: var(--green); }
+    .btn-reject  { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
+    .btn-reject:hover  { background: var(--red); color: #fff; border-color: var(--red); }
+    .btn-cx-sm { padding: .25rem .75rem; font-size: .75rem; }
+    .btn-cx-primary { background: var(--blue); color: #fff; border: none; }
+    .btn-cx-primary:hover { background: #1d4ed8; color: #fff; }
+    .btn-cx-outline { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .btn-cx-outline:hover { background: var(--card); color: var(--text); }
+
+    /* ── SEARCH/FILTER BAR ── */
+    .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+    .filter-bar input, .filter-bar select {
+      background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 100px; padding: .375rem .875rem; font-size: .8125rem;
+      outline: none;
+    }
+    .filter-bar input:focus, .filter-bar select:focus { border-color: var(--blue); }
+
+    /* ── RECENT ACTIVITY ── */
+    .activity-item {
+      display: flex; gap: .75rem; padding: .75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: .8rem;
+    }
+    .activity-text { font-size: .8125rem; color: var(--text2); }
+    .activity-time { font-size: .75rem; color: var(--muted); margin-top: .125rem; }
+
+    /* ── MODAL ── */
+    .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 20px; }
+    .modal-header { border-bottom: 1px solid var(--border); }
+    .modal-footer { border-top: 1px solid var(--border); }
+    .form-control, .form-select {
+      background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 100px;
+    }
+    .form-control:focus, .form-select:focus {
+      background: var(--bg2); color: var(--text); border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.2);
+    }
+    label { color: var(--text2); font-size: .875rem; }
+
+    /* ── TOAST ── */
+    #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: .5rem; }
+    .cx-toast {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: .75rem 1rem; font-size: .875rem;
+      display: flex; align-items: center; gap: .5rem; min-width: 260px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4); animation: slideIn .3s ease;
+    }
+    .cx-toast.success { border-left: 3px solid var(--green); }
+    .cx-toast.error   { border-left: 3px solid var(--red); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      #sidebar { width: 0; position: fixed; z-index: 1000; height: 100vh; }
+      #sidebar.open { width: 220px; }
+      #content { padding: 1rem; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-brand">
+    <i class="bi bi-grid-3x3-gap-fill" style="color:var(--blue-l)"></i>
+    Capital<span class="cx">X</span>
+    <span class="badge-admin">ADMIN</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Overview</div>
+    <button class="sidebar-link active" onclick="showPanel('dashboard', this)">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </button>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Finance</div>
+    <button class="sidebar-link" onclick="showPanel('deposits', this)">
+      <i class="bi bi-arrow-down-circle"></i> Deposits
+      {% if deposit_stats.pending_count %}<span class="badge bg-warning text-dark">{{ deposit_stats.pending_count }}</span>{% endif %}
+    </button>
+    <button class="sidebar-link" onclick="showPanel('withdrawals', this)">
+      <i class="bi bi-arrow-up-circle"></i> Withdrawals
+      {% if withdrawal_stats.pending_count %}<span class="badge bg-warning text-dark">{{ withdrawal_stats.pending_count }}</span>{% endif %}
+    </button>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Investments</div>
+    <button class="sidebar-link" onclick="showPanel('investments', this)">
+      <i class="bi bi-graph-up"></i> Company Investments
+    </button>
+    <button class="sidebar-link" onclick="showPanel('plan_investments', this)">
+      <i class="bi bi-layers"></i> Plan Investments
+    </button>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Management</div>
+    <button class="sidebar-link" onclick="showPanel('users', this)">
+      <i class="bi bi-people"></i> Users
+    </button>
+    <button class="sidebar-link" onclick="showPanel('referrals', this)">
+      <i class="bi bi-share"></i> Referrals
+    </button>
+    <button class="sidebar-link" onclick="showPanel('companies', this)">
+      <i class="bi bi-building"></i> Companies
+    </button>
+    <button class="sidebar-link" onclick="showPanel('plans', this)">
+      <i class="bi bi-bar-chart-steps"></i> Plans
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div><i class="bi bi-person-circle me-1"></i> {{ request.user.email }}</div>
+    <a href="{% url 'logout' %}" style="color:var(--red); font-size:.8rem; text-decoration:none;">
+      <i class="bi bi-box-arrow-right me-1"></i>Log out
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <button class="btn btn-cx-outline btn-cx-sm d-md-none" onclick="toggleSidebar()">
+      <i class="bi bi-list"></i>
+    </button>
+    <h5 id="panel-title">Dashboard</h5>
+    <div class="user-pill">
+      <i class="bi bi-shield-check" style="color:var(--green)"></i>
+      {{ user_role_name }}
+    </div>
+    <span style="font-size:.8rem; color:var(--muted)">{{ request.user.email }}</span>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- ═══════════════════════════════════════════
+         DASHBOARD PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="icon icon-blue"><i class="bi bi-people-fill"></i></div>
+          <div class="label">Total Users</div>
+          <div class="value">{{ total_users }}</div>
+          <div class="sub">{{ user_levels.l1 }} L1 · {{ user_levels.l2 }} L2 · {{ user_levels.l3 }} L3</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+          <div class="label">Pending Deposits</div>
+          <div class="value">{{ deposit_stats.pending_count|default:0 }}</div>
+          <div class="sub" style="color:var(--yellow)">R{{ deposit_stats.pending_amount|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="label">Approved Deposits</div>
+          <div class="value">{{ deposit_stats.approved_count|default:0 }}</div>
+          <div class="sub">R{{ deposit_stats.approved_amount|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-yellow"><i class="bi bi-clock-history"></i></div>
+          <div class="label">Pending Withdrawals</div>
+          <div class="value">{{ withdrawal_stats.pending_count|default:0 }}</div>
+          <div class="sub" style="color:var(--yellow)">R{{ withdrawal_stats.pending_amount|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-blue"><i class="bi bi-graph-up-arrow"></i></div>
+          <div class="label">Active Investments</div>
+          <div class="value">{{ investment_stats.active_count|default:0 }}</div>
+          <div class="sub">R{{ investment_stats.active_amount|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-wallet2"></i></div>
+          <div class="label">Total Wallet Funds</div>
+          <div class="value">R{{ wallet_total }}</div>
+          <div class="sub">across all users</div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="cx-table-wrap">
+        <div class="cx-table-head"><h6><i class="bi bi-activity me-2"></i>Recent Activity</h6></div>
+        <div style="padding: .5rem 1.25rem 1rem;">
+          {% for act in recent_activities %}
+          <div class="activity-item">
+            <div class="activity-icon icon-blue"><i class="bi bi-lightning-fill"></i></div>
+            <div>
+              <div class="activity-text"><strong>{{ act.action }}</strong> — {{ act.details }}</div>
+              <div class="activity-time">{{ act.admin_user.email }} · {{ act.timestamp|timesince }} ago</div>
+            </div>
+          </div>
+          {% empty %}
+          <p style="color:var(--muted); font-size:.875rem; padding:1rem 0;">No activity yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         DEPOSITS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-deposits">
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+        <div class="stat-card">
+          <div class="icon icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+          <div class="label">Pending</div>
+          <div class="value">{{ deposit_stats.pending_count|default:0 }}</div>
+          <div class="sub" style="color:var(--yellow)">R{{ deposit_stats.pending_amount|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-check2-circle"></i></div>
+          <div class="label">Approved</div>
+          <div class="value">{{ deposit_stats.approved_count|default:0 }}</div>
+          <div class="sub">R{{ deposit_stats.approved_amount|default:0 }}</div>
+        </div>
+      </div>
+
+      <div class="cx-table-wrap">
+        <div class="cx-table-head">
+          <h6><i class="bi bi-arrow-down-circle me-2"></i>Deposits</h6>
+          <div class="filter-bar">
+            <input type="text" id="dep-search" placeholder="Search email..." oninput="filterTable('dep-tbody','dep-search',1)">
+            <select id="dep-status-filter" onchange="filterTableBySelect('dep-tbody','dep-status-filter',3)">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th><th>User</th><th>Amount</th><th>Status</th><th>Method</th><th>Date</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dep-tbody">
+              {% for d in deposits %}
+              <tr id="dep-row-{{ d.id }}">
+                <td>{{ d.id }}</td>
+                <td>{{ d.user.email }}</td>
+                <td><strong>R{{ d.amount }}</strong></td>
+                <td><span class="badge-status badge-{{ d.status }}">{{ d.status }}</span></td>
+                <td>{{ d.payment_method|default:"—" }}</td>
+                <td>{{ d.created_at|date:"d M Y H:i" }}</td>
+                <td>
+                  {% if d.status == 'pending' %}
+                  <button class="btn btn-approve btn-cx-sm me-1" onclick="approveDeposit({{ d.id }})">
+                    <i class="bi bi-check2"></i> Approve
+                  </button>
+                  <button class="btn btn-reject btn-cx-sm" onclick="rejectDeposit({{ d.id }})">
+                    <i class="bi bi-x"></i> Reject
+                  </button>
+                  {% else %}
+                  <span style="color:var(--muted); font-size:.8rem;">{{ d.status }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:2rem;">No deposits found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         WITHDRAWALS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-withdrawals">
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+        <div class="stat-card">
+          <div class="icon icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+          <div class="label">Pending</div>
+          <div class="value">{{ withdrawal_stats.pending_count|default:0 }}</div>
+          <div class="sub" style="color:var(--yellow)">R{{ withdrawal_stats.pending_amount|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-check2-circle"></i></div>
+          <div class="label">Approved</div>
+          <div class="value">{{ withdrawal_stats.approved_count|default:0 }}</div>
+          <div class="sub">R{{ withdrawal_stats.approved_amount|default:0 }}</div>
+        </div>
+      </div>
+
+      <div class="cx-table-wrap">
+        <div class="cx-table-head">
+          <h6><i class="bi bi-arrow-up-circle me-2"></i>Withdrawals</h6>
+          <div class="filter-bar">
+            <input type="text" id="wd-search" placeholder="Search email..." oninput="filterTable('wd-tbody','wd-search',1)">
+            <select onchange="filterTableBySelect('wd-tbody', this, 2)">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>User</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="wd-tbody">
+              {% for w in withdrawals %}
+              <tr id="wd-row-{{ w.id }}">
+                <td>{{ w.id }}</td>
+                <td>{{ w.user.email }}</td>
+                <td><strong>R{{ w.amount }}</strong></td>
+                <td><span class="badge-status badge-{{ w.status }}">{{ w.status }}</span></td>
+                <td>{{ w.created_at|date:"d M Y H:i" }}</td>
+                <td>
+                  {% if w.status == 'pending' %}
+                  <button class="btn btn-approve btn-cx-sm me-1" onclick="approveWithdrawal({{ w.id }})">
+                    <i class="bi bi-check2"></i> Approve
+                  </button>
+                  <button class="btn btn-reject btn-cx-sm" onclick="rejectWithdrawal({{ w.id }})">
+                    <i class="bi bi-x"></i> Reject
+                  </button>
+                  {% else %}
+                  <span style="color:var(--muted); font-size:.8rem;">{{ w.status }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:2rem;">No withdrawals found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         COMPANY INVESTMENTS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-investments">
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+        <div class="stat-card">
+          <div class="icon icon-blue"><i class="bi bi-graph-up"></i></div>
+          <div class="label">Total</div>
+          <div class="value">{{ investment_stats.total_count|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-activity"></i></div>
+          <div class="label">Active</div>
+          <div class="value">{{ investment_stats.active_count|default:0 }}</div>
+          <div class="sub">R{{ investment_stats.active_amount|default:0 }}</div>
+        </div>
+      </div>
+      <div class="cx-table-wrap">
+        <div class="cx-table-head">
+          <h6><i class="bi bi-graph-up me-2"></i>Company Investments</h6>
+          <div class="filter-bar">
+            <input type="text" placeholder="Search..." oninput="filterTable('inv-tbody', this, 1)">
+            <select onchange="filterTableBySelect('inv-tbody', this, 3)">
+              <option value="">All</option>
+              <option value="true">Active</option>
+              <option value="false">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>User</th><th>Company</th><th>Status</th><th>Amount</th><th>Return</th><th>Date</th></tr>
+            </thead>
+            <tbody id="inv-tbody">
+              {% for inv in investments %}
+              <tr>
+                <td>{{ inv.id }}</td>
+                <td>{{ inv.user.email }}</td>
+                <td>{{ inv.company.name }}</td>
+                <td>
+                  <span class="badge-status {% if inv.is_active %}badge-active{% else %}badge-completed{% endif %}">
+                    {% if inv.is_active %}Active{% else %}Completed{% endif %}
+                  </span>
+                </td>
+                <td>R{{ inv.amount }}</td>
+                <td>R{{ inv.return_amount|default:"—" }}</td>
+                <td>{{ inv.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:2rem;">No investments found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         PLAN INVESTMENTS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-plan_investments">
+      <div class="cx-table-wrap">
+        <div class="cx-table-head">
+          <h6><i class="bi bi-layers me-2"></i>Plan Investments</h6>
+          <div class="filter-bar">
+            <input type="text" placeholder="Search email..." oninput="filterTable('pinv-tbody', this, 1)">
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>User</th><th>Plan</th><th>Amount</th><th>Return</th><th>Paid</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="pinv-tbody">
+              {% for pi in plan_investments %}
+              <tr id="pinv-row-{{ pi.id }}">
+                <td>{{ pi.id }}</td>
+                <td>{{ pi.user.email }}</td>
+                <td>{{ pi.plan.name }}</td>
+                <td>R{{ pi.amount }}</td>
+                <td>R{{ pi.return_amount }}</td>
+                <td>
+                  <span class="badge-status {% if pi.profit_paid %}badge-completed{% else %}badge-pending{% endif %}">
+                    {% if pi.profit_paid %}Paid{% else %}Pending{% endif %}
+                  </span>
+                </td>
+                <td>{{ pi.created_at|date:"d M Y" }}</td>
+                <td>
+                  {% if not pi.profit_paid %}
+                  <button class="btn btn-approve btn-cx-sm" onclick="forcePayout({{ pi.id }})">
+                    <i class="bi bi-send"></i> Payout
+                  </button>
+                  {% else %}
+                  <span style="color:var(--muted); font-size:.8rem;">Done</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" style="text-align:center; color:var(--muted); padding:2rem;">No plan investments found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         USERS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-users">
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+        <div class="stat-card">
+          <div class="icon icon-blue"><i class="bi bi-people-fill"></i></div>
+          <div class="label">Total Users</div>
+          <div class="value">{{ total_users }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-1-circle"></i></div>
+          <div class="label">Level 1</div>
+          <div class="value">{{ user_levels.l1 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-blue"><i class="bi bi-2-circle"></i></div>
+          <div class="label">Level 2</div>
+          <div class="value">{{ user_levels.l2 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-yellow"><i class="bi bi-3-circle"></i></div>
+          <div class="label">Level 3</div>
+          <div class="value">{{ user_levels.l3 }}</div>
+        </div>
+      </div>
+      <div class="cx-table-wrap">
+        <div class="cx-table-head">
+          <h6><i class="bi bi-people me-2"></i>Users</h6>
+          <div class="filter-bar">
+            <input type="text" placeholder="Search email..." oninput="filterTable('users-tbody', this, 0)">
+          </div>
+          <button class="btn btn-cx-primary btn-cx-sm ms-auto" data-bs-toggle="modal" data-bs-target="#walletModal">
+            <i class="bi bi-plus-circle me-1"></i>Add Wallet Funds
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>Email</th><th>Level</th><th>Balance</th><th>Joined</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="users-tbody">
+              {% for u in users %}
+              <tr id="user-row-{{ u.id }}">
+                <td>{{ u.email }}</td>
+                <td>L{{ u.level }}</td>
+                <td>R{{ u.wallet.balance|default:"0.00" }}</td>
+                <td>{{ u.date_joined|date:"d M Y" }}</td>
+                <td>
+                  <span class="badge-status {% if u.is_active %}badge-active{% else %}badge-rejected{% endif %}" id="user-status-{{ u.id }}">
+                    {% if u.is_active %}Active{% else %}Disabled{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-cx-outline btn-cx-sm" onclick="toggleUser({{ u.id }})" id="user-toggle-{{ u.id }}">
+                    {% if u.is_active %}Disable{% else %}Enable{% endif %}
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:2rem;">No users found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         REFERRALS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-referrals">
+      {% if referral_stats %}
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+        <div class="stat-card">
+          <div class="icon icon-blue"><i class="bi bi-share-fill"></i></div>
+          <div class="label">Total Referrals</div>
+          <div class="value">{{ referral_stats.total }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-green"><i class="bi bi-check-circle"></i></div>
+          <div class="label">Active</div>
+          <div class="value">{{ referral_stats.active }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon icon-yellow"><i class="bi bi-gift"></i></div>
+          <div class="label">Total Rewards</div>
+          <div class="value">R{{ referral_stats.rewards }}</div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="cx-table-wrap">
+        <div class="cx-table-head"><h6><i class="bi bi-share me-2"></i>Referrals</h6></div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>Inviter</th><th>Invitee</th><th>Status</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              {% for r in referrals %}
+              <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.inviter.email }}</td>
+                <td>{{ r.invitee.email }}</td>
+                <td><span class="badge-status badge-{{ r.status }}">{{ r.status }}</span></td>
+                <td>{{ r.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" style="text-align:center; color:var(--muted); padding:2rem;">No referrals yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         COMPANIES PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-companies">
+      <div class="cx-table-wrap">
+        <div class="cx-table-head"><h6><i class="bi bi-building me-2"></i>Companies / Tiers</h6></div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>Name</th><th>Share Price</th><th>Investments</th><th>Total Invested</th></tr>
+            </thead>
+            <tbody>
+              {% for c in companies %}
+              <tr>
+                <td><strong>{{ c.name }}</strong></td>
+                <td>R{{ c.share_price }}</td>
+                <td>{{ c.investment_count|default:0 }}</td>
+                <td>R{{ c.total_invested|default:0 }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" style="text-align:center; color:var(--muted); padding:2rem;">No companies found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         INVESTMENT PLANS PANEL
+    ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-plans">
+      <div class="cx-table-wrap">
+        <div class="cx-table-head"><h6><i class="bi bi-bar-chart-steps me-2"></i>Investment Plans</h6></div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>Plan</th><th>Phase</th><th>Investments</th><th>Total Invested</th></tr>
+            </thead>
+            <tbody>
+              {% for p in plans %}
+              <tr>
+                <td><strong>{{ p.name }}</strong></td>
+                <td>Phase {{ p.phase_order }}</td>
+                <td>{{ p.investment_count|default:0 }}</td>
+                <td>R{{ p.total_invested|default:0 }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" style="text-align:center; color:var(--muted); padding:2rem;">No plans found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════════════════
+     ADD WALLET FUNDS MODAL
+═══════════════════════════════════════════ -->
+<div class="modal fade" id="walletModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="color:var(--text)">Add Wallet Funds</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Select User</label>
+          <select class="form-select" id="wallet-user-id" style="border-radius:12px">
+            {% for u in users %}
+            <option value="{{ u.id }}">{{ u.email }} (R{{ u.wallet.balance|default:"0.00" }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Amount (R)</label>
+          <input type="number" class="form-control" id="wallet-amount" placeholder="e.g. 500" step="0.01" style="border-radius:12px">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cx-outline" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-cx-primary" onclick="addWalletFunds()">
+          <i class="bi bi-plus-circle me-1"></i>Credit Wallet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const CSRF = '{{ csrf_token }}';
+
+  // ── Panel switching ──
+  function showPanel(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-title').textContent = btn.textContent.trim().replace(/^\d+/, '').trim();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // ── Toast ──
+  function toast(msg, type = 'success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'cx-toast ' + type;
+    t.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'x-circle-fill'}" style="color:var(--${type === 'success' ? 'green' : 'red'})"></i> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // ── Ajax helper ──
+  async function post(url) {
+    const r = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': CSRF } });
+    return r.json();
+  }
+
+  // ── Deposits ──
+  async function approveDeposit(id) {
+    const data = await post(`/admin/ajax/approve-deposit/${id}/`);
+    if (data.success) {
+      document.getElementById('dep-row-' + id).querySelector('td:nth-child(4)').innerHTML = '<span class="badge-status badge-approved">approved</span>';
+      document.getElementById('dep-row-' + id).querySelector('td:last-child').innerHTML = '<span style="color:var(--muted);font-size:.8rem">approved</span>';
+      toast('Deposit approved & wallet credited.');
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  async function rejectDeposit(id) {
+    const data = await post(`/admin/ajax/reject-deposit/${id}/`);
+    if (data.success) {
+      document.getElementById('dep-row-' + id).querySelector('td:nth-child(4)').innerHTML = '<span class="badge-status badge-rejected">rejected</span>';
+      document.getElementById('dep-row-' + id).querySelector('td:last-child').innerHTML = '<span style="color:var(--muted);font-size:.8rem">rejected</span>';
+      toast('Deposit rejected.', 'error');
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  // ── Withdrawals ──
+  async function approveWithdrawal(id) {
+    const data = await post(`/admin/ajax/approve-withdrawal/${id}/`);
+    if (data.success) {
+      document.getElementById('wd-row-' + id).querySelector('td:nth-child(4)').innerHTML = '<span class="badge-status badge-approved">approved</span>';
+      document.getElementById('wd-row-' + id).querySelector('td:last-child').innerHTML = '<span style="color:var(--muted);font-size:.8rem">approved</span>';
+      toast('Withdrawal approved.');
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  async function rejectWithdrawal(id) {
+    const data = await post(`/admin/ajax/reject-withdrawal/${id}/`);
+    if (data.success) {
+      document.getElementById('wd-row-' + id).querySelector('td:nth-child(4)').innerHTML = '<span class="badge-status badge-rejected">rejected</span>';
+      document.getElementById('wd-row-' + id).querySelector('td:last-child').innerHTML = '<span style="color:var(--muted);font-size:.8rem">rejected</span>';
+      toast('Withdrawal rejected & wallet refunded.');
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  // ── Plan payout ──
+  async function forcePayout(id) {
+    const data = await post(`/admin/ajax/force-payout/${id}/`);
+    if (data.success) {
+      document.getElementById('pinv-row-' + id).querySelector('td:nth-child(6)').innerHTML = '<span class="badge-status badge-completed">Paid</span>';
+      document.getElementById('pinv-row-' + id).querySelector('td:last-child').innerHTML = '<span style="color:var(--muted);font-size:.8rem">Done</span>';
+      toast('Payout processed successfully.');
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  // ── Toggle user ──
+  async function toggleUser(id) {
+    const data = await post(`/admin/ajax/toggle-user/${id}/`);
+    if (data.success) {
+      const statusEl = document.getElementById('user-status-' + id);
+      const toggleBtn = document.getElementById('user-toggle-' + id);
+      if (data.is_active) {
+        statusEl.className = 'badge-status badge-active'; statusEl.textContent = 'Active';
+        toggleBtn.textContent = 'Disable';
+      } else {
+        statusEl.className = 'badge-status badge-rejected'; statusEl.textContent = 'Disabled';
+        toggleBtn.textContent = 'Enable';
+      }
+      toast('User status updated.');
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  // ── Add wallet funds ──
+  async function addWalletFunds() {
+    const userId = document.getElementById('wallet-user-id').value;
+    const amount = document.getElementById('wallet-amount').value;
+    if (!amount || parseFloat(amount) <= 0) { toast('Enter a valid amount.', 'error'); return; }
+    const r = await fetch('/admin/ajax/add-wallet-funds/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `user_id=${userId}&amount=${amount}`
+    });
+    const data = await r.json();
+    if (data.success) {
+      bootstrap.Modal.getInstance(document.getElementById('walletModal')).hide();
+      toast(`Wallet credited. New balance: R${data.new_balance}`);
+    } else { toast(data.error || 'Failed', 'error'); }
+  }
+
+  // ── Client-side table filter ──
+  function filterTable(tbodyId, inputEl, colIdx) {
+    const q = (typeof inputEl === 'string' ? document.getElementById(inputEl) : inputEl).value.toLowerCase();
+    document.querySelectorAll('#' + tbodyId + ' tr').forEach(row => {
+      const cell = row.cells[colIdx];
+      row.style.display = (!cell || cell.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+  }
+
+  function filterTableBySelect(tbodyId, selectEl, colIdx) {
+    const q = (typeof selectEl === 'string' ? document.getElementById(selectEl) : selectEl).value.toLowerCase();
+    document.querySelectorAll('#' + tbodyId + ' tr').forEach(row => {
+      const cell = row.cells[colIdx];
+      row.style.display = (!q || !cell || cell.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>
