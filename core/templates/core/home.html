@@ -5,6 +5,9 @@
 
 {% block extra_css %}
 <style>
+  /* Hide base footer on home page — home has its own footer */
+  footer.footer { display: none !important; }
+
   :root {
     --cx-bg: #080b12;
     --cx-card: #111520;
