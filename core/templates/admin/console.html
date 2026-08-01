@@ -261,9 +261,7 @@
 <div id="adminTabContent">
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   DASHBOARD TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- DASHBOARD TAB -->
 <div id="tab-dashboard" class="tab-pane {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}">
 
   <div class="section-heading"><i class="fas fa-tachometer-alt me-2 text-warning"></i>Dashboard</div>
@@ -371,9 +369,7 @@
 </div>{# /tab-dashboard #}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   DEPOSITS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- DEPOSITS TAB -->
 {% if 'all' in user_permissions or 'deposits' in user_permissions %}
 <div id="tab-deposits" class="tab-pane {% if active_tab == 'deposits' %}active{% endif %}">
 
@@ -505,9 +501,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   WITHDRAWALS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- WITHDRAWALS TAB -->
 {% if 'all' in user_permissions or 'withdrawals' in user_permissions %}
 <div id="tab-withdrawals" class="tab-pane {% if active_tab == 'withdrawals' %}active{% endif %}">
 
@@ -605,9 +599,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   INVESTMENTS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- INVESTMENTS TAB -->
 {% if 'all' in user_permissions or 'investments' in user_permissions %}
 <div id="tab-investments" class="tab-pane {% if active_tab == 'investments' %}active{% endif %}">
 
@@ -747,9 +739,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   USERS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- USERS TAB -->
 {% if 'all' in user_permissions or 'users' in user_permissions %}
 <div id="tab-users" class="tab-pane {% if active_tab == 'users' %}active{% endif %}">
 
@@ -838,9 +828,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   COMPANIES TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- COMPANIES TAB -->
 {% if 'all' in user_permissions or 'companies' in user_permissions %}
 <div id="tab-companies" class="tab-pane {% if active_tab == 'companies' %}active{% endif %}">
 
@@ -904,9 +892,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   INVESTMENT PLANS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- INVESTMENT PLANS TAB -->
 {% if 'all' in user_permissions or 'investment_plans' in user_permissions %}
 <div id="tab-plans" class="tab-pane {% if active_tab == 'plans' %}active{% endif %}">
 
@@ -981,9 +967,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   REFERRALS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- REFERRALS TAB -->
 {% if 'all' in user_permissions or 'referrals' in user_permissions %}
 <div id="tab-referrals" class="tab-pane {% if active_tab == 'referrals' %}active{% endif %}">
 
@@ -1045,9 +1029,7 @@
 {% endif %}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   LEADS TAB
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- LEADS TAB -->
 {% if 'all' in user_permissions or 'leads' in user_permissions %}
 <div id="tab-leads" class="tab-pane {% if active_tab == 'leads' %}active{% endif %}">
 
@@ -1117,9 +1099,7 @@
 </div>{# /adminTabContent #}
 
 
-{# ════════════════════════════════════════════════════════════════════════════
-   MODALS
-   ════════════════════════════════════════════════════════════════════════════ #}
+<!-- MODALS -->
 
 {# ── Lightbox / proof image modal ─────────────────────────────────────────── #}
 <div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
