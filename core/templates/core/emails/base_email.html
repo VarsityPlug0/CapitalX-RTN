@@ -5,408 +5,297 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ subject|default:"CapitalX" }}</title>
     <style>
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f4f4;
+            background-color: #050810;
+            color: #cbd5e1;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
         }
-        
+
+        .email-wrapper {
+            padding: 48px 16px;
+        }
+
         .email-container {
-            max-width: 600px;
+            max-width: 680px;
             margin: 0 auto;
-            background-color: #ffffff;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            background-color: #0d1117;
+            border: 1px solid #1e2538;
+            border-radius: 16px;
             overflow: hidden;
         }
-        
+
         /* Header */
         .email-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
+            background: linear-gradient(135deg, #0d1117 0%, #111520 100%);
+            border-bottom: 1px solid #1e2538;
+            padding: 48px 56px 40px;
             text-align: center;
         }
-        
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
+
+        .logo-mark {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            background: #2563eb;
+            border-radius: 12px;
+            line-height: 48px;
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 800;
+            color: #f1f5f9;
+            letter-spacing: -0.5px;
             margin-bottom: 8px;
-            letter-spacing: 1px;
         }
-        
+
+        .logo-text span {
+            color: #3b82f6;
+        }
+
         .tagline {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 300;
+            font-size: 13px;
+            color: #8b9cb3;
+            font-weight: 400;
+            letter-spacing: 0.3px;
         }
-        
+
         /* Content */
         .email-content {
-            padding: 30px 25px;
+            padding: 52px 56px;
         }
-        
+
         .greeting {
-            font-size: 18px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #f1f5f9;
             margin-bottom: 20px;
-            color: #333;
-            font-weight: 500;
+            line-height: 1.4;
         }
-        
+
         .main-content {
-            font-size: 16px;
-            margin-bottom: 25px;
-            color: #555;
-            line-height: 1.7;
+            font-size: 15px;
+            color: #cbd5e1;
+            line-height: 1.8;
+            margin-bottom: 32px;
         }
-        
+
         .main-content p {
             margin-bottom: 16px;
         }
-        
-        /* Buttons */
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid #1e2538;
+            margin: 36px 0;
+        }
+
+        /* Button */
+        .btn-wrap {
+            text-align: center;
+            margin: 36px 0;
+        }
+
         .btn {
             display: inline-block;
-            padding: 16px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white !important;
+            padding: 15px 40px;
+            background: #2563eb;
+            color: #ffffff !important;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 16px;
-            margin: 20px 0;
-            transition: all 0.3s ease;
-            text-align: center;
-            min-width: 200px;
-            border: none;
-            cursor: pointer;
+            font-size: 15px;
+            letter-spacing: 0.2px;
         }
-        
-        .btn:hover {
-            background: linear-gradient(135deg, #5a67d8 0%, #6b5b95 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+
+        .btn-green {
+            background: #10b981;
         }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+        .btn-red {
+            background: #ef4444;
         }
-        
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, #e081e8 0%, #e04a5f 100%);
-        }
-        
-        /* Info boxes */
+
+        /* Info box */
         .info-box {
-            background-color: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
+            background: #111520;
+            border: 1px solid #1e2538;
+            border-left: 3px solid #2563eb;
+            border-radius: 10px;
+            padding: 24px 28px;
+            margin: 28px 0;
         }
-        
+
         .info-box h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3b82f6;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
         }
-        
+
         .info-box p {
-            margin-bottom: 8px;
             font-size: 14px;
-            color: #666;
+            color: #8b9cb3;
+            margin-bottom: 6px;
+            line-height: 1.6;
         }
-        
-        /* Amount/Currency styling */
+
+        /* Amount */
         .amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2d3748;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 32px;
+            font-weight: 800;
+            color: #3b82f6;
+            letter-spacing: -1px;
+            display: block;
+            margin: 8px 0 4px;
         }
-        
-        /* Table styles for better mobile display */
+
+        .amount-label {
+            font-size: 12px;
+            color: #8b9cb3;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* Table */
         .info-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 24px 0;
         }
-        
+
+        .info-table tr:not(:last-child) td {
+            border-bottom: 1px solid #1e2538;
+        }
+
         .info-table td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 4px;
             font-size: 14px;
+            vertical-align: top;
         }
-        
+
         .info-table .label {
-            font-weight: 600;
-            color: #4a5568;
-            width: 40%;
+            color: #8b9cb3;
+            font-weight: 500;
+            width: 42%;
         }
-        
+
         .info-table .value {
-            color: #2d3748;
+            color: #f1f5f9;
+            font-weight: 500;
         }
-        
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-green  { background: rgba(16,185,129,.15); color: #10b981; }
+        .badge-yellow { background: rgba(245,158,11,.15);  color: #f59e0b; }
+        .badge-red    { background: rgba(239,68,68,.15);   color: #ef4444; }
+        .badge-blue   { background: rgba(59,130,246,.15);  color: #3b82f6; }
+
         /* Footer */
         .email-footer {
-            background-color: #2c3e50;
-            color: white;
-            padding: 25px 20px;
+            background: #080b12;
+            border-top: 1px solid #1e2538;
+            padding: 36px 56px;
             text-align: center;
         }
-        
+
         .footer-links {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
-        
+
         .footer-links a {
-            color: #3498db;
+            color: #8b9cb3;
             text-decoration: none;
-            margin: 0 12px;
-            font-size: 14px;
-            display: inline-block;
-            padding: 5px 0;
+            margin: 0 14px;
+            font-size: 13px;
+            transition: color 0.2s;
         }
-        
+
         .footer-links a:hover {
-            text-decoration: underline;
+            color: #3b82f6;
         }
-        
-        .social-links {
-            margin-bottom: 15px;
+
+        .footer-divider {
+            width: 40px;
+            border: none;
+            border-top: 1px solid #1e2538;
+            margin: 20px auto;
         }
-        
-        .social-links a {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 50%;
-            line-height: 36px;
-            margin: 0 8px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        
-        .social-links a:hover {
-            background-color: #2980b9;
-            transform: scale(1.1);
-        }
-        
+
         .disclaimer {
-            font-size: 11px;
-            color: #bdc3c7;
-            line-height: 1.5;
-            margin-top: 15px;
+            font-size: 12px;
+            color: #4a5568;
+            line-height: 1.7;
         }
-        
-        .disclaimer p {
-            margin-bottom: 8px;
-        }
-        
-        /* Mobile-first responsive design */
-        @media only screen and (max-width: 640px) {
-            .email-container {
-                margin: 0 !important;
-                border-radius: 0 !important;
-                max-width: 100% !important;
-                width: 100% !important;
-            }
-            
-            .email-content {
-                padding: 20px 16px !important;
-            }
-            
-            .email-header {
-                padding: 20px 16px !important;
-            }
-            
-            .logo {
-                font-size: 24px !important;
-            }
-            
-            .tagline {
-                font-size: 13px !important;
-            }
-            
-            .greeting {
-                font-size: 16px !important;
-                margin-bottom: 16px !important;
-            }
-            
-            .main-content {
-                font-size: 15px !important;
-                margin-bottom: 20px !important;
-            }
-            
-            .btn {
-                display: block !important;
-                width: 100% !important;
-                text-align: center !important;
-                padding: 18px 16px !important;
-                font-size: 16px !important;
-                margin: 16px 0 !important;
-                min-width: auto !important;
-            }
-            
-            .info-box {
-                padding: 16px !important;
-                margin: 16px 0 !important;
-            }
-            
-            .info-box h3 {
-                font-size: 16px !important;
-            }
-            
-            .amount {
-                font-size: 20px !important;
-            }
-            
-            .info-table td {
-                padding: 10px 4px !important;
-                font-size: 13px !important;
-            }
-            
-            .info-table .label {
-                width: 45% !important;
-            }
-            
-            .footer-links a {
-                display: block !important;
-                margin: 8px 0 !important;
-                padding: 8px 0 !important;
-            }
-            
-            .social-links a {
-                width: 44px !important;
-                height: 44px !important;
-                line-height: 44px !important;
-                margin: 0 6px !important;
-                font-size: 16px !important;
-            }
-            
-            .disclaimer {
-                font-size: 10px !important;
-                line-height: 1.4 !important;
-            }
-        }
-        
-        /* Very small screens (iPhone SE, etc.) */
-        @media only screen and (max-width: 375px) {
-            .email-content {
-                padding: 16px 12px !important;
-            }
-            
-            .email-header {
-                padding: 16px 12px !important;
-            }
-            
-            .btn {
-                padding: 16px 12px !important;
-                font-size: 15px !important;
-            }
-            
-            .info-box {
-                padding: 12px !important;
-            }
-            
-            .social-links a {
-                width: 40px !important;
-                height: 40px !important;
-                line-height: 40px !important;
-                margin: 0 4px !important;
-            }
-        }
-        
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            .email-container {
-                background-color: #1a202c !important;
-            }
-            
-            .email-content {
-                background-color: #1a202c !important;
-            }
-            
-            .greeting {
-                color: #e2e8f0 !important;
-            }
-            
-            .main-content {
-                color: #cbd5e0 !important;
-            }
-            
-            .info-box {
-                background-color: #2d3748 !important;
-            }
-            
-            .info-table td {
-                border-bottom-color: #4a5568 !important;
-            }
-            
-            .info-table .label {
-                color: #a0aec0 !important;
-            }
-            
-            .info-table .value {
-                color: #e2e8f0 !important;
-            }
+
+        .disclaimer p { margin-bottom: 4px; }
+
+        /* Responsive */
+        @media only screen and (max-width: 620px) {
+            .email-wrapper { padding: 0 !important; }
+            .email-container { border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+            .email-header  { padding: 36px 24px 28px !important; }
+            .email-content { padding: 36px 24px !important; }
+            .email-footer  { padding: 28px 24px !important; }
+            .btn { display: block !important; text-align: center !important; padding: 16px 24px !important; }
+            .footer-links a { display: inline-block; margin: 6px 8px !important; }
+            .amount { font-size: 26px !important; }
         }
     </style>
 </head>
 <body>
+<div class="email-wrapper">
     <div class="email-container">
+
         <!-- Header -->
         <div class="email-header">
-            <div class="logo">CapitalX</div>
+            <div class="logo-mark">CX</div>
+            <div class="logo-text">Capital<span>X</span></div>
             <div class="tagline">Your Gateway to Smart Investments</div>
         </div>
-        
+
         <!-- Content -->
         <div class="email-content">
-            {% block content %}
-            <!-- Email content goes here -->
-            {% endblock %}
+            {% block content %}{% endblock %}
         </div>
-        
+
         <!-- Footer -->
         <div class="email-footer">
             <div class="footer-links">
-                <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}">Home</a>
-                <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/about">About</a>
-                <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/contact">Contact</a>
-                <a href="{{ site_url|default:'https://capitalx-rtn.onrender.com' }}/support">Support</a>
+                <a href="{{ site_url|default:'https://safechain.cc' }}">Home</a>
+                <a href="{{ site_url|default:'https://safechain.cc' }}/dashboard">Dashboard</a>
+                <a href="{{ site_url|default:'https://safechain.cc' }}/contact">Contact</a>
+                <a href="{{ site_url|default:'https://safechain.cc' }}/support">Support</a>
             </div>
-            
-            <div class="social-links">
-                <a href="#" title="Facebook">f</a>
-                <a href="#" title="Twitter">t</a>
-                <a href="#" title="LinkedIn">in</a>
-                <a href="#" title="Instagram">ig</a>
-            </div>
-            
+            <hr class="footer-divider">
             <div class="disclaimer">
                 <p>This email was sent to {{ user.email }} from CapitalX.</p>
-                <p>If you have any questions, please contact our support team.</p>
-                <p>&copy; 2024 CapitalX. All rights reserved.</p>
+                <p>If you have questions, visit <a href="https://safechain.cc/support" style="color:#3b82f6;text-decoration:none;">safechain.cc/support</a></p>
+                <p style="margin-top:8px;">&copy; 2025 CapitalX. All rights reserved.</p>
             </div>
         </div>
+
     </div>
+</div>
 </body>
 </html>
