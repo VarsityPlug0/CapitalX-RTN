@@ -24,24 +24,21 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 if DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:8001', 'http://127.0.0.1:8001']
+    CSRF_TRUSTED_ORIGINS += ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:8001', 'http://127.0.0.1:8001']
 else:
     if RENDER_EXTERNAL_HOSTNAME:
-        CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
+        CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
     csrf_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
     if csrf_origins_env:
         CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_env.split(',')])
-    render_domain = os.getenv('RENDER_EXTERNAL_HOSTNAME')
-    if render_domain and f"https://{render_domain}" not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(f"https://{render_domain}")
 
-CSRF_COOKIE_HTTPONLY = not DEBUG
+CSRF_COOKIE_HTTPONLY = False  # Must be False so JS can read the token for AJAX requests
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_AGE = 3600
+CSRF_COOKIE_AGE = 31449600  # 1 year (Django default) — prevents expiry mid-session
 CSRF_TOKEN_USE_SESSIONS = False
 CSRF_COOKIE_NAME = 'csrftoken'
 
