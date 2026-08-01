@@ -64,16 +64,18 @@
     <div class="wl-stat-icon blue"><i class="bi bi-wallet2"></i></div>
     <div class="wl-stat-label">Available Balance</div>
     <div class="wl-stat-value">R{{ user.wallet.balance|floatformat:2 }}</div>
+    {% if total_pending %}<div style="font-size:.72rem;color:#f59e0b;margin-top:.25rem;">+R{{ total_pending|floatformat:2 }} awaiting approval</div>{% endif %}
   </div>
   <div class="wl-stat">
     <div class="wl-stat-icon yellow"><i class="bi bi-clock-history"></i></div>
     <div class="wl-stat-label">Pending Deposits</div>
     <div class="wl-stat-value">R{{ total_pending|floatformat:2 }}</div>
+    <div style="font-size:.72rem;color:var(--cx-muted);margin-top:.25rem;">Added to balance on approval</div>
   </div>
   <div class="wl-stat" style="grid-column: 1/-1;">
     <div class="wl-stat-icon green"><i class="bi bi-graph-up-arrow"></i></div>
     <div class="wl-stat-label">Total Earnings</div>
-    <div class="wl-stat-value">R{{ user.wallet.total_earnings|floatformat:2 }}</div>
+    <div class="wl-stat-value">R{{ total_earnings|floatformat:2 }}</div>
   </div>
 </div>
 

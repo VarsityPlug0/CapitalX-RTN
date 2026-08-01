@@ -385,16 +385,20 @@ def wallet_view(request):
     try:
         user = request.user
         wallet, created = Wallet.objects.get_or_create(user=user)
-        deposits = Deposit.objects.filter(user=user).exclude(payment_method='voucher').order_by('-created_at')
-        voucher_deposits = Deposit.objects.filter(user=user, payment_method='voucher').order_by('-created_at')
+        all_deposits = Deposit.objects.filter(user=user).order_by('-created_at')
+        deposits = all_deposits.exclude(payment_method='voucher')
+        voucher_deposits = all_deposits.filter(payment_method='voucher')
         withdrawals = Withdrawal.objects.filter(user=user).order_by('-created_at')
         investments = Investment.objects.filter(user=user).order_by('-created_at')
-        pending_deposits = deposits.filter(status='pending')
+        pending_deposits = all_deposits.filter(status='pending')
         approved_deposits = deposits.filter(status='approved')
         rejected_deposits = deposits.filter(status='rejected')
         total_pending = sum(d.amount for d in pending_deposits)
         total_approved = sum(d.amount for d in approved_deposits)
         total_rejected = sum(d.amount for d in rejected_deposits)
+        total_referral_earnings = ReferralReward.objects.filter(referrer=user).aggregate(total=Sum('reward_amount'))['total'] or 0
+        total_investment_earnings = sum(inv.return_amount for inv in investments if not inv.is_active)
+        total_earnings = total_investment_earnings + total_referral_earnings
         transactions = []
         for deposit in deposits:
             transactions.append({
@@ -461,6 +465,7 @@ def wallet_view(request):
             'total_pending': total_pending,
             'total_approved': total_approved,
             'total_rejected': total_rejected,
+            'total_earnings': total_earnings,
         }
         return render(request, 'core/wallet.html', context)
     except Exception as e:
