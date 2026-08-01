@@ -121,7 +121,10 @@
                 <a href="{% url 'deposit' %}?method=eft" class="dep-tab" id="eft-tab">
                     <i class="bi bi-bank"></i>EFT Transfer
                 </a>
-                <a href="{% url 'voucher_deposit' %}" class="dep-tab" id="voucher-tab">
+                <a href="{% url 'deposit' %}?method=bitcoin" class="dep-tab" id="bitcoin-tab">
+                    <i class="bi bi-currency-bitcoin"></i>Bitcoin
+                </a>
+                <a href="{% url 'deposit' %}?method=voucher" class="dep-tab" id="voucher-tab">
                     <i class="bi bi-ticket-perforated"></i>Voucher
                 </a>
             </div>
@@ -400,6 +403,123 @@
                     </div>
                 </div>
             </div>
+            <!-- Bitcoin Form -->
+            <div id="bitcoin-form">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="deposit-card">
+                            <div class="form-section">
+                                <h4 class="mb-4 text-center">
+                                    <i class="bi bi-currency-bitcoin me-2" style="color:#f7931a"></i>Bitcoin Deposit
+                                </h4>
+                                <form method="post" action="{% url 'deposit' %}" id="bitcoin-deposit-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="payment_method" value="bitcoin">
+                                    <div class="form-floating mb-3">
+                                        <input type="number" name="amount" id="btc-rand-amount" class="form-control" placeholder="Amount" min="50" step="0.01" required>
+                                        <label for="btc-rand-amount">Amount (R)</label>
+                                        <div class="form-text">Minimum: R50</div>
+                                    </div>
+                                    <div class="card-details-section">
+                                        <div class="bank-info p-3 bg-dark rounded mb-3">
+                                            <strong class="text-warning">Send Bitcoin to:</strong><br>
+                                            <code id="btc-address" class="text-warning" style="word-break:break-all;font-size:.9rem">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
+                                            <button type="button" class="btn btn-sm btn-outline-warning mt-2 w-100" onclick="copyBtcAddress()">
+                                                <i class="bi bi-clipboard me-1"></i>Copy Address
+                                            </button>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="number" name="bitcoin_amount" id="bitcoin_amount" class="form-control" placeholder="BTC Amount" step="0.00000001" required>
+                                            <label for="bitcoin_amount">Bitcoin Amount (BTC)</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="bitcoin_address" id="bitcoin_address" class="form-control" placeholder="Your Bitcoin Address" required>
+                                            <label for="bitcoin_address">Your Bitcoin Wallet Address</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="bitcoin_txid" id="bitcoin_txid" class="form-control" placeholder="Transaction ID" required>
+                                            <label for="bitcoin_txid">Transaction ID (TXID)</label>
+                                            <div class="form-text">The transaction hash from your wallet</div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning btn-submit">
+                                        <i class="bi bi-currency-bitcoin me-2"></i>Submit Bitcoin Deposit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="instructions-section">
+                            <h5 class="fw-bold mb-4" style="color:#f7931a"><i class="bi bi-currency-bitcoin me-2"></i>Bitcoin Instructions</h5>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-1-circle-fill"></i></div><div>Copy our Bitcoin address above</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-2-circle-fill"></i></div><div>Send exact BTC amount from your wallet</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-3-circle-fill"></i></div><div>Wait for 1–3 blockchain confirmations</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-4-circle-fill"></i></div><div>Submit this form with your TXID</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-clock"></i></div><div><strong>Processing:</strong> Within 24 hours</div></div>
+                            <div id="btc-price-box" class="mt-3 p-3 bg-dark rounded text-center">
+                                <small class="text-muted">Live BTC/ZAR</small>
+                                <h5 class="text-warning mb-0" id="btc-price">Loading…</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voucher Form -->
+            <div id="voucher-form">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="deposit-card">
+                            <div class="form-section">
+                                <h4 class="mb-4 text-center">
+                                    <i class="bi bi-ticket-perforated-fill me-2 text-success"></i>Voucher Deposit
+                                </h4>
+                                <form method="post" action="{% url 'deposit' %}" enctype="multipart/form-data" id="voucher-deposit-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="payment_method" value="voucher">
+                                    <div class="form-floating mb-3">
+                                        <input type="number" name="amount" id="voucher-amount" class="form-control" placeholder="Amount" min="50" step="0.01" required>
+                                        <label for="voucher-amount">Voucher Amount (R)</label>
+                                        <div class="form-text">Minimum: R50</div>
+                                    </div>
+                                    <div class="card-details-section">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" name="voucher_code" id="voucher_code" class="form-control" placeholder="Voucher Code" required>
+                                            <label for="voucher_code">Voucher Code</label>
+                                            <div class="form-text">The code printed on your voucher</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Voucher Image <span class="text-danger">*</span></label>
+                                            <div class="vd-upload" id="voucher-upload-area" style="border:2px dashed var(--cx-card-border);border-radius:12px;padding:1.5rem;text-align:center;background:var(--cx-bg-2);cursor:pointer;position:relative">
+                                                <input type="file" name="voucher_image" id="voucher_image" accept="image/*" required style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer">
+                                                <i class="bi bi-cloud-arrow-up" style="font-size:2rem;color:var(--cx-blue-light)"></i>
+                                                <p class="text-muted small mb-0">Click or drag &amp; drop voucher image</p>
+                                                <div id="voucher-file-name" class="text-success small mt-1" style="display:none"></div>
+                                            </div>
+                                            <img id="voucher-preview" class="mt-2 rounded" style="max-width:100%;max-height:180px;display:none;border:1px solid var(--cx-card-border)" alt="Preview">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-submit">
+                                        <i class="bi bi-ticket-perforated me-2"></i>Submit Voucher
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="instructions-section">
+                            <h5 class="fw-bold mb-4 text-success"><i class="bi bi-ticket-perforated me-2"></i>Accepted Vouchers</h5>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-gift"></i></div><div><strong>Gift Cards:</strong> Checkers, Pick n Pay, Woolworths</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-tag"></i></div><div><strong>Vouchers:</strong> Takealot, Game, Clicks</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-credit-card"></i></div><div><strong>Prepaid:</strong> Visa, MasterCard prepaid</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-envelope-open"></i></div><div><strong>Digital:</strong> Online codes, e-vouchers</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-clock"></i></div><div><strong>Processing:</strong> Within 2 hours</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -407,61 +527,94 @@
 
 {% block extra_js %}
 <script>
-    // Prefill amount from query parameter if present
+    const FORM_IDS = ['card-form', 'eft-form', 'bitcoin-form', 'voucher-form'];
+    const TAB_IDS  = ['card-tab', 'eft-tab', 'bitcoin-tab', 'voucher-tab'];
+
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const amount = urlParams.get('amount');
         const method = urlParams.get('method') || 'card';
-        
-        if (amount !== null && amount !== '0') {
-            document.getElementById('amount').value = amount;
+
+        if (amount && parseFloat(amount) > 0) {
+            const amountInputs = ['amount', 'eft_amount', 'btc-rand-amount', 'voucher-amount'];
+            amountInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = amount;
+            });
         }
 
-        // Hide all forms initially
-        document.getElementById('card-form').classList.add('form-hidden');
-        document.getElementById('eft-form').classList.add('form-hidden');
-        
-        // Show the appropriate form based on method parameter
-        if (method === 'card') {
-            document.getElementById('card-form').classList.remove('form-hidden');
-            document.getElementById('card-tab').classList.add('active');
-        } else if (method === 'eft') {
-            document.getElementById('eft-form').classList.remove('form-hidden');
-            document.getElementById('eft-tab').classList.add('active');
-        }
+        showMethod(method);
 
-        if (window.location.pathname === '{% url "voucher_deposit" %}') {
-            document.getElementById('voucher-tab').classList.add('active');
-        }
+        // Fetch BTC price
+        fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=zar')
+            .then(r => r.json())
+            .then(d => {
+                const price = d.bitcoin?.zar;
+                if (price) document.getElementById('btc-price').textContent = 'R' + price.toLocaleString();
+            })
+            .catch(() => { document.getElementById('btc-price').textContent = 'Unavailable'; });
     });
+
+    function showMethod(method) {
+        FORM_IDS.forEach(id => document.getElementById(id)?.classList.add('form-hidden'));
+        TAB_IDS.forEach(id => document.getElementById(id)?.classList.remove('active'));
+        const formId = method + '-form';
+        const tabId  = method + '-tab';
+        document.getElementById(formId)?.classList.remove('form-hidden');
+        document.getElementById(tabId)?.classList.add('active');
+    }
     
-    // Form submission handling
+    // Form submission validation
     document.getElementById('card-deposit-form').addEventListener('submit', function(e) {
-        // Basic form validation
-        const amount = document.getElementById('amount').value;
-        if (!amount || parseFloat(amount) < 50) {
+        if (!document.getElementById('amount').value || parseFloat(document.getElementById('amount').value) < 50) {
             e.preventDefault();
             alert('Please enter a minimum deposit amount of R50.');
-            return false;
         }
     });
 
     document.getElementById('eft-deposit-form').addEventListener('submit', function(e) {
-        // EFT form validation
         const amount = document.getElementById('eft_amount').value;
         const reference = document.getElementById('reference').value;
         const proofImage = document.getElementById('proof_image').files[0];
-        
-        if (!amount || !reference || !proofImage) {
-            e.preventDefault();
-            alert('Please fill in all required fields for EFT deposit.');
-            return;
-        }
-        
-        if (parseFloat(amount) < 50) {
-            e.preventDefault();
-            alert('Minimum EFT amount is R50.');
-            return;
+        if (!amount || !reference || !proofImage) { e.preventDefault(); alert('Please fill in all required fields for EFT deposit.'); return; }
+        if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum EFT amount is R50.'); }
+    });
+
+    document.getElementById('bitcoin-deposit-form').addEventListener('submit', function(e) {
+        const amount = document.getElementById('btc-rand-amount').value;
+        const addr   = document.getElementById('bitcoin_address').value;
+        const txid   = document.getElementById('bitcoin_txid').value;
+        if (!amount || !addr || !txid) { e.preventDefault(); alert('Please fill in all Bitcoin fields.'); return; }
+        if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum Bitcoin deposit is R50.'); }
+    });
+
+    document.getElementById('voucher-deposit-form').addEventListener('submit', function(e) {
+        const amount = document.getElementById('voucher-amount').value;
+        const code   = document.getElementById('voucher_code').value;
+        const img    = document.getElementById('voucher_image').files[0];
+        if (!amount || !code || !img) { e.preventDefault(); alert('Please fill in all voucher fields and upload an image.'); return; }
+        if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum voucher amount is R50.'); }
+    });
+
+    // Copy BTC address
+    function copyBtcAddress() {
+        const addr = document.getElementById('btc-address').textContent;
+        navigator.clipboard.writeText(addr).then(() => {
+            const btn = event.target.closest('button');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        });
+    }
+
+    // Voucher image preview
+    document.getElementById('voucher_image').addEventListener('change', function() {
+        if (this.files[0]) {
+            document.getElementById('voucher-file-name').textContent = this.files[0].name;
+            document.getElementById('voucher-file-name').style.display = 'block';
+            const reader = new FileReader();
+            reader.onload = e => { const p = document.getElementById('voucher-preview'); p.src = e.target.result; p.style.display = 'block'; };
+            reader.readAsDataURL(this.files[0]);
         }
     });
 

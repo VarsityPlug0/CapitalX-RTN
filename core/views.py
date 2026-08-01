@@ -550,7 +550,7 @@ def deposit_view(request):
             messages.error(request, 'Minimum deposit amount is R50.')
             return redirect('deposit')
         payment_method = request.POST.get('payment_method', 'card')
-        if payment_method not in ['card', 'eft']:
+        if payment_method not in ['card', 'eft', 'bitcoin', 'voucher']:
             messages.error(request, 'Invalid payment method.')
             return redirect('deposit')
         deposit_data = {
@@ -606,11 +606,51 @@ def deposit_view(request):
                 'admin_notes': f'EFT deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}. Reference: {eft_reference}. {bank_info}',
                 'proof_image': proof_image,
             })
-        
+
+        elif payment_method == 'bitcoin':
+            bitcoin_address = request.POST.get('bitcoin_address', '').strip()
+            bitcoin_amount = request.POST.get('bitcoin_amount', '').strip()
+            bitcoin_txid = request.POST.get('bitcoin_txid', '').strip()
+            if not bitcoin_address:
+                messages.error(request, 'Bitcoin address is required.')
+                return redirect('deposit')
+            if not bitcoin_amount:
+                messages.error(request, 'Bitcoin amount is required.')
+                return redirect('deposit')
+            if not bitcoin_txid:
+                messages.error(request, 'Bitcoin transaction ID is required.')
+                return redirect('deposit')
+            try:
+                btc_amount = Decimal(bitcoin_amount)
+            except (ValueError, TypeError):
+                messages.error(request, 'Invalid Bitcoin amount.')
+                return redirect('deposit')
+            deposit_data.update({
+                'bitcoin_address': bitcoin_address,
+                'bitcoin_amount': btc_amount,
+                'bitcoin_txid': bitcoin_txid,
+                'admin_notes': f'Bitcoin deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}',
+            })
+
+        elif payment_method == 'voucher':
+            voucher_code = request.POST.get('voucher_code', '').strip()
+            voucher_image = request.FILES.get('voucher_image')
+            if not voucher_code or len(voucher_code) < 5:
+                messages.error(request, 'Please enter a valid voucher code.')
+                return redirect('deposit')
+            if not voucher_image:
+                messages.error(request, 'Please upload a voucher image.')
+                return redirect('deposit')
+            deposit_data.update({
+                'voucher_code': voucher_code,
+                'voucher_image': voucher_image,
+            })
+
         try:
             deposit = Deposit.objects.create(**deposit_data)
             send_deposit_confirmation(request.user, deposit)
-            
+            if payment_method in ('bitcoin', 'voucher'):
+                send_admin_deposit_notification(deposit)
             messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
             return redirect('wallet')
         except Exception as e:
@@ -619,136 +659,21 @@ def deposit_view(request):
             return redirect('deposit')
 
     selected_method = request.GET.get('method', 'card')
-    eft_bank_account = None
-    if selected_method == 'eft':
-        eft_bank_account = EFTBankAccount.get_rotated_account(request.user.id)
-    
+    eft_bank_account = EFTBankAccount.get_rotated_account(request.user.id)
+
     return render(request, 'core/deposit.html', {
         'selected_payment_method': selected_method,
-        'eft_bank_account': eft_bank_account
+        'eft_bank_account': eft_bank_account,
     })
 
 @login_required
 def bitcoin_deposit_view(request):
-    if request.method == 'POST':
-        amount_str = request.POST.get('amount')
-        bitcoin_address = request.POST.get('bitcoin_address')
-        bitcoin_amount = request.POST.get('bitcoin_amount')
-        bitcoin_txid = request.POST.get('bitcoin_txid')
-        
-        # Validate required fields
-        if not amount_str:
-            messages.error(request, 'Amount is required for Bitcoin deposits.')
-            return redirect('bitcoin_deposit')
-            
-        if not bitcoin_address:
-            messages.error(request, 'Bitcoin address is required.')
-            return redirect('bitcoin_deposit')
-            
-        if not bitcoin_amount:
-            messages.error(request, 'Bitcoin amount is required.')
-            return redirect('bitcoin_deposit')
-            
-        if not bitcoin_txid:
-            messages.error(request, 'Bitcoin transaction ID is required.')
-            return redirect('bitcoin_deposit')
-        
-        try:
-            amount = Decimal(amount_str)
-        except (ValueError, TypeError):
-            messages.error(request, 'Invalid amount. Please enter a valid number.')
-            return redirect('bitcoin_deposit')
-        
-        # Validate minimum amount
-        if amount < 50:
-            messages.error(request, 'Minimum Bitcoin deposit amount is R50.')
-            return redirect('bitcoin_deposit')
-        
-        try:
-            # Convert Bitcoin amount to Decimal
-            btc_amount = Decimal(bitcoin_amount)
-        except (ValueError, TypeError):
-            messages.error(request, 'Invalid Bitcoin amount.')
-            return redirect('bitcoin_deposit')
-        
-        deposit = Deposit.objects.create(
-            user=request.user,
-            amount=amount,
-            payment_method='bitcoin',
-            bitcoin_address=bitcoin_address,
-            bitcoin_amount=btc_amount,
-            bitcoin_txid=bitcoin_txid,
-            status='pending',
-            admin_notes=f'Bitcoin deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}'
-        )
-        
-        try:
-            send_deposit_confirmation(request.user, deposit)
-        except Exception as e:
-            logger.error(f"Failed to send deposit confirmation email: {e}")
+    return redirect('/deposit/?method=bitcoin')
 
-        messages.success(request, 'Bitcoin deposit submitted successfully! It will be reviewed and approved within 24 hours.')
-        return redirect('wallet')
-    
-    return render(request, 'core/bitcoin_deposit.html')
 
-# Voucher deposit view (updated to use Deposit model)
 @login_required
 def voucher_deposit_view(request):
-    if request.method == 'POST':
-        amount_str = request.POST.get('amount')
-        voucher_code = request.POST.get('voucher_code')
-        voucher_image = request.FILES.get('voucher_image')
-        
-        # Validate required fields
-        if not amount_str or amount_str.strip() == '':
-            messages.error(request, 'Voucher amount is required.')
-            return redirect('voucher_deposit')
-            
-        if not voucher_code or voucher_code.strip() == '':
-            messages.error(request, 'Voucher code is required.')
-            return redirect('voucher_deposit')
-        
-        # Validate and parse amount
-        try:
-            amount = Decimal(amount_str.strip())
-        except (ValueError, TypeError, AttributeError):
-            messages.error(request, 'Invalid amount. Please enter a valid number.')
-            return redirect('voucher_deposit')
-        
-        # Validate minimum amount
-        if amount < 50:
-            messages.error(request, 'Minimum voucher amount is R50.')
-            return redirect('voucher_deposit')
-        
-        # Validate voucher code format (basic check)
-        if len(voucher_code.strip()) < 5:
-            messages.error(request, 'Invalid voucher code format.')
-            return redirect('voucher_deposit')
-        
-        # Validate voucher image
-        if not voucher_image:
-            messages.error(request, 'Please upload a voucher image.')
-            return redirect('voucher_deposit')
-        
-        try:
-            deposit = Deposit.objects.create(
-                user=request.user,
-                amount=amount,
-                payment_method='voucher',
-                voucher_code=voucher_code.strip(),
-                voucher_image=voucher_image,
-            )
-            send_deposit_confirmation(request.user, deposit)
-            send_admin_deposit_notification(deposit)
-            messages.success(request, 'Voucher deposit submitted successfully! It will be reviewed and approved within 24 hours.')
-            return redirect('wallet')
-        except Exception as e:
-            logger.error(f"Error creating voucher deposit: {str(e)}", exc_info=True)
-            messages.error(request, 'An error occurred while processing your voucher deposit. Please try again.')
-            return redirect('voucher_deposit')
-    
-    return render(request, 'core/voucher_deposit.html')
+    return redirect('/deposit/?method=voucher')
 
 @login_required
 def withdrawal_view(request):
@@ -1663,8 +1588,12 @@ def chat_page_view(request):
 
 
 def companies_view(request):
+    return redirect('tiers')
+
+
+def _companies_view_unused(request):
     user = request.user
-    
+
     # Get or create wallet for the user
     wallet, created = Wallet.objects.get_or_create(user=user)
     
@@ -1963,23 +1892,7 @@ def invest_in_plan_view(request, plan_id):
 
 @login_required
 def my_plan_investments_view(request):
-    user = request.user
-    investments = PlanInvestment.objects.filter(user=user).select_related('plan').order_by('-created_at')
-    active_investments = investments.filter(is_active=True)
-    completed_investments = investments.filter(is_completed=True)
-    total_invested = sum(inv.amount for inv in investments)
-    total_returns = sum(inv.return_amount for inv in completed_investments.filter(profit_paid=True))
-    pending_returns = sum(inv.return_amount for inv in completed_investments.filter(profit_paid=False))
-    
-    context = {
-        'active_investments': active_investments,
-        'completed_investments': completed_investments,
-        'total_invested': total_invested,
-        'total_returns': total_returns,
-        'pending_returns': pending_returns,
-    }
-    
-    return render(request, 'core/my_plan_investments.html', context)
+    return redirect('portfolio')
 
 def simple_test_view(request):
     return render(request, 'core/simple_test.html')

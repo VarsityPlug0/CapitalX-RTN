@@ -169,7 +169,14 @@
             <div class="collapse navbar-collapse" id="main-nav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a></li>
-                    <li class="nav-item"><a href="{% url 'tiers' %}" class="nav-link">Shares</a></li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Invest</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'tiers' %}"><i class="bi bi-layers-fill me-2"></i>Company Shares</a></li>
+                            <li><a class="dropdown-item" href="{% url 'investment_plans' %}"><i class="bi bi-graph-up-arrow me-2"></i>Investment Plans</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a href="{% url 'portfolio' %}" class="nav-link">Portfolio</a></li>
                     <li class="nav-item"><a href="{% url 'wallet' %}" class="nav-link">Wallet</a></li>
                     <li class="nav-item"><a href="{% url 'referral' %}" class="nav-link">Referrals</a></li>
                     <li class="nav-item"><a href="{% url 'feed' %}" class="nav-link">Feed</a></li>
@@ -388,11 +395,15 @@
         {% if user.is_authenticated %}
         <a href="{% url 'dashboard' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="bi bi-grid-fill"></i>
-            <span>Dashboard</span>
+            <span>Home</span>
         </a>
-        <a href="{% url 'tiers' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'tiers' %}active{% endif %}">
+        <a href="{% url 'tiers' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name in 'tiers,investment_plans' %}active{% endif %}">
             <i class="bi bi-layers-fill"></i>
-            <span>Shares</span>
+            <span>Invest</span>
+        </a>
+        <a href="{% url 'portfolio' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'portfolio' %}active{% endif %}">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Portfolio</span>
         </a>
         <a href="{% url 'wallet' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'wallet' %}active{% endif %}">
             <i class="bi bi-wallet2"></i>
@@ -401,10 +412,6 @@
         <a href="{% url 'referral' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'referral' %}active{% endif %}">
             <i class="bi bi-people-fill"></i>
             <span>Referrals</span>
-        </a>
-        <a href="{% url 'feed' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
-            <i class="bi bi-rss-fill"></i>
-            <span>Feed</span>
         </a>
         {% else %}
         <a href="{% url 'home' %}" class="mat-bottom-nav__item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
