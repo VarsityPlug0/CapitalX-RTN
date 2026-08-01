@@ -205,12 +205,10 @@ class Investment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            if not self.start_date:
-                self.start_date = timezone.now()
-            self.end_date = self.start_date + timezone.timedelta(days=self.company.duration_days)
+            self.end_date = timezone.now() + timezone.timedelta(days=self.company.duration_days)
             self.user.total_invested += self.amount
             self.user.update_level()
-        if (self.end_date and self.is_active and timezone.now() >= self.end_date):
+        if self.end_date and self.is_active and timezone.now() >= self.end_date:
             self.is_active = False
         super().save(*args, **kwargs)
 
@@ -713,7 +711,6 @@ class PlanInvestment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        unique_together = ['user', 'plan']
         ordering = ['-created_at']
         verbose_name = 'Plan Investment'
         verbose_name_plural = 'Plan Investments'

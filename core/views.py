@@ -5,6 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum, Q, Count
+from django.db import transaction
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -37,9 +38,11 @@ logger = logging.getLogger(__name__)
 def home_view(request):
     investment_plans = InvestmentPlan.objects.filter(is_active=True)[:3]
     total_investors = CustomUser.objects.count()
-    total_payouts = Investment.objects.filter(is_active=False).aggregate(
-        total=Sum('return_amount')
-    )['total'] or 0
+    total_payouts = (
+        Investment.objects.filter(is_active=False).aggregate(total=Sum('return_amount'))['total'] or 0
+    ) + (
+        PlanInvestment.objects.filter(profit_paid=True).aggregate(total=Sum('return_amount'))['total'] or 0
+    )
     ai_strategies = 5
     top_referrers = CustomUser.objects.annotate(
         total_earnings=Sum('rewards__reward_amount')
@@ -186,7 +189,7 @@ def dashboard_view(request):
     investments = Investment.objects.filter(user=user).select_related('company')
     deposits = Deposit.objects.filter(user=user).order_by('-created_at')
     total_referral_earnings = ReferralReward.objects.filter(referrer=user).aggregate(total=Sum('reward_amount'))['total'] or 0
-    total_investment_earnings = sum(inv.return_amount - inv.amount for inv in investments if not inv.is_active)
+    total_investment_earnings = sum(inv.return_amount for inv in investments if not inv.is_active)
     total_earnings = total_investment_earnings + total_referral_earnings
     active_investments = investments.filter(is_active=True)
     active_plan_investments = PlanInvestment.objects.filter(
@@ -768,37 +771,35 @@ def withdrawal_view(request):
             return redirect('withdraw')
         
         try:
-            wallet = Wallet.objects.get(user=request.user)
-            if amount > wallet.balance:
-                messages.error(request, f'Insufficient balance. Your available balance is R{wallet.balance}.')
-                return redirect('withdraw')
-        except Wallet.DoesNotExist:
-            messages.error(request, 'Wallet not found. Please contact support.')
-            return redirect('withdraw')
+            with transaction.atomic():
+                wallet = Wallet.objects.select_for_update().get(user=request.user)
+                if amount > wallet.balance:
+                    messages.error(request, f'Insufficient balance. Your available balance is R{wallet.balance}.')
+                    return redirect('withdraw')
 
-        total_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
-        total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')
-        if total_earnings > 0 and total_deposits < (Decimal('0.5') * total_earnings):
-            messages.error(request, 'You must deposit at least 50% of your total earnings before you can withdraw.')
-            return redirect('withdraw')
-        
-        try:
-            withdrawal_data = {
-                'user': request.user,
-                'amount': amount,
-                'payment_method': payment_method,
-            }
-            
-            if payment_method == 'bank':
-                withdrawal_data.update({
-                    'account_holder_name': request.POST.get('account_holder_name', ''),
-                    'bank_name': request.POST.get('bank_name', ''),
-                    'account_number': request.POST.get('account_number', ''),
-                    'branch_code': request.POST.get('branch_code', ''),
-                    'account_type': request.POST.get('account_type', ''),
-                })
-            
-            withdrawal = Withdrawal.objects.create(**withdrawal_data)
+                inv_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
+                plan_earnings = PlanInvestment.objects.filter(user=request.user, profit_paid=True).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
+                total_earnings = inv_earnings + plan_earnings
+                total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')
+                if total_earnings > 0 and total_deposits < (Decimal('0.5') * total_earnings):
+                    messages.error(request, 'You must deposit at least 50% of your total earnings before you can withdraw.')
+                    return redirect('withdraw')
+
+                withdrawal_data = {
+                    'user': request.user,
+                    'amount': amount,
+                    'payment_method': payment_method,
+                }
+                if payment_method == 'bank':
+                    withdrawal_data.update({
+                        'account_holder_name': request.POST.get('account_holder_name', ''),
+                        'bank_name': request.POST.get('bank_name', ''),
+                        'account_number': request.POST.get('account_number', ''),
+                        'branch_code': request.POST.get('branch_code', ''),
+                        'account_type': request.POST.get('account_type', ''),
+                    })
+                withdrawal = Withdrawal.objects.create(**withdrawal_data)
+
             try:
                 send_withdrawal_confirmation(request.user, withdrawal)
             except Exception as e:
@@ -807,9 +808,12 @@ def withdrawal_view(request):
                 send_admin_withdrawal_notification(withdrawal)
             except Exception as e:
                 logger.error(f"Failed to send admin withdrawal notification email: {e}")
-            
+
             messages.success(request, 'Withdrawal request submitted successfully. Please wait for approval.')
             return redirect('wallet')
+        except Wallet.DoesNotExist:
+            messages.error(request, 'Wallet not found. Please contact support.')
+            return redirect('withdraw')
         except ValueError as e:
             messages.error(request, str(e))
             return redirect('withdraw')
@@ -819,117 +823,81 @@ def withdrawal_view(request):
 @login_required
 def feed_view(request):
     try:
-        investment_updates = [
-            {
-                'message': 'AI Trading Bot completed 5 successful trades',
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 5))
-            },
-            {
-                'message': 'Market analysis shows positive trends for BTC',
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(6, 10))
-            },
-            {
-                'message': 'New trading strategy implemented successfully',
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(11, 15))
-            },
-            {
-                'message': 'AI detected profitable arbitrage opportunity',
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(16, 20))
-            },
-            {
-                'message': 'Portfolio rebalancing completed for optimal returns',
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(21, 25))
-            }
-        ]
+        # Real recent investments
+        recent_inv_qs = Investment.objects.select_related('user', 'company').order_by('-created_at')[:3]
+        recent_plan_qs = PlanInvestment.objects.select_related('user', 'plan').order_by('-created_at')[:2]
+        investment_updates = []
+        for inv in recent_inv_qs:
+            name = inv.user.first_name or inv.user.username
+            investment_updates.append({
+                'message': f'{name} invested in {inv.company.name}',
+                'timestamp': inv.created_at,
+            })
+        for inv in recent_plan_qs:
+            name = inv.user.first_name or inv.user.username
+            investment_updates.append({
+                'message': f'{name} started the {inv.plan.name} plan',
+                'timestamp': inv.created_at,
+            })
+        investment_updates.sort(key=lambda x: x['timestamp'], reverse=True)
 
-        user_milestones = [
-            {
-                'type': 'deposit',
-                'user': 'CryptoKing',
-                'amount': random.randint(1000, 10000),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 5))
-            },
-            {
-                'type': 'deposit',
-                'user': 'TraderPro',
-                'amount': random.randint(1000, 10000),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(6, 10))
-            },
-            {
-                'type': 'upgrade',
-                'user': 'BitcoinWhale',
-                'level': random.randint(2, 5),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(11, 15))
-            },
-            {
-                'type': 'payout',
-                'user': 'CryptoMaster',
-                'amount': random.randint(1000, 10000),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(16, 20))
-            },
-            {
-                'type': 'deposit',
-                'user': 'AltcoinTrader',
-                'amount': random.randint(1000, 10000),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(21, 25))
-            }
-        ]
+        # Real recent deposits and payouts
+        recent_deposits = Deposit.objects.filter(status='approved').select_related('user').order_by('-updated_at')[:3]
+        recent_payouts = Investment.objects.filter(funds_claimed=True).select_related('user').order_by('-updated_at')[:2]
+        user_milestones = []
+        for d in recent_deposits:
+            name = d.user.first_name or d.user.username
+            user_milestones.append({'type': 'deposit', 'user': name, 'amount': d.amount, 'timestamp': d.updated_at})
+        for inv in recent_payouts:
+            name = inv.user.first_name or inv.user.username
+            user_milestones.append({'type': 'payout', 'user': name, 'amount': inv.return_amount, 'timestamp': inv.updated_at})
+        user_milestones.sort(key=lambda x: x['timestamp'], reverse=True)
 
-        referral_activities = [
-            {
-                'referrer': 'MasterTrader',
-                'referred': 'NewUser123',
-                'amount': random.randint(10, 50),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 5))
-            },
-            {
-                'referrer': 'CryptoPro',
-                'referred': 'Investor456',
-                'amount': random.randint(10, 50),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(6, 10))
-            },
-            {
-                'referrer': 'BitcoinKing',
-                'referred': 'Trader789',
-                'amount': random.randint(10, 50),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(11, 15))
-            },
-            {
-                'referrer': 'AltcoinMaster',
-                'referred': 'CryptoNewbie',
-                'amount': random.randint(10, 50),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(16, 20))
-            },
-            {
-                'referrer': 'TradingGuru',
-                'referred': 'FutureTrader',
-                'amount': random.randint(10, 50),
-                'timestamp': timezone.now() - timedelta(minutes=random.randint(21, 25))
-            }
-        ]
+        # Real referral activity
+        recent_referrals = ReferralReward.objects.select_related('referrer', 'referred').order_by('-awarded_at')[:5]
+        referral_activities = [{
+            'referrer': r.referrer.first_name or r.referrer.username,
+            'referred': r.referred.first_name or r.referred.username,
+            'amount': r.reward_amount,
+            'timestamp': r.awarded_at,
+        } for r in recent_referrals]
 
         tips = [
-            "💡 Tip: Reinvest to reach higher companies faster.",
-            "💡 Tip: Refer friends to earn passive income.",
-            "💡 Tip: Higher companies offer better returns.",
-            "💡 Tip: Stay consistent with your investments.",
-            "💡 Tip: Monitor market trends for better timing."
-        ]
-        
-        security_reminders = [
-            "⚠️ We never ask for your private keys. Stay safe.",
-            "⚠️ Enable 2FA for extra security.",
-            "⚠️ Keep your login credentials private.",
-            "⚠️ Verify all transactions carefully.",
-            "⚠️ Report suspicious activity immediately."
+            "Reinvest your returns to compound your growth faster.",
+            "Refer friends to earn passive income on every deposit.",
+            "Higher-tier companies offer better returns.",
+            "Stay consistent with your investments.",
+            "Check your portfolio regularly to track progress.",
         ]
 
+        security_reminders = [
+            "We never ask for your password or private keys.",
+            "Keep your login credentials private.",
+            "Verify all transactions carefully before confirming.",
+            "Report any suspicious activity to support immediately.",
+            "Use a strong, unique password for your account.",
+        ]
+
+        # Real platform stats
+        active_inv_count = (
+            Investment.objects.filter(is_active=True).count() +
+            PlanInvestment.objects.filter(profit_paid=False, end_date__gt=timezone.now()).count()
+        )
+        total_dep = Deposit.objects.filter(status='approved').aggregate(total=Sum('amount'))['total'] or 0
+        total_pay = (
+            (Investment.objects.filter(profit_paid=True).aggregate(total=Sum('return_amount'))['total'] or 0) +
+            (PlanInvestment.objects.filter(profit_paid=True).aggregate(total=Sum('return_amount'))['total'] or 0)
+        )
+        total_closed = Investment.objects.filter(is_active=False).count() + PlanInvestment.objects.filter(is_completed=True).count()
+        paid_count = Investment.objects.filter(profit_paid=True).count() + PlanInvestment.objects.filter(profit_paid=True).count()
+        success_rate = round((paid_count / total_closed * 100), 1) if total_closed > 0 else 100.0
+
         daily_stats = {
-            'total_users': random.randint(1000, 1500),
-            'active_investments': random.randint(800, 1000),
-            'total_deposits': random.randint(2000000, 3000000),
-            'total_payouts': random.randint(1500000, 2000000),
-            'success_rate': random.uniform(95.0, 99.9)
+            'total_users': CustomUser.objects.count(),
+            'active_investments': active_inv_count,
+            'total_deposits': total_dep,
+            'total_payouts': total_pay,
+            'success_rate': success_rate,
         }
 
         context = {
@@ -967,27 +935,8 @@ def feed_view(request):
 
 @login_required
 def cash_out_view(request, investment_id):
-    try:
-        investment = Investment.objects.get(id=investment_id, user=request.user)
-        if investment.is_active or investment.end_date > timezone.now():
-            messages.error(request, 'This investment is not ready for claiming yet.')
-            return redirect('portfolio')
-        if investment.funds_claimed:
-            messages.error(request, 'Funds for this investment have already been claimed.')
-            return redirect('portfolio')
-        wallet = Wallet.objects.get(user=request.user)
-        total_amount = investment.amount + investment.return_amount
-        wallet.balance += total_amount
-        wallet.save()
-        investment.funds_claimed = True
-        investment.save()
-        
-        messages.success(request, f'Successfully claimed R{total_amount} from your completed investment.')
-        return redirect('portfolio')
-        
-    except Investment.DoesNotExist:
-        messages.error(request, 'Invalid investment.')
-        return redirect('portfolio')
+    # Delegate to claim_investment_funds to avoid duplicate payout logic
+    return claim_investment_funds(request, investment_id)
 
 @login_required
 def generate_api_token(request):
@@ -1180,7 +1129,8 @@ def admin_dashboard_view(request):
         )
         
         total_investments = investment_overall_stats['total_count']
-        total_returns = investment_overall_stats['total_returns'] or 0
+        plan_returns = PlanInvestment.objects.filter(profit_paid=True).aggregate(total=Sum('return_amount'))['total'] or 0
+        total_returns = (investment_overall_stats['total_returns'] or 0) + plan_returns
         
         total_users = CustomUser.objects.count()
 
