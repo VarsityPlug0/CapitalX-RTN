@@ -8,6 +8,7 @@ All admin functionality is accessible from /admin/ with proper permission checks
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models import Count, Sum, Q, Avg
 from django.utils import timezone
@@ -17,11 +18,48 @@ from datetime import timedelta
 from decimal import Decimal
 
 from .models import (
-    CustomUser, Investment, Deposit, Withdrawal, Wallet, 
+    CustomUser, Investment, Deposit, Withdrawal, Wallet,
     Company, InvestmentPlan, PlanInvestment, Referral, ReferralReward,
     LeadCampaign, Lead, AdminActivityLog
 )
 from .decorators import admin_with_permission, get_admin_context
+
+
+def admin_login_view(request):
+    """Dedicated admin login — only staff/superuser accounts are accepted."""
+    if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('admin_console')
+        # Logged-in regular user trying to reach admin login → send them away
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            # Try by email field directly
+            try:
+                u = CustomUser.objects.get(email=email)
+                user = authenticate(request, username=u.username, password=password)
+            except CustomUser.DoesNotExist:
+                user = None
+
+        if user is not None and (user.is_staff or user.is_superuser):
+            login(request, user)
+            return redirect(request.GET.get('next', 'admin_console'))
+        elif user is not None:
+            messages.error(request, 'Your account does not have admin privileges.')
+        else:
+            messages.error(request, 'Invalid email or password.')
+
+    return render(request, 'core/admin_login.html')
+
+
+def admin_logout_view(request):
+    """Logs out from the admin session and redirects to admin login."""
+    logout(request)
+    return redirect('admin_login')
 
 
 @admin_with_permission(['dashboard'])

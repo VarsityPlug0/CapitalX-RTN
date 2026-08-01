@@ -17,71 +17,36 @@ def client_only(view_func):
     return wrapper
 
 
+def _admin_login_redirect(request):
+    return redirect(f'/admin/login/?next={request.path}')
+
+
 def admin_only(view_func):
-    """
-    Decorator to ensure only admin users can access admin views
-    """
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        # Check if user is authenticated
         if not request.user.is_authenticated:
-            messages.error(request, 'Please log in to access this page.')
-            return redirect('login')
-        
-        # Check if user has admin privileges
+            return _admin_login_redirect(request)
         if not (request.user.is_staff or request.user.is_superuser):
-            messages.error(
-                request, 
-                f'Access denied. Admin privileges required. '
-                f'Current user: {request.user.email} (Staff: {request.user.is_staff}, Superuser: {request.user.is_superuser})'
-            )
-            return redirect('home')
-        
-        # Continue with normal view execution
+            return _admin_login_redirect(request)
         return view_func(request, *args, **kwargs)
-    
     return wrapper
 
 
 def admin_with_permission(required_permissions):
-    """
-    Decorator for role-based admin access control.
-    
-    Usage:
-        @admin_with_permission(['deposits', 'withdrawals'])
-        def deposit_dashboard_view(request):
-            ...
-    
-    Args:
-        required_permissions: list of permission strings (e.g., ['deposits', 'users'])
-    
-    Returns:
-        Decorated function that checks user permissions before allowing access
-    """
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            # Check if user is authenticated
             if not request.user.is_authenticated:
-                messages.error(request, 'Please log in to access this page.')
-                return redirect('login')
-            
-            # Check if user has admin privileges
+                return _admin_login_redirect(request)
             if not (request.user.is_staff or request.user.is_superuser):
-                messages.error(request, 'Admin access required.')
-                return redirect('home')
-            
-            # Import here to avoid circular imports
+                return _admin_login_redirect(request)
+
             from .admin_roles import has_permission
-            
-            # Check role permissions
             if has_permission(request.user, required_permissions):
                 return view_func(request, *args, **kwargs)
-            
-            # User doesn't have required permissions
+
             messages.error(request, 'You do not have permission to access this section.')
-            return redirect('admin_dashboard')
-        
+            return redirect('admin_console')
         return wrapper
     return decorator
 

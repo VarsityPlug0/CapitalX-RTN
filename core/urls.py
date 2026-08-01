@@ -63,7 +63,9 @@ urlpatterns = [
     path('health/', health_views.health_check, name='health_check'),
     path('sentry-webhook/', views.sentry_webhook, name='sentry_webhook'),
 
-    # ── Admin console (single entry point — tabs handle sections) ─────────────
+    # ── Admin (separate login — never shares with client /login/) ────────────
+    path('admin/login/', admin_views.admin_login_view, name='admin_login'),
+    path('admin/logout/', admin_views.admin_logout_view, name='admin_logout'),
     path('admin/', admin_views.admin_console, name='admin_dashboard'),
     path('admin/console/', admin_views.admin_console, name='admin_console'),
 
