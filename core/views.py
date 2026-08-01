@@ -657,15 +657,24 @@ def deposit_view(request):
 
         try:
             deposit = Deposit.objects.create(**deposit_data)
-            send_deposit_confirmation(request.user, deposit)
-            if payment_method in ('bitcoin', 'voucher'):
-                send_admin_deposit_notification(deposit)
-            messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
-            return redirect('wallet')
         except Exception as e:
             logger.error(f"Error creating deposit for user {request.user.email}: {e}", exc_info=True)
             messages.error(request, 'An error occurred while processing your deposit. Please try again.')
             return redirect('deposit')
+
+        try:
+            send_deposit_confirmation(request.user, deposit)
+        except Exception as e:
+            logger.error(f"Failed to send deposit confirmation email for deposit {deposit.id}: {e}", exc_info=True)
+
+        try:
+            if payment_method in ('bitcoin', 'voucher'):
+                send_admin_deposit_notification(deposit)
+        except Exception as e:
+            logger.error(f"Failed to send admin deposit notification for deposit {deposit.id}: {e}", exc_info=True)
+
+        messages.success(request, 'Deposit submitted successfully! Your request is pending admin approval. You will receive an email notification once it is reviewed.')
+        return redirect('wallet')
 
     selected_method = request.GET.get('method', 'card')
     eft_bank_account = EFTBankAccount.get_rotated_account(request.user.id)
