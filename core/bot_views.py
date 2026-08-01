@@ -1,3 +1,4 @@
+from django.shortcuts import render
 """
 Bot-specific views for secure API authentication
 """
@@ -286,3 +287,120 @@ def bot_get_referrals(request):
         'active_referrals': referrals.filter(status='active').count(),
         'total_earned': total_earned,
     })
+
+
+# ── Live Support ──────────────────────────────────────────────────────────────
+ADMIN_TG_TOKEN = "8397907571:AAHA2VJ1KAokAFeo0TEX7EzupAuEotd34xE"
+ADMIN_TG_CHAT  = "8558050560"
+CLIENT_BOT_TOKEN = "8939708680:AAFSt9hug2CyP7BK-KQeWPHh76FLB1Yj_Hs"
+
+import requests as _req
+
+def _tg_send(token, chat_id, text):
+    try:
+        _req.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                  json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}, timeout=8)
+    except Exception:
+        pass
+
+
+@login_required
+def support_send(request):
+    """Client sends a support message (from website)."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    import json
+    body = json.loads(request.body)
+    msg_text = body.get('message', '').strip()
+    if not msg_text:
+        return JsonResponse({'success': False, 'error': 'Empty message'})
+
+    from .models import SupportMessage
+    SupportMessage.objects.create(user=request.user, message=msg_text, sender='client')
+
+    # Notify admin on Telegram
+    _tg_send(ADMIN_TG_TOKEN, ADMIN_TG_CHAT,
+             f"<b>Support message from {request.user.username}</b>\n\n{msg_text}\n\n"
+             f"Reply: <code>/reply {request.user.username} your reply here</code>")
+
+    return JsonResponse({'success': True})
+
+
+@login_required
+def support_history(request):
+    """Return message history for the logged-in user."""
+    from .models import SupportMessage
+    msgs = SupportMessage.objects.filter(user=request.user).order_by('created_at')
+    # Mark admin messages as read
+    msgs.filter(sender='admin', is_read=False).update(is_read=True)
+    data = [{'sender': m.sender, 'message': m.message,
+             'time': m.created_at.strftime('%H:%M')} for m in msgs]
+    return JsonResponse({'success': True, 'messages': data})
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def support_admin_reply(request):
+    """Admin sends a reply (called by engineer bot /reply command)."""
+    secret = request.data.get('admin_secret')
+    if secret != 'cx-support-2026':
+        return Response({'success': False, 'error': 'Unauthorized'}, status=403)
+
+    username   = request.data.get('username', '').strip()
+    reply_text = request.data.get('message', '').strip()
+    if not username or not reply_text:
+        return Response({'success': False, 'error': 'username and message required'}, status=400)
+
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        # try email
+        try:
+            user = CustomUser.objects.get(email=username)
+        except CustomUser.DoesNotExist:
+            return Response({'success': False, 'error': f'User {username} not found'}, status=404)
+
+    from .models import SupportMessage
+    msg = SupportMessage.objects.create(user=user, message=reply_text, sender='admin')
+
+    # If user has a linked telegram chat_id, send via client bot
+    last_tg = SupportMessage.objects.filter(user=user, telegram_chat_id__isnull=False).last()
+    if last_tg and last_tg.telegram_chat_id:
+        _tg_send(CLIENT_BOT_TOKEN, last_tg.telegram_chat_id,
+                 f"<b>Support reply:</b>\n\n{reply_text}")
+
+    return Response({'success': True, 'delivered_to_telegram': bool(last_tg and last_tg.telegram_chat_id)})
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def support_bot_message(request):
+    """Client sends support message via Telegram bot."""
+    secret     = request.data.get('secret')
+    msg_text   = request.data.get('message', '').strip()
+    tg_chat_id = request.data.get('telegram_chat_id', '')
+
+    if not secret or not msg_text:
+        return Response({'success': False, 'error': 'secret and message required'}, status=400)
+
+    try:
+        user = CustomUser.objects.get(bot_secret=secret)
+    except CustomUser.DoesNotExist:
+        return Response({'success': False, 'error': 'Invalid secret'}, status=401)
+
+    from .models import SupportMessage
+    SupportMessage.objects.create(user=user, message=msg_text, sender='client',
+                                  telegram_chat_id=tg_chat_id or None)
+
+    _tg_send(ADMIN_TG_TOKEN, ADMIN_TG_CHAT,
+             f"<b>Support from {user.username} (via bot)</b>\n\n{msg_text}\n\n"
+             f"Reply: <code>/reply {user.username} your reply here</code>")
+
+    return Response({'success': True})
+
+
+@login_required
+def chat_view(request):
+    return render(request, 'core/chat.html')

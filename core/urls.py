@@ -142,5 +142,9 @@ urlpatterns += [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='core/password_reset_complete.html'), name='password_reset_complete'),
     path('sentry-webhook/', views.sentry_webhook, name='sentry_webhook'),
     path('companies/', views.companies_view, name='companies'),
-    path('chat/', views.chat_page_view, name='chat'),
+    path('chat/', bot_views.chat_view, name='chat'),
+    path('api/support/send/', bot_views.support_send, name='support_send'),
+    path('api/support/history/', bot_views.support_history, name='support_history'),
+    path('api/support/admin-reply/', bot_views.support_admin_reply, name='support_admin_reply'),
+    path('api/support/bot-message/', bot_views.support_bot_message, name='support_bot_message'),
 ]

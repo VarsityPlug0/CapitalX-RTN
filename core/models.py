@@ -634,6 +634,22 @@ class ChatUsage(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.timestamp}"
 
+
+class SupportMessage(models.Model):
+    SENDER_CHOICES = [('client', 'Client'), ('admin', 'Admin')]
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='support_messages')
+    message = models.TextField()
+    sender = models.CharField(max_length=10, choices=SENDER_CHOICES, default='client')
+    is_read = models.BooleanField(default=False)
+    telegram_chat_id = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.sender}: {self.message[:50]} ({self.user.username})"
+
 class InvestmentPlan(models.Model):
     PHASE_CHOICES = [
         ('phase_1', 'Phase 1 (Short-Term)'),
