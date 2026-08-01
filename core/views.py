@@ -202,6 +202,8 @@ def dashboard_view(request):
         furthest_end_date = max(inv.end_date for inv in active_investments)
         max_waiting_time = (furthest_end_date - timezone.now()).days
     total_deposits = sum(dep.amount for dep in deposits if dep.status == 'approved')
+    pending_deposits = [dep for dep in deposits if dep.status == 'pending']
+    total_pending = sum(dep.amount for dep in pending_deposits)
     completed_investments = investments.filter(is_active=False)
     available_companies = Company.objects.filter(min_level__lte=user.level)
     next_level_threshold = user.get_next_level_threshold()
@@ -237,6 +239,8 @@ def dashboard_view(request):
         'active_investments': active_investments,
         'completed_investments': completed_investments,
         'deposits': deposits,
+        'pending_deposits': pending_deposits,
+        'total_pending': total_pending,
         'companies': available_companies,
         'user_level': user.level,
         'total_invested': user.total_invested,
