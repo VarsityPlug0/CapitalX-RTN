@@ -6,6 +6,7 @@ from . import health_views
 from . import simple_lead_views
 from . import lead_views
 from . import lead_manager_views
+from . import admin_test_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -98,13 +99,30 @@ urlpatterns = [
     path('admin/deposits/<int:deposit_id>/approve/', admin_views.ajax_approve_deposit, name='admin_approve_deposit'),
     path('admin/deposits/<int:deposit_id>/reject/', admin_views.ajax_reject_deposit, name='admin_reject_deposit'),
 
+    # ── Admin manage aliases (used by templates, point to existing views) ─────
+    path('admin/manage-users/', views.manage_users_view, name='manage_users'),
+    path('admin/manage-companies/', views.manage_companies_view, name='manage_companies'),
+    path('admin/manage-investment-plans/', views.manage_investment_plans_view, name='manage_investment_plans'),
+    path('admin/unified-dashboard/', admin_views.admin_console, name='unified_admin_dashboard'),
+    path('debug/admin-status/', admin_test_views.debug_admin_status, name='debug_admin_status'),
+
     # ── Lead management ───────────────────────────────────────────────────────
     path('admin/leads/', simple_lead_views.simple_lead_dashboard, name='admin_leads'),
+    path('admin/leads/', lead_views.lead_dashboard, name='lead_dashboard'),
+    path('admin/leads/analytics/', lead_views.lead_analytics, name='lead_analytics'),
     path('admin/leads/campaign/<int:campaign_id>/', lead_views.campaign_detail, name='campaign_detail'),
     path('admin/leads/campaign/<int:campaign_id>/upload/', lead_views.upload_leads, name='upload_leads'),
     path('admin/leads/campaign/<int:campaign_id>/process/', lead_views.process_leads, name='process_leads'),
     path('admin/leads/campaign/<int:campaign_id>/export/', lead_views.export_results, name='export_results'),
     path('admin/leads/campaign/<int:campaign_id>/toggle/', lead_views.api_toggle_campaign, name='api_toggle_campaign'),
+    path('lead-manager/', lead_manager_views.lead_manager_dashboard, name='lead_manager_dashboard'),
+    path('lead-manager/campaigns/', lead_manager_views.campaign_manager_list, name='campaign_manager_list'),
+    path('lead-manager/campaign/<int:campaign_id>/', lead_manager_views.campaign_manager_detail, name='campaign_manager_detail'),
+    path('lead-manager/create/', lead_manager_views.create_automated_campaign, name='create_automated_campaign'),
+    path('lead-manager/campaign/<int:campaign_id>/process/', lead_manager_views.process_campaign_leads, name='process_campaign_leads'),
+    path('lead-manager/campaign/<int:campaign_id>/more/', lead_manager_views.generate_more_leads, name='generate_more_leads'),
+    path('lead-manager/campaign/<int:campaign_id>/toggle/', lead_manager_views.toggle_campaign_status, name='toggle_campaign_status'),
+    path('lead-manager/campaign/<int:campaign_id>/delete/', lead_manager_views.delete_campaign, name='delete_campaign'),
 
     # ── Internal API ──────────────────────────────────────────────────────────
     path('api/user/financial-info/', views.user_financial_info_api, name='user_financial_info_api'),
