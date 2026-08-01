@@ -99,5 +99,469 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+
+<!-- ── SafeChain Live Chat Widget ─────────────────────────────────────────── -->
+<style>
+  /* Floating button */
+  .cx-chat-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    width: 60px;
+    height: 60px;
+    background: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 24px rgba(37,211,102,.5);
+    border: none;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    animation: cx-fab-pulse 2.8s infinite;
+  }
+  .cx-chat-fab:hover { transform: scale(1.1); box-shadow: 0 6px 32px rgba(37,211,102,.7); }
+  .cx-chat-fab svg  { width: 32px; height: 32px; fill: #fff; }
+  .cx-chat-fab .cx-fab-close { display: none; font-size: 26px; color: #fff; line-height: 1; }
+  .cx-chat-fab.open .cx-fab-icon  { display: none; }
+  .cx-chat-fab.open .cx-fab-close { display: block; }
+  @keyframes cx-fab-pulse {
+    0%,100% { box-shadow: 0 4px 24px rgba(37,211,102,.5); }
+    50%      { box-shadow: 0 4px 40px rgba(37,211,102,.8), 0 0 0 8px rgba(37,211,102,.1); }
+  }
+
+  /* Unread badge */
+  .cx-chat-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 18px; height: 18px;
+    background: #ef4444;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #050810;
+  }
+
+  /* Chat window — WhatsApp style */
+  .cx-chat-window {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    z-index: 9998;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    height: 520px;
+    max-height: calc(100vh - 120px);
+    background: #0d1117;
+    border: 1px solid #1e2538;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 12px 50px rgba(0,0,0,.6);
+    display: none;
+    flex-direction: column;
+    transform: scale(.95) translateY(10px);
+    opacity: 0;
+    transition: transform .2s, opacity .2s;
+  }
+  .cx-chat-window.open {
+    display: flex;
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  /* Header */
+  .cx-chat-header {
+    background: #075e54;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .cx-chat-avatar {
+    width: 42px; height: 42px;
+    background: #25d366;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,.3);
+  }
+  .cx-chat-header-info { flex: 1; min-width: 0; }
+  .cx-chat-header-info strong { display: block; color: #fff; font-size: 15px; font-weight: 700; }
+  .cx-chat-header-info span { color: #b2dfdb; font-size: 12px; }
+  .cx-chat-header-menu { color: rgba(255,255,255,.8); font-size: 20px; cursor: default; }
+
+  /* Chat background (WhatsApp pattern) */
+  .cx-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #0a0f1a;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e2538' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .cx-chat-messages::-webkit-scrollbar { width: 4px; }
+  .cx-chat-messages::-webkit-scrollbar-thumb { background: #1e2538; border-radius: 4px; }
+
+  /* Message bubbles */
+  .cx-msg {
+    max-width: 82%;
+    padding: 8px 12px 4px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    position: relative;
+    word-break: break-word;
+  }
+  .cx-msg-time {
+    font-size: 10px;
+    opacity: .6;
+    text-align: right;
+    margin-top: 2px;
+    display: block;
+  }
+  /* Agent message (left) */
+  .cx-msg.agent {
+    background: #1f2c34;
+    color: #e9edef;
+    align-self: flex-start;
+    border-top-left-radius: 0;
+  }
+  .cx-msg.agent strong { color: #25d366; font-size: 12px; display: block; margin-bottom: 2px; }
+  /* User message (right) */
+  .cx-msg.user {
+    background: #005c4b;
+    color: #e9edef;
+    align-self: flex-end;
+    border-top-right-radius: 0;
+  }
+  /* Date divider */
+  .cx-msg-date {
+    align-self: center;
+    background: rgba(17,21,32,.85);
+    color: #8b9cb3;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    margin: 4px 0;
+  }
+  /* Typing */
+  .cx-typing {
+    background: #1f2c34;
+    border-radius: 8px;
+    border-top-left-radius: 0;
+    padding: 10px 14px;
+    align-self: flex-start;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .cx-typing span {
+    width: 7px; height: 7px;
+    background: #8b9cb3;
+    border-radius: 50%;
+    animation: cx-dot 1.2s infinite;
+  }
+  .cx-typing span:nth-child(2) { animation-delay: .2s; }
+  .cx-typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes cx-dot { 0%,80%,100%{opacity:.3;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+
+  /* Quick reply chips */
+  .cx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .cx-chip {
+    background: #1f2c34;
+    border: 1px solid #25d366;
+    color: #25d366;
+    border-radius: 18px;
+    padding: 5px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  .cx-chip:hover { background: rgba(37,211,102,.12); }
+
+  /* Input bar */
+  .cx-chat-input-bar {
+    padding: 8px 10px;
+    background: #1a2028;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .cx-chat-input {
+    flex: 1;
+    background: #2a3942;
+    border: none;
+    border-radius: 24px;
+    padding: 9px 16px;
+    font-size: 14px;
+    color: #e9edef;
+    outline: none;
+  }
+  .cx-chat-input::placeholder { color: #8b9cb3; }
+  .cx-chat-send {
+    width: 42px; height: 42px;
+    background: #25d366;
+    border: none;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .cx-chat-send:hover { background: #20c05c; }
+  .cx-chat-send svg { width: 20px; height: 20px; fill: #fff; }
+</style>
+
+<!-- Floating Button -->
+<button class="cx-chat-fab" id="cx-chat-fab" aria-label="Open support chat">
+  <span class="cx-chat-badge" id="cx-chat-badge">1</span>
+  <span class="cx-fab-icon">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </span>
+  <span class="cx-fab-close">&times;</span>
+</button>
+
+<!-- Chat Window -->
+<div class="cx-chat-window" id="cx-chat-window" role="dialog" aria-label="SafeChain Support Chat">
+  <div class="cx-chat-header">
+    <div class="cx-chat-avatar">🛡️</div>
+    <div class="cx-chat-header-info">
+      <strong>SafeChain Support</strong>
+      <span>🟢 Online · Typically replies instantly</span>
+    </div>
+    <span class="cx-chat-header-menu">⋮</span>
+  </div>
+  <div class="cx-chat-messages" id="cx-chat-messages">
+    <div class="cx-msg-date" id="cx-date-label">Today</div>
+  </div>
+  <div class="cx-chat-input-bar">
+    <input class="cx-chat-input" id="cx-chat-input" type="text" placeholder="Type a message..." autocomplete="off" maxlength="200">
+    <button class="cx-chat-send" id="cx-chat-send" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const fab    = document.getElementById('cx-chat-fab');
+  const win    = document.getElementById('cx-chat-window');
+  const msgs   = document.getElementById('cx-chat-messages');
+  const input  = document.getElementById('cx-chat-input');
+  const send   = document.getElementById('cx-chat-send');
+  const badge  = document.getElementById('cx-chat-badge');
+
+  let opened = false;
+
+  const now = () => {
+    const d = new Date();
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  };
+
+  function agentMsg(html) {
+    return new Promise(resolve => {
+      const t = document.createElement('div');
+      t.className = 'cx-typing';
+      t.innerHTML = '<span></span><span></span><span></span>';
+      msgs.appendChild(t);
+      scroll();
+      setTimeout(() => {
+        t.remove();
+        const m = document.createElement('div');
+        m.className = 'cx-msg agent';
+        m.innerHTML = `<strong>SafeChain Support</strong>${html}<span class="cx-msg-time">${now()}</span>`;
+        msgs.appendChild(m);
+        scroll();
+        resolve();
+      }, 800);
+    });
+  }
+
+  function userMsg(text) {
+    const m = document.createElement('div');
+    m.className = 'cx-msg user';
+    m.innerHTML = `${text}<span class="cx-msg-time">${now()} ✓✓</span>`;
+    msgs.appendChild(m);
+    scroll();
+  }
+
+  function addChips(chipDefs) {
+    const wrap = document.createElement('div');
+    wrap.className = 'cx-chips';
+    chipDefs.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'cx-chip';
+      b.textContent = c.label;
+      b.addEventListener('click', () => {
+        wrap.remove();
+        userMsg(c.label);
+        setTimeout(() => handleTopic(c.topic), 300);
+      });
+      wrap.appendChild(b);
+    });
+    msgs.appendChild(wrap);
+    scroll();
+  }
+
+  function scroll() { msgs.scrollTop = msgs.scrollHeight; }
+
+  const topics = {
+    deposit: {
+      label: '💳 How to Deposit',
+      reply: `To deposit funds:<br>
+1️⃣ Go to <b>Wallet → Deposit</b><br>
+2️⃣ Choose a method — EFT, Card, Bitcoin, or Voucher<br>
+3️⃣ Complete the payment and upload proof if needed<br>
+4️⃣ Wait for admin approval (usually a few hours)<br><br>
+💡 Minimum deposit is <b>R50</b>. Your wallet balance updates automatically once approved.`
+    },
+    invest: {
+      label: '📈 How to Invest',
+      reply: `To start investing:<br>
+1️⃣ Make sure your wallet has an approved deposit<br>
+2️⃣ Go to <b>Plans</b> and browse available options<br>
+3️⃣ Choose a plan and enter your investment amount<br>
+4️⃣ Confirm — your investment starts immediately<br><br>
+📊 Returns are credited to your wallet when the investment matures.<br>
+🔓 Higher account levels unlock premium companies.`
+    },
+    withdraw: {
+      label: '🏧 How to Withdraw',
+      reply: `To withdraw funds:<br>
+1️⃣ Go to <b>Wallet → Withdraw</b><br>
+2️⃣ Add your banking details (first time only)<br>
+3️⃣ Enter the amount and submit<br><br>
+⚠️ <b>Important:</b><br>
+• Only available wallet balance can be withdrawn<br>
+• Active investments cannot be withdrawn until maturity<br>
+• Processing takes 1–2 business days`
+    },
+    referral: {
+      label: '👥 Referrals',
+      reply: `Our referral program rewards you for growing the community!<br><br>
+1️⃣ Go to <b>Referrals</b> and copy your unique link<br>
+2️⃣ Share it with friends and family<br>
+3️⃣ When they register and get their first deposit approved — you earn a <b>R10 bonus</b> instantly<br><br>
+📌 Your referral shows as <i>active</i> once their first deposit is approved.`
+    },
+    levels: {
+      label: '⭐ Account Levels',
+      reply: `SafeChain has 3 account levels based on total invested:<br><br>
+🥉 <b>Level 1</b> — Default, access to starter companies<br>
+🥈 <b>Level 2</b> — Unlocked at R10,000 invested<br>
+🥇 <b>Level 3</b> — Unlocked at R20,000 invested<br><br>
+Higher levels give access to premium investment companies with better returns. Your level updates automatically.`
+    },
+    security: {
+      label: '🔒 Account Safety',
+      reply: `Keep your account secure:<br><br>
+✅ Use a strong, unique password<br>
+✅ Never share your password or OTP with anyone<br>
+✅ <b>SafeChain staff will NEVER ask for your password</b><br>
+✅ Change your password regularly under Profile<br>
+✅ Report suspicious activity immediately<br><br>
+🛡️ All data is encrypted via HTTPS.`
+    },
+    about: {
+      label: '🏢 About SafeChain',
+      reply: `<b>SafeChain AI</b> (powered by CapitalX) is a smart investment platform that lets you:<br><br>
+💰 Deposit funds securely<br>
+📈 Invest in curated companies with fixed returns<br>
+🏧 Withdraw your earnings easily<br>
+👥 Earn referral bonuses<br><br>
+We handle everything transparently. Your funds, your returns — all tracked in real time on your dashboard.`
+    },
+    contact: {
+      label: '📞 Contact Support',
+      reply: `Need to speak to a real person?<br><br>
+📧 Email: <b>capitalxinvestmentsrsa@gmail.com</b><br>
+🌐 Visit: <b>safechain.cc/contact</b><br><br>
+Our team typically responds within a few hours during business hours. For urgent issues, use the contact page for fastest response.`
+    }
+  };
+
+  async function handleTopic(topic) {
+    if (!topics[topic]) return;
+    await agentMsg(topics[topic].reply);
+    await agentMsg('Anything else I can help you with?');
+    addChips(mainChips());
+  }
+
+  function mainChips() {
+    return Object.entries(topics).map(([k, v]) => ({ label: v.label, topic: k }));
+  }
+
+  async function handleUserInput(text) {
+    const t = text.toLowerCase();
+    let matched = null;
+    if (t.match(/deposit|pay|fund|money|eft|card|bitcoin|voucher/)) matched = 'deposit';
+    else if (t.match(/invest|plan|return|company|compan|tier/)) matched = 'invest';
+    else if (t.match(/withdraw|cash|bank|transfer|payout/)) matched = 'withdraw';
+    else if (t.match(/refer|friend|bonus|link|invite/)) matched = 'referral';
+    else if (t.match(/level|tier|unlock|premium/)) matched = 'levels';
+    else if (t.match(/safe|secure|password|hack|fraud|scam|trust/)) matched = 'security';
+    else if (t.match(/about|what is|who are|explain|how does/)) matched = 'about';
+    else if (t.match(/contact|email|support|help|agent|human|staff/)) matched = 'contact';
+
+    if (matched) {
+      await handleTopic(matched);
+    } else {
+      await agentMsg(`Thanks for your message! I'm not sure about that specific question. Please choose a topic below or visit <b>safechain.cc/contact</b> to reach our team directly.`);
+      addChips(mainChips());
+    }
+  }
+
+  // Open/close
+  fab.addEventListener('click', async () => {
+    const isOpen = win.classList.contains('open');
+    if (isOpen) {
+      win.classList.remove('open');
+      fab.classList.remove('open');
+    } else {
+      win.classList.add('open');
+      fab.classList.add('open');
+      badge.style.display = 'none';
+      if (!opened) {
+        opened = true;
+        await agentMsg(`👋 Hi there! Welcome to <b>SafeChain AI</b>.<br>I'm your support assistant. How can I help you today?`);
+        addChips(mainChips());
+      }
+    }
+  });
+
+  // Send message
+  async function sendMsg() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    userMsg(text);
+    // remove any chips
+    msgs.querySelectorAll('.cx-chips').forEach(c => c.remove());
+    await handleUserInput(text);
+  }
+
+  send.addEventListener('click', sendMsg);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
+})();
+</script>
+<!-- ── End SafeChain Live Chat Widget ──────────────────────────────────────── -->
+
 </body>
 </html>
