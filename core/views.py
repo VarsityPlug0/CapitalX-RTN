@@ -189,7 +189,11 @@ def dashboard_view(request):
     total_investment_earnings = sum(inv.return_amount - inv.amount for inv in investments if not inv.is_active)
     total_earnings = total_investment_earnings + total_referral_earnings
     active_investments = investments.filter(is_active=True)
+    active_plan_investments = PlanInvestment.objects.filter(
+        user=user, profit_paid=False, end_date__gt=timezone.now()
+    )
     total_expected_return = sum(inv.return_amount for inv in active_investments)
+    total_expected_return += sum(inv.return_amount for inv in active_plan_investments)
     max_waiting_time = 0
     if active_investments.exists():
         furthest_end_date = max(inv.end_date for inv in active_investments)
