@@ -51,6 +51,7 @@ urlpatterns = [
     path('support/', views.support_view, name='support'),
     path('chat/', bot_views.chat_view, name='chat'),
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('claim-bonus/', views.claim_bonus_view, name='claim_bonus'),
 
     # Legacy redirects — keep so old links/bookmarks don't 404
     path('bitcoin-deposit/', views.bitcoin_deposit_view, name='bitcoin_deposit'),

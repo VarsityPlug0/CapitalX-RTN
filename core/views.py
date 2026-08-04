@@ -214,6 +214,7 @@ def dashboard_view(request):
         elif user.level == 2:
             progress_percentage = ((user.total_invested - Decimal('10000')) / Decimal('10000')) * 100
     has_verified_account = Deposit.objects.filter(user=user, status='approved').exists()
+    show_claim_bonus = not user.has_claimed_bonus
     has_banking_details = Withdrawal.objects.filter(
         user=user,
         account_holder_name__isnull=False,
@@ -248,8 +249,9 @@ def dashboard_view(request):
         'progress_percentage': progress_percentage,
         'has_banking_details': has_banking_details,
         'has_verified_account': has_verified_account,
+        'show_claim_bonus': show_claim_bonus,
     }
-    
+
     return render(request, 'core/dashboard.html', context)
 
 @login_required
@@ -720,12 +722,10 @@ def withdrawal_view(request):
                     messages.error(request, f'Insufficient balance. Your available balance is R{wallet.balance}.')
                     return redirect('withdraw')
 
-                inv_earnings = Investment.objects.filter(user=request.user, is_active=False).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
-                plan_earnings = PlanInvestment.objects.filter(user=request.user, profit_paid=True).aggregate(total=Sum('return_amount'))['total'] or Decimal('0')
-                total_earnings = inv_earnings + plan_earnings
                 total_deposits = Deposit.objects.filter(user=request.user, status='approved').aggregate(total=Sum('amount'))['total'] or Decimal('0')
-                if total_earnings > 0 and total_deposits < (Decimal('0.5') * total_earnings):
-                    messages.error(request, 'You must deposit at least 50% of your total earnings before you can withdraw.')
+                required_deposit = (Decimal('0.5') * amount).quantize(Decimal('0.01'))
+                if total_deposits < required_deposit:
+                    messages.error(request, f'You must make a deposit of at least R{required_deposit} (50% of your withdrawal amount) before you can withdraw.')
                     return redirect('withdraw')
 
                 withdrawal_data = {
@@ -1970,3 +1970,18 @@ def sentry_webhook(request):
     except Exception:
         pass
     return HttpResponse('OK')
+
+
+@login_required
+def claim_bonus_view(request):
+    user = request.user
+    if not user.has_claimed_bonus:
+        wallet, _ = Wallet.objects.get_or_create(user=user)
+        wallet.balance += Decimal('50')
+        wallet.save()
+        user.has_claimed_bonus = True
+        user.save()
+        messages.success(request, 'R50 bonus claimed and added to your wallet!')
+    else:
+        messages.error(request, 'You have already claimed your R50 bonus.')
+    return redirect('dashboard')
