@@ -51,6 +51,56 @@
   .table td.text-muted   { color: #9ca3af !important; }
   .table td.text-warning { color: #facc15 !important; }
   .table thead th { color: #d1d5db; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; border-bottom-color: rgba(255,255,255,.15); background-color: rgba(0,0,0,.2) !important; }
+
+  /* ── Mobile: stacked card rows ── */
+  @media (max-width: 767.98px) {
+    .table-responsive { overflow-x: unset; }
+    .table-responsive table,
+    .table-responsive tbody,
+    .table-responsive tr,
+    .table-responsive td { display: block; width: 100%; }
+    .table-responsive thead { display: none; }
+    .table-responsive tr {
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      margin-bottom: .875rem;
+      padding: .625rem .75rem;
+      background: rgba(255,255,255,.02);
+    }
+    .table-responsive td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .35rem 0;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      font-size: .875rem;
+      gap: .5rem;
+    }
+    .table-responsive td:last-child { border-bottom: none; }
+    .table-responsive td::before {
+      content: attr(data-label);
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #6b7280;
+      flex-shrink: 0;
+      min-width: 80px;
+    }
+    .table-responsive td:empty { display: none; }
+    /* Plan cell with logo+name stacks differently */
+    .table-responsive td.pf-plan-cell {
+      flex-direction: column;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding-bottom: .5rem;
+      margin-bottom: .25rem;
+    }
+    .table-responsive td.pf-plan-cell::before { display: none; }
+    .table-responsive td.pf-plan-cell img { width: 40px; height: 40px; }
+    .table-responsive td.pf-plan-cell span.fw-medium { font-size: 1rem; color: #fff; }
+  }
 </style>
 {% endblock %}
 
@@ -109,15 +159,15 @@
           <tbody>
             {% for inv in matured_plan_investments %}
             <tr>
-              <td>
+              <td class="pf-plan-cell">
                 {% if inv.plan.logo_url %}<img src="{% static inv.plan.logo_url %}" alt="{{ inv.plan.name }}" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
               </td>
-              <td>R{{ inv.amount|floatformat:2 }}</td>
-              <td class="text-success">+R{{ inv.return_amount|floatformat:2 }}</td>
-              <td class="fw-bold text-warning">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
-              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
-              <td>
+              <td data-label="Invested">R{{ inv.amount|floatformat:2 }}</td>
+              <td data-label="Return" class="text-success">+R{{ inv.return_amount|floatformat:2 }}</td>
+              <td data-label="Total Payout" class="fw-bold text-warning">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
+              <td data-label="Matured" class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td data-label="Action">
                 <a href="{% url 'claim_plan_investment_funds' inv.id %}"
                    class="btn btn-warning btn-sm claim-btn fw-bold"
                    onclick="return confirm('Claim R{{ inv.amount|add:inv.return_amount|floatformat:2 }} to your wallet?')">
@@ -154,15 +204,15 @@
             {% for inv in active_plan_investments %}
             {% with remaining=inv.end_date|timeuntil %}
             <tr>
-              <td>
+              <td class="pf-plan-cell">
                 {% if inv.plan.logo_url %}<img src="{% static inv.plan.logo_url %}" alt="{{ inv.plan.name }}" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1" style="color:#fff">{{ inv.plan.name }}</span>
               </td>
-              <td><span class="badge bg-secondary plan-badge">{{ inv.plan.phase|title }}</span></td>
-              <td class="fw-medium" style="color:#fff">R{{ inv.amount|floatformat:2 }}</td>
-              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
-              <td class="text-muted small">{{ inv.end_date|date:"M d, Y H:i" }}</td>
-              <td>
+              <td data-label="Phase"><span class="badge bg-secondary plan-badge">{{ inv.plan.phase|title }}</span></td>
+              <td data-label="Invested" class="fw-medium" style="color:#fff">R{{ inv.amount|floatformat:2 }}</td>
+              <td data-label="Return" class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td data-label="Matures" class="text-muted small">{{ inv.end_date|date:"M d, Y H:i" }}</td>
+              <td data-label="Time Left">
                 <span class="badge bg-primary plan-badge">{{ remaining }}</span>
               </td>
             </tr>
@@ -197,12 +247,12 @@
           <tbody>
             {% for inv in active_investments %}
             <tr>
-              <td class="fw-medium">{{ inv.company.name }}</td>
-              <td>R{{ inv.amount|floatformat:2 }}</td>
-              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
-              <td class="text-muted small">{{ inv.start_date|date:"M d, Y" }}</td>
-              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
-              <td><span class="badge bg-warning text-dark">Active</span></td>
+              <td data-label="Company" class="fw-medium">{{ inv.company.name }}</td>
+              <td data-label="Amount">R{{ inv.amount|floatformat:2 }}</td>
+              <td data-label="Return" class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td data-label="Start" class="text-muted small">{{ inv.start_date|date:"M d, Y" }}</td>
+              <td data-label="End" class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td data-label="Status"><span class="badge bg-warning text-dark">Active</span></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -234,15 +284,15 @@
           <tbody>
             {% for inv in completed_plan_investments %}
             <tr>
-              <td>
+              <td class="pf-plan-cell">
                 {% if inv.plan.logo_url %}<img src="{% static inv.plan.logo_url %}" alt="{{ inv.plan.name }}" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
               </td>
-              <td>R{{ inv.amount|floatformat:2 }}</td>
-              <td class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
-              <td class="fw-bold">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
-              <td class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
-              <td><span class="badge bg-success">Completed</span></td>
+              <td data-label="Invested">R{{ inv.amount|floatformat:2 }}</td>
+              <td data-label="Return" class="text-success">R{{ inv.return_amount|floatformat:2 }}</td>
+              <td data-label="Total Paid" class="fw-bold">R{{ inv.amount|add:inv.return_amount|floatformat:2 }}</td>
+              <td data-label="Completed" class="text-muted small">{{ inv.end_date|date:"M d, Y" }}</td>
+              <td data-label="Status"><span class="badge bg-success">Completed</span></td>
             </tr>
             {% endfor %}
           </tbody>
