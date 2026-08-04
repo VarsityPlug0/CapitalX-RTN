@@ -1853,11 +1853,23 @@ def investment_plans_view(request):
     user_investments = PlanInvestment.objects.filter(user=user).select_related('plan')
     invested_plan_ids = set(inv.plan.id for inv in user_investments)
     wallet, created = Wallet.objects.get_or_create(user=user)
+    plan_logos = {
+        'Shoprite Plan':      'https://logo.clearbit.com/shoprite.co.za',
+        'Mr Price Plan':      'https://logo.clearbit.com/mrpgroup.com',
+        'Capitec Plan':       'https://logo.clearbit.com/capitecbank.co.za',
+        'MTN Plan':           'https://logo.clearbit.com/mtn.com',
+        'Vodacom Plan':       'https://logo.clearbit.com/vodacom.co.za',
+        'Discovery Plan':     'https://logo.clearbit.com/discovery.co.za',
+        'Sasol Plan':         'https://logo.clearbit.com/sasol.com',
+        'Standard Bank Plan': 'https://logo.clearbit.com/standardbank.co.za',
+        'Naspers Plan':       'https://logo.clearbit.com/naspers.com',
+    }
     for phase_plans in [phase_1_plans, phase_2_plans, phase_3_plans]:
         for plan in phase_plans:
             plan.user_has_invested = plan.id in invested_plan_ids
             plan.user_can_afford = wallet.balance >= plan.min_amount
             plan.user_investment = user_investments.filter(plan=plan).first()
+            plan.logo_url = plan_logos.get(plan.name, '')
     
     context = {
         'phase_1_plans': phase_1_plans,
