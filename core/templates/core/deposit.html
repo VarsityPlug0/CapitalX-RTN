@@ -96,9 +96,44 @@
 
     .form-hidden { display: none; }
 
+    /* Voucher provider grid */
+    .voucher-provider-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .75rem;
+    }
+    .voucher-provider-card {
+        border: 2px solid var(--cx-card-border);
+        border-radius: 12px;
+        padding: .5rem;
+        cursor: pointer;
+        background: var(--cx-bg-2);
+        transition: all .15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .voucher-provider-card img {
+        width: 100%;
+        height: 52px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+    .voucher-provider-card:hover {
+        border-color: #2d3a50;
+        background: var(--cx-card-hover);
+    }
+    .voucher-provider-card.selected {
+        border-color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    }
+
     @media (max-width: 576px) {
         .dep-tabs { flex-direction: column; }
         .dep-tab { flex: none; width: 100%; }
+        .voucher-provider-grid { grid-template-columns: repeat(2, 1fr); }
     }
 </style>
 {% endblock %}
@@ -503,6 +538,35 @@
                                 <form method="post" action="{% url 'deposit' %}" enctype="multipart/form-data" id="voucher-deposit-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="payment_method" value="voucher">
+                                    <input type="hidden" name="voucher_provider" id="voucher-provider-input" value="">
+
+                                    <!-- Voucher Provider Selector -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold mb-2">Select Voucher Type</label>
+                                        <div class="voucher-provider-grid">
+                                            <div class="voucher-provider-card" data-provider="BluVoucher" onclick="selectVoucherProvider(this)">
+                                                <img src="{% static 'images/logos/bluvoucher.svg' %}" alt="BluVoucher">
+                                            </div>
+                                            <div class="voucher-provider-card" data-provider="1Voucher" onclick="selectVoucherProvider(this)">
+                                                <img src="{% static 'images/logos/1voucher.svg' %}" alt="1Voucher">
+                                            </div>
+                                            <div class="voucher-provider-card" data-provider="OTT Voucher" onclick="selectVoucherProvider(this)">
+                                                <img src="{% static 'images/logos/ottvoucher.svg' %}" alt="OTT Voucher">
+                                            </div>
+                                            <div class="voucher-provider-card" data-provider="Kazang" onclick="selectVoucherProvider(this)">
+                                                <img src="{% static 'images/logos/kazang.svg' %}" alt="Kazang">
+                                            </div>
+                                            <div class="voucher-provider-card" data-provider="Flash" onclick="selectVoucherProvider(this)">
+                                                <img src="{% static 'images/logos/flash.svg' %}" alt="Flash">
+                                            </div>
+                                            <div class="voucher-provider-card" data-provider="EasyPay" onclick="selectVoucherProvider(this)">
+                                                <img src="{% static 'images/logos/easypay.svg' %}" alt="EasyPay">
+                                            </div>
+                                        </div>
+                                        <div id="voucher-provider-error" class="text-danger small mt-1" style="display:none">Please select a voucher type to continue.</div>
+                                    </div>
+
+                                    <div id="voucher-fields" style="display:none">
                                     <div class="form-floating mb-3">
                                         <input type="number" name="amount" id="voucher-amount" class="form-control" placeholder="Amount" min="50" step="0.01" required>
                                         <label for="voucher-amount">Voucher Amount (R)</label>
@@ -528,6 +592,7 @@
                                     <button type="submit" class="btn btn-success btn-submit">
                                         <i class="bi bi-ticket-perforated me-2"></i>Submit Voucher
                                     </button>
+                                    </div><!-- end voucher-fields -->
                                 </form>
                             </div>
                         </div>
@@ -626,7 +691,22 @@
         if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum crypto deposit is R50.'); }
     });
 
+    function selectVoucherProvider(card) {
+        document.querySelectorAll('.voucher-provider-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        document.getElementById('voucher-provider-input').value = card.dataset.provider;
+        document.getElementById('voucher-fields').style.display = 'block';
+        document.getElementById('voucher-provider-error').style.display = 'none';
+    }
+
     document.getElementById('voucher-deposit-form').addEventListener('submit', function(e) {
+        const provider = document.getElementById('voucher-provider-input').value;
+        if (!provider) {
+            e.preventDefault();
+            document.getElementById('voucher-provider-error').style.display = 'block';
+            document.querySelector('.voucher-provider-grid').scrollIntoView({behavior:'smooth'});
+            return;
+        }
         const amount = document.getElementById('voucher-amount').value;
         const code   = document.getElementById('voucher_code').value;
         const img    = document.getElementById('voucher_image').files[0];

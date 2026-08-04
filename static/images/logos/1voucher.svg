@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" width="200" height="80">
+  <rect width="200" height="80" rx="12" fill="#F26522"/>
+  <rect x="0" y="50" width="200" height="30" rx="0" fill="#E05010"/>
+  <rect x="0" y="62" width="200" height="18" rx="0" ry="0" fill="#E05010"/>
+  <rect x="188" y="62" width="12" height="18" rx="0 0 12 0" fill="#E05010"/>
+  <rect x="0" y="62" width="12" height="18" rx="0 0 0 12" fill="#E05010"/>
+  <text x="100" y="34" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="#fff" text-anchor="middle">1Voucher</text>
+  <text x="100" y="62" font-family="Arial,sans-serif" font-size="11" font-weight="600" fill="#FFD" text-anchor="middle">SOUTH AFRICA</text>
+</svg>

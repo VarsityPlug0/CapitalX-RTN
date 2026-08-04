@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" width="200" height="80">
+  <rect width="200" height="80" rx="12" fill="#1B2A4A"/>
+  <rect x="0" y="54" width="200" height="26" rx="0" fill="#E8401C"/>
+  <rect x="188" y="54" width="12" height="26" rx="0 0 12 0" fill="#E8401C"/>
+  <rect x="0" y="54" width="12" height="26" rx="0 0 0 12" fill="#E8401C"/>
+  <text x="100" y="38" font-family="Arial Black,Arial,sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">OTT Voucher</text>
+  <text x="100" y="70" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PREPAID AIRTIME &amp; DATA</text>
+</svg>

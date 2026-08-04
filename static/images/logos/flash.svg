@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" width="200" height="80">
+  <rect width="200" height="80" rx="12" fill="#1A1A1A"/>
+  <polygon points="85,12 70,44 90,44 75,68 118,36 96,36 112,12" fill="#FFC300"/>
+  <text x="150" y="46" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="#FFC300" text-anchor="middle">Flash</text>
+</svg>
