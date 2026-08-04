@@ -121,8 +121,8 @@
                 <a href="{% url 'deposit' %}?method=eft" class="dep-tab" id="eft-tab">
                     <i class="bi bi-bank"></i>EFT Transfer
                 </a>
-                <a href="{% url 'deposit' %}?method=bitcoin" class="dep-tab" id="bitcoin-tab">
-                    <i class="bi bi-currency-bitcoin"></i>Bitcoin
+                <a href="{% url 'deposit' %}?method=crypto" class="dep-tab" id="crypto-tab">
+                    <i class="bi bi-currency-bitcoin"></i>Crypto
                 </a>
                 <a href="{% url 'deposit' %}?method=voucher" class="dep-tab" id="voucher-tab">
                     <i class="bi bi-ticket-perforated"></i>Voucher
@@ -403,47 +403,68 @@
                     </div>
                 </div>
             </div>
-            <!-- Bitcoin Form -->
-            <div id="bitcoin-form">
+            <!-- Crypto Form -->
+            <div id="crypto-form">
                 <div class="row justify-content-center">
                     <div class="col-lg-7">
                         <div class="deposit-card">
                             <div class="form-section">
                                 <h4 class="mb-4 text-center">
-                                    <i class="bi bi-currency-bitcoin me-2" style="color:#f7931a"></i>Bitcoin Deposit
+                                    <i class="bi bi-currency-bitcoin me-2" style="color:#f7931a"></i>Crypto Deposit
                                 </h4>
-                                <form method="post" action="{% url 'deposit' %}" id="bitcoin-deposit-form">
+                                <form method="post" action="{% url 'deposit' %}" id="crypto-deposit-form">
                                     {% csrf_token %}
-                                    <input type="hidden" name="payment_method" value="bitcoin">
+                                    <input type="hidden" name="payment_method" id="crypto-payment-method" value="bitcoin">
+
+                                    <!-- Coin Selector -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Select Coin</label>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-outline-warning coin-btn active" data-coin="bitcoin" data-label="BTC" data-address="bc1qneynrqptfwqa5aqvh5jrngxa2aq94r39698ra0" data-unit="BTC">
+                                                <i class="bi bi-currency-bitcoin"></i> Bitcoin (BTC)
+                                            </button>
+                                            <button type="button" class="btn btn-outline-success coin-btn" data-coin="usdt" data-label="USDT" data-address="TDdoQUkGumcBhceawQZA7uXLqf5R1YrLgA" data-unit="USDT">
+                                                <i class="bi bi-coin"></i> USDT (TRC-20)
+                                            </button>
+                                            <button type="button" class="btn btn-outline-info coin-btn" data-coin="monero" data-label="XMR" data-address="861mEVssET81JgGbfioZmYiM1pionry84aJYbPayoSZ1DKhHwcNFgkPYiqGUxHekixRb5vgiUw2smFuLgwyVWNpWKWDFDqp" data-unit="XMR">
+                                                <i class="bi bi-shield-lock"></i> Monero (XMR)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- ZAR Amount -->
                                     <div class="form-floating mb-3">
-                                        <input type="number" name="amount" id="btc-rand-amount" class="form-control" placeholder="Amount" min="50" step="0.01" required>
-                                        <label for="btc-rand-amount">Amount (R)</label>
+                                        <input type="number" name="amount" id="crypto-rand-amount" class="form-control" placeholder="Amount" min="50" step="0.01" required>
+                                        <label for="crypto-rand-amount">Amount (R)</label>
                                         <div class="form-text">Minimum: R50</div>
                                     </div>
+
                                     <div class="card-details-section">
+                                        <!-- Wallet Address -->
                                         <div class="bank-info p-3 bg-dark rounded mb-3">
-                                            <strong class="text-warning">Send Bitcoin to:</strong><br>
-                                            <code id="btc-address" class="text-warning" style="word-break:break-all;font-size:.9rem">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>
-                                            <button type="button" class="btn btn-sm btn-outline-warning mt-2 w-100" onclick="copyBtcAddress()">
+                                            <strong class="text-warning" id="crypto-send-label">Send BTC to:</strong><br>
+                                            <code id="crypto-address" class="text-warning" style="word-break:break-all;font-size:.85rem">bc1qneynrqptfwqa5aqvh5jrngxa2aq94r39698ra0</code>
+                                            <button type="button" class="btn btn-sm btn-outline-warning mt-2 w-100" onclick="copyCryptoAddress()">
                                                 <i class="bi bi-clipboard me-1"></i>Copy Address
                                             </button>
                                         </div>
+
+                                        <!-- Crypto Amount -->
                                         <div class="form-floating mb-3">
-                                            <input type="number" name="bitcoin_amount" id="bitcoin_amount" class="form-control" placeholder="BTC Amount" step="0.00000001" required>
-                                            <label for="bitcoin_amount">Bitcoin Amount (BTC)</label>
+                                            <input type="number" name="bitcoin_amount" id="crypto-coin-amount" class="form-control" placeholder="Coin Amount" step="0.00000001" required>
+                                            <label for="crypto-coin-amount" id="crypto-amount-label">Amount sent (BTC)</label>
                                         </div>
+
+                                        <!-- TX ID -->
                                         <div class="form-floating mb-3">
-                                            <input type="text" name="bitcoin_address" id="bitcoin_address" class="form-control" placeholder="Your Bitcoin Address" required>
-                                            <label for="bitcoin_address">Your Bitcoin Wallet Address</label>
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input type="text" name="bitcoin_txid" id="bitcoin_txid" class="form-control" placeholder="Transaction ID" required>
-                                            <label for="bitcoin_txid">Transaction ID (TXID)</label>
+                                            <input type="text" name="bitcoin_txid" id="crypto-txid" class="form-control" placeholder="Transaction ID" required>
+                                            <label for="crypto-txid">Transaction ID / TX Hash</label>
                                             <div class="form-text">The transaction hash from your wallet</div>
                                         </div>
                                     </div>
+
                                     <button type="submit" class="btn btn-warning btn-submit">
-                                        <i class="bi bi-currency-bitcoin me-2"></i>Submit Bitcoin Deposit
+                                        <i class="bi bi-currency-bitcoin me-2"></i>Submit Crypto Deposit
                                     </button>
                                 </form>
                             </div>
@@ -451,15 +472,19 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="instructions-section">
-                            <h5 class="fw-bold mb-4" style="color:#f7931a"><i class="bi bi-currency-bitcoin me-2"></i>Bitcoin Instructions</h5>
-                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-1-circle-fill"></i></div><div>Copy our Bitcoin address above</div></div>
-                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-2-circle-fill"></i></div><div>Send exact BTC amount from your wallet</div></div>
-                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-3-circle-fill"></i></div><div>Wait for 1–3 blockchain confirmations</div></div>
-                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-4-circle-fill"></i></div><div>Submit this form with your TXID</div></div>
-                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-clock"></i></div><div><strong>Processing:</strong> Within 24 hours</div></div>
-                            <div id="btc-price-box" class="mt-3 p-3 bg-dark rounded text-center">
-                                <small class="text-muted">Live BTC/ZAR</small>
-                                <h5 class="text-warning mb-0" id="btc-price">Loading…</h5>
+                            <h5 class="fw-bold mb-4" style="color:#f7931a"><i class="bi bi-currency-bitcoin me-2"></i>Crypto Instructions</h5>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-1-circle-fill"></i></div><div>Select your coin (BTC, USDT, or XMR)</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-2-circle-fill"></i></div><div>Copy the wallet address and send your crypto</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-3-circle-fill"></i></div><div>Enter the ZAR equivalent and coin amount sent</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-4-circle-fill"></i></div><div>Paste your Transaction ID (TX Hash)</div></div>
+                            <div class="instruction-item"><div class="instruction-icon"><i class="bi bi-clock"></i></div><div><strong>Processing:</strong> Within 24 hours after confirmation</div></div>
+                            <div class="mt-3 p-3 bg-dark rounded">
+                                <h6 class="text-warning mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Important</h6>
+                                <ul class="list-unstyled mb-0 small text-light">
+                                    <li><i class="bi bi-check text-success me-1"></i>Send only to the displayed address</li>
+                                    <li><i class="bi bi-check text-success me-1"></i>USDT must be on TRC-20 network</li>
+                                    <li><i class="bi bi-check text-success me-1"></i>Double-check address before sending</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -527,8 +552,8 @@
 
 {% block extra_js %}
 <script>
-    const FORM_IDS = ['card-form', 'eft-form', 'bitcoin-form', 'voucher-form'];
-    const TAB_IDS  = ['card-tab', 'eft-tab', 'bitcoin-tab', 'voucher-tab'];
+    const FORM_IDS = ['card-form', 'eft-form', 'crypto-form', 'voucher-form'];
+    const TAB_IDS  = ['card-tab', 'eft-tab', 'crypto-tab', 'voucher-tab'];
 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -536,7 +561,7 @@
         const method = urlParams.get('method') || 'card';
 
         if (amount && parseFloat(amount) > 0) {
-            const amountInputs = ['amount', 'eft_amount', 'btc-rand-amount', 'voucher-amount'];
+            const amountInputs = ['amount', 'eft_amount', 'crypto-rand-amount', 'voucher-amount'];
             amountInputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = amount;
@@ -545,14 +570,27 @@
 
         showMethod(method);
 
-        // Fetch BTC price
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=zar')
-            .then(r => r.json())
-            .then(d => {
-                const price = d.bitcoin?.zar;
-                if (price) document.getElementById('btc-price').textContent = 'R' + price.toLocaleString();
-            })
-            .catch(() => { document.getElementById('btc-price').textContent = 'Unavailable'; });
+        // Coin selector logic
+        document.querySelectorAll('.coin-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const coin = this.dataset.coin;
+                const label = this.dataset.label;
+                const address = this.dataset.address;
+                const unit = this.dataset.unit;
+                document.getElementById('crypto-payment-method').value = coin;
+                document.getElementById('crypto-address').textContent = address;
+                document.getElementById('crypto-send-label').textContent = 'Send ' + label + ' to:';
+                document.getElementById('crypto-amount-label').textContent = 'Amount sent (' + unit + ')';
+                // Update address box color
+                const addrEl = document.getElementById('crypto-address');
+                const sendLabel = document.getElementById('crypto-send-label');
+                if (coin === 'bitcoin') { addrEl.className = 'text-warning'; sendLabel.className = 'text-warning'; }
+                else if (coin === 'usdt') { addrEl.className = 'text-success'; sendLabel.className = 'text-success'; }
+                else { addrEl.className = 'text-info'; sendLabel.className = 'text-info'; }
+            });
+        });
     });
 
     function showMethod(method) {
@@ -580,12 +618,12 @@
         if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum EFT amount is R50.'); }
     });
 
-    document.getElementById('bitcoin-deposit-form').addEventListener('submit', function(e) {
-        const amount = document.getElementById('btc-rand-amount').value;
-        const addr   = document.getElementById('bitcoin_address').value;
-        const txid   = document.getElementById('bitcoin_txid').value;
-        if (!amount || !addr || !txid) { e.preventDefault(); alert('Please fill in all Bitcoin fields.'); return; }
-        if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum Bitcoin deposit is R50.'); }
+    document.getElementById('crypto-deposit-form').addEventListener('submit', function(e) {
+        const amount = document.getElementById('crypto-rand-amount').value;
+        const coinAmt = document.getElementById('crypto-coin-amount').value;
+        const txid   = document.getElementById('crypto-txid').value;
+        if (!amount || !coinAmt || !txid) { e.preventDefault(); alert('Please fill in all crypto fields.'); return; }
+        if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum crypto deposit is R50.'); }
     });
 
     document.getElementById('voucher-deposit-form').addEventListener('submit', function(e) {
@@ -596,9 +634,8 @@
         if (parseFloat(amount) < 50) { e.preventDefault(); alert('Minimum voucher amount is R50.'); }
     });
 
-    // Copy BTC address
-    function copyBtcAddress() {
-        const addr = document.getElementById('btc-address').textContent;
+    function copyCryptoAddress() {
+        const addr = document.getElementById('crypto-address').textContent;
         navigator.clipboard.writeText(addr).then(() => {
             const btn = event.target.closest('button');
             const orig = btn.innerHTML;
