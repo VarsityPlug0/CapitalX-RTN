@@ -91,7 +91,7 @@
     <div class="card">
         <div class="card-body">
             <h2 class="h4 mb-4">Referral History</h2>
-            <div class="table-responsive">
+            <div class="table-responsive table-mobile-stack">
                 <table class="table">
                     <thead>
                         <tr>
@@ -104,10 +104,10 @@
                     <tbody>
                         {% for referral in referrals %}
                         <tr>
-                            <td>{{ referral.created_at|date:"M d, Y" }}</td>
-                            <td>{{ referral.invitee.email }}</td>
-                            <td>R{{ referral.bonus_amount|floatformat:2 }}</td>
-                            <td>
+                            <td data-label="Date">{{ referral.created_at|date:"M d, Y" }}</td>
+                            <td data-label="User">{{ referral.invitee.email }}</td>
+                            <td data-label="Bonus">R{{ referral.bonus_amount|floatformat:2 }}</td>
+                            <td data-label="Status">
                                 <span class="badge {% if referral.status == 'active' %}bg-success{% elif referral.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
                                     {{ referral.status|title }}
                                 </span>

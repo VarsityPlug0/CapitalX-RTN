@@ -96,23 +96,23 @@
     <span class="wl-card-title"><i class="bi bi-clock" style="color:#f59e0b;"></i> Pending Deposits</span>
     <span class="wl-badge pending">{{ pending_deposits|length }} awaiting</span>
   </div>
-  <div style="overflow-x:auto;">
+  <div class="table-mobile-stack">
     <table class="wl-table">
       <thead>
         <tr>
           <th>Amount</th>
-          <th class="d-none d-sm-table-cell">Method</th>
+          <th>Method</th>
           <th>Status</th>
-          <th class="d-none d-md-table-cell">Date</th>
+          <th>Date</th>
         </tr>
       </thead>
       <tbody>
         {% for dep in pending_deposits %}
         <tr>
-          <td style="font-weight:700;color:#f59e0b;">R{{ dep.amount|floatformat:2 }}</td>
-          <td class="d-none d-sm-table-cell">{{ dep.get_payment_method_display }}</td>
-          <td><span class="wl-badge pending"><i class="bi bi-clock"></i> Pending</span></td>
-          <td class="d-none d-md-table-cell">{{ dep.created_at|date:"d M Y" }}</td>
+          <td data-label="Amount" style="font-weight:700;color:#f59e0b;">R{{ dep.amount|floatformat:2 }}</td>
+          <td data-label="Method">{{ dep.get_payment_method_display }}</td>
+          <td data-label="Status"><span class="wl-badge pending"><i class="bi bi-clock"></i> Pending</span></td>
+          <td data-label="Date">{{ dep.created_at|date:"d M Y" }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -126,21 +126,21 @@
   <div class="wl-card-header">
     <span class="wl-card-title"><i class="bi bi-list-ul" style="color:var(--cx-blue-light);"></i> Transaction History</span>
   </div>
-  <div style="overflow-x:auto;">
+  <div class="table-mobile-stack">
     <table class="wl-table">
       <thead>
         <tr>
           <th>Type</th>
           <th>Amount</th>
           <th>Status</th>
-          <th class="d-none d-sm-table-cell">Description</th>
-          <th class="d-none d-md-table-cell">Date</th>
+          <th>Description</th>
+          <th>Date</th>
         </tr>
       </thead>
       <tbody>
         {% for tx in transactions %}
         <tr>
-          <td>
+          <td data-label="Type">
             {% if tx.transaction_type == 'deposit' %}
               <span class="wl-badge deposit"><i class="bi bi-arrow-down-circle"></i> Deposit</span>
             {% elif tx.transaction_type == 'withdrawal' %}
@@ -153,8 +153,8 @@
               <span class="wl-badge deposit">{{ tx.transaction_type|title }}</span>
             {% endif %}
           </td>
-          <td style="font-weight:700;color:#fff;">R{{ tx.amount|floatformat:2 }}</td>
-          <td>
+          <td data-label="Amount" style="font-weight:700;color:#fff;">R{{ tx.amount|floatformat:2 }}</td>
+          <td data-label="Status">
             {% if tx.status == 'completed' or tx.status == 'approved' %}
               <span class="wl-badge completed"><i class="bi bi-check-circle-fill"></i> Done</span>
             {% elif tx.status == 'pending' %}
@@ -163,8 +163,8 @@
               <span class="wl-badge failed"><i class="bi bi-x-circle-fill"></i> Failed</span>
             {% endif %}
           </td>
-          <td class="d-none d-sm-table-cell" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.description }}</td>
-          <td class="d-none d-md-table-cell" style="white-space:nowrap;">{{ tx.created_at|date:"d M Y" }}</td>
+          <td data-label="Description" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.description }}</td>
+          <td data-label="Date" style="white-space:nowrap;">{{ tx.created_at|date:"d M Y" }}</td>
         </tr>
         {% empty %}
         <tr class="empty"><td colspan="5"><i class="bi bi-inbox me-2"></i>No transactions yet.</td></tr>

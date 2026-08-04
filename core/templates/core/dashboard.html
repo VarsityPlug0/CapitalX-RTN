@@ -121,27 +121,27 @@
         <a href="{% url 'investment_plans' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>New Plan</a>
       </div>
       <div class="db-card-body">
-        <div class="table-responsive">
+        <div class="table-responsive table-mobile-stack">
           <table class="db-table">
             <thead>
               <tr>
                 <th>Company</th>
                 <th>Amount</th>
                 <th>Return</th>
-                <th class="d-none d-sm-table-cell">Start</th>
-                <th class="d-none d-md-table-cell">End</th>
+                <th>Start</th>
+                <th>End</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {% for inv in active_investments %}
               <tr>
-                <td style="font-weight:600;color:#fff;">{{ inv.company.name }}</td>
-                <td>R{{ inv.amount }}</td>
-                <td style="color:var(--cx-green);font-weight:600;">R{{ inv.return_amount }}</td>
-                <td class="d-none d-sm-table-cell">{{ inv.start_date|date:"d M Y" }}</td>
-                <td class="d-none d-md-table-cell">{{ inv.end_date|date:"d M Y" }}</td>
-                <td><span class="db-badge active"><i class="bi bi-circle-fill" style="font-size:.45rem;"></i> Active</span></td>
+                <td data-label="Company" style="font-weight:600;color:#fff;">{{ inv.company.name }}</td>
+                <td data-label="Amount">R{{ inv.amount }}</td>
+                <td data-label="Return" style="color:var(--cx-green);font-weight:600;">R{{ inv.return_amount }}</td>
+                <td data-label="Start">{{ inv.start_date|date:"d M Y" }}</td>
+                <td data-label="End">{{ inv.end_date|date:"d M Y" }}</td>
+                <td data-label="Status"><span class="db-badge active"><i class="bi bi-circle-fill" style="font-size:.45rem;"></i> Active</span></td>
               </tr>
               {% empty %}
               <tr class="empty"><td colspan="6"><i class="bi bi-inbox me-2"></i>No active investments yet.<br><a href="{% url 'investment_plans' %}" style="color:var(--cx-blue-light);">Browse plans</a></td></tr>
@@ -159,22 +159,22 @@
         <a href="{% url 'deposit' %}" class="btn btn-secondary btn-sm"><i class="bi bi-plus me-1"></i>Deposit</a>
       </div>
       <div class="db-card-body">
-        <div class="table-responsive">
+        <div class="table-responsive table-mobile-stack">
           <table class="db-table">
             <thead>
               <tr>
                 <th>Amount</th>
-                <th class="d-none d-sm-table-cell">Method</th>
+                <th>Method</th>
                 <th>Status</th>
-                <th class="d-none d-md-table-cell">Date</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
               {% for dep in deposits %}
               <tr>
-                <td style="font-weight:600;color:#fff;">R{{ dep.amount }}</td>
-                <td class="d-none d-sm-table-cell">{{ dep.get_payment_method_display }}</td>
-                <td>
+                <td data-label="Amount" style="font-weight:600;color:#fff;">R{{ dep.amount }}</td>
+                <td data-label="Method">{{ dep.get_payment_method_display }}</td>
+                <td data-label="Status">
                   {% if dep.status == 'approved' %}
                     <span class="db-badge approved"><i class="bi bi-check-circle-fill"></i> Approved</span>
                   {% elif dep.status == 'rejected' %}
@@ -183,7 +183,7 @@
                     <span class="db-badge pending"><i class="bi bi-clock"></i> Pending</span>
                   {% endif %}
                 </td>
-                <td class="d-none d-md-table-cell">{{ dep.created_at|date:"d M Y" }}</td>
+                <td data-label="Date">{{ dep.created_at|date:"d M Y" }}</td>
               </tr>
               {% empty %}
               <tr class="empty"><td colspan="4"><i class="bi bi-inbox me-2"></i>No deposits yet.<br><a href="{% url 'deposit' %}" style="color:var(--cx-blue-light);">Make your first deposit</a></td></tr>

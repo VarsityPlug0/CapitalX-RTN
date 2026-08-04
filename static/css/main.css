@@ -605,6 +605,53 @@ body { overflow-x: clip; }
 /* Ensure no child ever bleeds outside the viewport */
 .container, .container-fluid { max-width: 100vw; }
 
+/* ── MOBILE STACKED TABLES ── */
+/* Add class="table-mobile-stack" to any wrapper div around a table */
+@media (max-width: 767.98px) {
+  .table-mobile-stack { overflow-x: unset !important; }
+  .table-mobile-stack table,
+  .table-mobile-stack tbody,
+  .table-mobile-stack tr,
+  .table-mobile-stack td { display: block !important; width: 100% !important; }
+  .table-mobile-stack thead { display: none !important; }
+  .table-mobile-stack tr {
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 10px;
+    margin-bottom: .875rem;
+    padding: .5rem .75rem;
+    background: rgba(255,255,255,.02);
+  }
+  .table-mobile-stack td {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: .35rem 0;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,.05) !important;
+    font-size: .875rem;
+    gap: .5rem;
+  }
+  .table-mobile-stack td:last-child { border-bottom: none !important; }
+  .table-mobile-stack td[data-label]::before {
+    content: attr(data-label);
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6b7280;
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+  /* Plan/name cell — full width, no label prefix */
+  .table-mobile-stack td.ms-plan-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+    padding-bottom: .5rem;
+  }
+  .table-mobile-stack td.ms-plan-cell::before { display: none; }
+}
+
 /* ── ACCESSIBILITY ── */
 :focus-visible { outline: 2px solid var(--cx-blue); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
