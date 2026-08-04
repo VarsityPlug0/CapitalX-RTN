@@ -1854,15 +1854,15 @@ def investment_plans_view(request):
     invested_plan_ids = set(inv.plan.id for inv in user_investments)
     wallet, created = Wallet.objects.get_or_create(user=user)
     plan_logos = {
-        'Shoprite Plan':      'https://cdn.brandfetch.io/shoprite.co.za/w/200/h/200',
-        'Mr Price Plan':      'https://cdn.brandfetch.io/mrpgroup.com/w/200/h/200',
-        'Capitec Plan':       'https://cdn.brandfetch.io/capitecbank.co.za/w/200/h/200',
-        'MTN Plan':           'https://cdn.brandfetch.io/mtn.com/w/200/h/200',
-        'Vodacom Plan':       'https://cdn.brandfetch.io/vodacom.co.za/w/200/h/200',
-        'Discovery Plan':     'https://cdn.brandfetch.io/discovery.co.za/w/200/h/200',
-        'Sasol Plan':         'https://cdn.brandfetch.io/sasol.com/w/200/h/200',
-        'Standard Bank Plan': 'https://cdn.brandfetch.io/standardbank.com/w/200/h/200',
-        'Naspers Plan':       'https://cdn.brandfetch.io/naspers.com/w/200/h/200',
+        'Shoprite Plan':      'images/logos/shoprite.png',
+        'Mr Price Plan':      'images/logos/mrprice.png',
+        'Capitec Plan':       'images/logos/capitec.png',
+        'MTN Plan':           'images/logos/mtn.png',
+        'Vodacom Plan':       'images/logos/vodacom.png',
+        'Discovery Plan':     'images/logos/discovery.png',
+        'Sasol Plan':         'images/logos/sasol.png',
+        'Standard Bank Plan': 'images/logos/standardbank.png',
+        'Naspers Plan':       'images/logos/naspers.png',
     }
     for phase_plans in [phase_1_plans, phase_2_plans, phase_3_plans]:
         for plan in phase_plans:
