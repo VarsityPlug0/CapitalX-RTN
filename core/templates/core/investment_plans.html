@@ -56,6 +56,16 @@
   .ip-info-icon { width:36px; height:36px; flex-shrink:0; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.9375rem; }
   .ip-info-item h6 { font-size:.875rem; font-weight:600; color:#fff; margin-bottom:.25rem; }
   .ip-info-item p { font-size:.8125rem; color:var(--cx-muted); margin:0; line-height:1.5; }
+
+  @media (max-width: 575.98px) {
+    .ip-plan-card { padding:1rem; }
+    .ip-plan-name { font-size:1rem; }
+    .ip-plan-desc { font-size:.8rem; margin-bottom:.75rem; }
+    .ip-plan-row { font-size:.8125rem; }
+    .ip-wallet { padding:1rem; }
+    .ip-wallet-amount { font-size:1.375rem; }
+    .ip-btn { padding:.625rem .75rem; font-size:.875rem; }
+  }
 </style>
 {% endblock %}
 
@@ -98,7 +108,7 @@
 </div>
 <div class="row g-3 mb-4">
   {% for plan in phase_1_plans %}
-  <div class="col-lg-4 col-md-6">
+  <div class="col-12 col-md-6 col-lg-4">
     <div class="ip-plan-card {% if plan.user_has_invested %}invested{% elif not plan.user_can_afford %}insufficient{% endif %}">
       {% if plan.user_has_invested %}
         <span class="ip-status-badge invested"><i class="bi bi-check-circle-fill"></i> Invested</span>
@@ -136,7 +146,7 @@
 </div>
 <div class="row g-3 mb-4">
   {% for plan in phase_2_plans %}
-  <div class="col-lg-4 col-md-6">
+  <div class="col-12 col-md-6 col-lg-4">
     <div class="ip-plan-card {% if plan.user_has_invested %}invested{% elif not plan.user_can_afford %}insufficient{% endif %}">
       {% if plan.user_has_invested %}
         <span class="ip-status-badge invested"><i class="bi bi-check-circle-fill"></i> Invested</span>
@@ -174,7 +184,7 @@
 </div>
 <div class="row g-3 mb-4">
   {% for plan in phase_3_plans %}
-  <div class="col-lg-4 col-md-6">
+  <div class="col-12 col-md-6 col-lg-4">
     <div class="ip-plan-card {% if plan.user_has_invested %}invested{% elif not plan.user_can_afford %}insufficient{% endif %}">
       {% if plan.user_has_invested %}
         <span class="ip-status-badge invested"><i class="bi bi-check-circle-fill"></i> Invested</span>
