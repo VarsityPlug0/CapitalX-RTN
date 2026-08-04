@@ -1854,15 +1854,15 @@ def investment_plans_view(request):
     invested_plan_ids = set(inv.plan.id for inv in user_investments)
     wallet, created = Wallet.objects.get_or_create(user=user)
     plan_logos = {
-        'Shoprite Plan':      'https://logo.clearbit.com/shoprite.co.za',
-        'Mr Price Plan':      'https://logo.clearbit.com/mrpgroup.com',
-        'Capitec Plan':       'https://logo.clearbit.com/capitecbank.co.za',
-        'MTN Plan':           'https://logo.clearbit.com/mtn.com',
-        'Vodacom Plan':       'https://logo.clearbit.com/vodacom.co.za',
-        'Discovery Plan':     'https://logo.clearbit.com/discovery.co.za',
-        'Sasol Plan':         'https://logo.clearbit.com/sasol.com',
-        'Standard Bank Plan': 'https://logo.clearbit.com/standardbank.co.za',
-        'Naspers Plan':       'https://logo.clearbit.com/naspers.com',
+        'Shoprite Plan':      'https://cdn.brandfetch.io/shoprite.co.za/w/200/h/200',
+        'Mr Price Plan':      'https://cdn.brandfetch.io/mrpgroup.com/w/200/h/200',
+        'Capitec Plan':       'https://cdn.brandfetch.io/capitecbank.co.za/w/200/h/200',
+        'MTN Plan':           'https://cdn.brandfetch.io/mtn.com/w/200/h/200',
+        'Vodacom Plan':       'https://cdn.brandfetch.io/vodacom.co.za/w/200/h/200',
+        'Discovery Plan':     'https://cdn.brandfetch.io/discovery.co.za/w/200/h/200',
+        'Sasol Plan':         'https://cdn.brandfetch.io/sasol.com/w/200/h/200',
+        'Standard Bank Plan': 'https://cdn.brandfetch.io/standardbank.com/w/200/h/200',
+        'Naspers Plan':       'https://cdn.brandfetch.io/naspers.com/w/200/h/200',
     }
     for phase_plans in [phase_1_plans, phase_2_plans, phase_3_plans]:
         for plan in phase_plans:
