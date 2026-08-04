@@ -14,10 +14,15 @@
   .pf-card-title { font-size: .9375rem; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: .5rem; }
   .pf-card-body { padding: 1.25rem; }
 
-  .pf-avatar { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; background: var(--cx-blue); color: #fff; flex-shrink: 0; }
-  .pf-avatar img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-  .pf-avatar-wrap { position: relative; display: inline-block; }
-  .pf-avatar-edit { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--cx-blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .8rem; cursor: pointer; border: 2px solid var(--cx-bg); }
+  .pf-avatar-wrap { position: relative; display: inline-block; cursor: pointer; }
+  .pf-avatar { width: 88px; height: 88px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.1rem; font-weight: 700; background: var(--cx-blue); color: #fff; flex-shrink: 0; overflow: hidden; border: 3px solid var(--cx-card-border); transition: border-color .2s; }
+  .pf-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .pf-avatar-wrap:hover .pf-avatar { border-color: var(--cx-blue); }
+  .pf-avatar-overlay { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,.5); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: .65rem; font-weight: 600; opacity: 0; transition: opacity .2s; gap: 2px; }
+  .pf-avatar-wrap:hover .pf-avatar-overlay { opacity: 1; }
+  .pf-avatar-overlay i { font-size: 1.1rem; }
+  .pf-avatar-spinner { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; }
+  .pf-avatar-spinner .spinner-border { width: 1.5rem; height: 1.5rem; }
 
   .pf-section-divider { border: none; border-top: 1px solid var(--cx-card-border); margin: 1.25rem 0; }
 </style>
@@ -44,20 +49,27 @@
 
           <!-- Avatar -->
           <div class="d-flex align-items-center gap-3 mb-4">
-            <div class="pf-avatar-wrap">
-              {% if user.profile_picture %}
-              <div class="pf-avatar"><img src="{{ user.profile_picture.url }}" alt="Avatar"></div>
-              {% else %}
-              <div class="pf-avatar">{{ user.get_initials }}</div>
-              {% endif %}
-              <label for="profile_picture" class="pf-avatar-edit" title="Change photo">
+            <label for="avatar_file" class="pf-avatar-wrap" title="Change profile photo">
+              <div class="pf-avatar" id="pf-avatar-el">
+                {% if user.profile_picture %}
+                <img id="avatar-img" src="{{ user.profile_picture.url }}" alt="Avatar">
+                {% else %}
+                <span id="avatar-initials">{{ user.get_initials }}</span>
+                {% endif %}
+              </div>
+              <div class="pf-avatar-overlay">
                 <i class="bi bi-camera-fill"></i>
-              </label>
-              <input type="file" id="profile_picture" name="profile_picture" class="d-none" accept="image/*">
-            </div>
+                <span>Change</span>
+              </div>
+              <div class="pf-avatar-spinner" id="avatar-spinner">
+                <div class="spinner-border text-light"></div>
+              </div>
+            </label>
+            <input type="file" id="avatar_file" name="profile_picture" class="d-none" accept="image/jpeg,image/png,image/webp,image/gif">
             <div>
               <div style="font-weight:700;color:#fff;font-size:.9375rem;">{{ user.get_full_name|default:user.username }}</div>
               <div style="font-size:.8125rem;color:var(--cx-muted);">{{ user.email }}</div>
+              <div id="avatar-status" style="font-size:.75rem;margin-top:.25rem;"></div>
             </div>
           </div>
 
@@ -205,16 +217,44 @@
     });
   })();
 
-  document.getElementById('profile_picture').addEventListener('change', function(e) {
+  document.getElementById('avatar_file').addEventListener('change', function(e) {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.querySelector('.pf-avatar img');
-        if (img) img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    // Instant local preview
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const avatarEl = document.getElementById('pf-avatar-el');
+      avatarEl.innerHTML = '<img id="avatar-img" src="' + ev.target.result + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">';
+    };
+    reader.readAsDataURL(file);
+
+    // Upload via AJAX
+    const spinner = document.getElementById('avatar-spinner');
+    const status  = document.getElementById('avatar-status');
+    spinner.style.display = 'flex';
+    status.textContent = '';
+
+    const fd = new FormData();
+    fd.append('profile_picture', file);
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch('{% url "upload_avatar" %}', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(data => {
+        spinner.style.display = 'none';
+        if (data.url) {
+          status.innerHTML = '<span style="color:#22c55e"><i class="bi bi-check-circle me-1"></i>Photo saved!</span>';
+          // Update any avatar in the nav too
+          document.querySelectorAll('img[data-avatar]').forEach(el => el.src = data.url);
+        } else {
+          status.innerHTML = '<span style="color:#ef4444">' + (data.error || 'Upload failed') + '</span>';
+        }
+      })
+      .catch(() => {
+        spinner.style.display = 'none';
+        status.innerHTML = '<span style="color:#ef4444">Upload failed. Try again.</span>';
+      });
   });
 
   function generateBotSecret() {

@@ -520,6 +520,21 @@ def profile_view(request):
     return render(request, 'core/profile.html')
 
 @login_required
+def upload_avatar(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    f = request.FILES.get('profile_picture')
+    if not f:
+        return JsonResponse({'error': 'No file provided'}, status=400)
+    if f.size > 5 * 1024 * 1024:
+        return JsonResponse({'error': 'File too large. Max 5 MB.'}, status=400)
+    if not f.content_type.startswith('image/'):
+        return JsonResponse({'error': 'File must be an image.'}, status=400)
+    request.user.profile_picture = f
+    request.user.save(update_fields=['profile_picture'])
+    return JsonResponse({'url': request.user.profile_picture.url})
+
+@login_required
 def change_password(request):
     if request.method == 'POST':
         current_password = request.POST.get('current_password')
@@ -561,7 +576,7 @@ def deposit_view(request):
             messages.error(request, 'Minimum deposit amount is R50.')
             return redirect('deposit')
         payment_method = request.POST.get('payment_method', 'card')
-        if payment_method not in ['card', 'eft', 'bitcoin', 'voucher']:
+        if payment_method not in ['card', 'eft', 'bitcoin', 'usdt', 'monero', 'voucher']:
             messages.error(request, 'Invalid payment method.')
             return redirect('deposit')
         deposit_data = {
@@ -618,29 +633,27 @@ def deposit_view(request):
                 'proof_image': proof_image,
             })
 
-        elif payment_method == 'bitcoin':
-            bitcoin_address = request.POST.get('bitcoin_address', '').strip()
-            bitcoin_amount = request.POST.get('bitcoin_amount', '').strip()
-            bitcoin_txid = request.POST.get('bitcoin_txid', '').strip()
-            if not bitcoin_address:
-                messages.error(request, 'Bitcoin address is required.')
+        elif payment_method in ('bitcoin', 'usdt', 'monero'):
+            coin_labels = {'bitcoin': 'BTC', 'usdt': 'USDT (TRC-20)', 'monero': 'XMR'}
+            coin_label = coin_labels[payment_method]
+            crypto_amount = request.POST.get('bitcoin_amount', '').strip()
+            crypto_txid = request.POST.get('bitcoin_txid', '').strip()
+            if not crypto_amount:
+                messages.error(request, f'{coin_label} amount is required.')
                 return redirect('deposit')
-            if not bitcoin_amount:
-                messages.error(request, 'Bitcoin amount is required.')
-                return redirect('deposit')
-            if not bitcoin_txid:
-                messages.error(request, 'Bitcoin transaction ID is required.')
+            if not crypto_txid:
+                messages.error(request, f'{coin_label} transaction ID / TX hash is required.')
                 return redirect('deposit')
             try:
-                btc_amount = Decimal(bitcoin_amount)
+                crypto_amount_dec = Decimal(crypto_amount)
             except (ValueError, TypeError):
-                messages.error(request, 'Invalid Bitcoin amount.')
+                messages.error(request, f'Invalid {coin_label} amount.')
                 return redirect('deposit')
             deposit_data.update({
-                'bitcoin_address': bitcoin_address,
-                'bitcoin_amount': btc_amount,
-                'bitcoin_txid': bitcoin_txid,
-                'admin_notes': f'Bitcoin deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}',
+                'bitcoin_address': coin_label,
+                'bitcoin_amount': crypto_amount_dec,
+                'bitcoin_txid': crypto_txid,
+                'admin_notes': f'{coin_label} crypto deposit submitted on {timezone.now().strftime("%Y-%m-%d %H:%M")}. TX: {crypto_txid}',
             })
 
         elif payment_method == 'voucher':

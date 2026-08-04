@@ -128,6 +128,7 @@ urlpatterns = [
     path('lead-manager/campaign/<int:campaign_id>/delete/', lead_manager_views.delete_campaign, name='delete_campaign'),
 
     # ── Internal API ──────────────────────────────────────────────────────────
+    path('api/upload-avatar/', views.upload_avatar, name='upload_avatar'),
     path('api/user/financial-info/', views.user_financial_info_api, name='user_financial_info_api'),
     path('api/generate-token/', views.generate_api_token, name='generate_api_token'),
     path('api/generate-bot-secret/', bot_views.generate_bot_secret, name='generate_bot_secret'),
