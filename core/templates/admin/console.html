@@ -696,7 +696,7 @@
                 <div class="fw-medium">{{ pi.user.username }}</div>
                 <small class="text-muted">{{ pi.user.email }}</small>
               </td>
-              <td>{{ pi.plan.emoji }} {{ pi.plan.name }}</td>
+              <td>{% if pi.plan.logo_url %}<img src="{% static pi.plan.logo_url %}" alt="{{ pi.plan.name }}" style="width:24px;height:24px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;vertical-align:middle;margin-right:6px;">{% else %}{{ pi.plan.emoji }} {% endif %}{{ pi.plan.name }}</td>
               <td class="fw-bold">R{{ pi.amount|floatformat:2 }}</td>
               <td class="text-success">R{{ pi.return_amount|floatformat:2 }}</td>
               <td class="text-muted small">{{ pi.end_date|date:"M d, Y H:i" }}</td>
@@ -930,7 +930,7 @@
                 data-is-active="{{ plan.is_active|yesno:'true,false' }}"
                 data-description="{{ plan.description }}">
               <td>
-                <span style="font-size:1.2rem">{{ plan.emoji }}</span>
+                {% if plan.logo_url %}<img src="{% static plan.logo_url %}" alt="{{ plan.name }}" style="width:28px;height:28px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.2rem">{{ plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1">{{ plan.name }}</span>
               </td>
               <td><span class="badge bg-secondary">{{ plan.get_phase_display|default:plan.phase }}</span></td>

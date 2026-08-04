@@ -676,6 +676,22 @@ class InvestmentPlan(models.Model):
         verbose_name = 'Investment Plan'
         verbose_name_plural = 'Investment Plans'
     
+    _LOGO_MAP = {
+        'Shoprite Plan':      'images/logos/shoprite.png',
+        'Mr Price Plan':      'images/logos/mrprice.png',
+        'Capitec Plan':       'images/logos/capitec.png',
+        'MTN Plan':           'images/logos/mtn.png',
+        'Vodacom Plan':       'images/logos/vodacom.png',
+        'Discovery Plan':     'images/logos/discovery.png',
+        'Sasol Plan':         'images/logos/sasol.png',
+        'Standard Bank Plan': 'images/logos/standardbank.png',
+        'Naspers Plan':       'images/logos/naspers.png',
+    }
+
+    @property
+    def logo_url(self):
+        return self._LOGO_MAP.get(self.name, '')
+
     def __str__(self):
         return f"{self.emoji} {self.name} - R{self.min_amount} → R{self.return_amount}"
     

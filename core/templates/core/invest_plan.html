@@ -197,7 +197,7 @@
                 <div class="invest-card">
                     <!-- Plan Header -->
                     <div class="plan-header">
-                        <span class="plan-emoji">{{ plan.emoji }}</span>
+                        {% if plan.logo_url %}<img src="{% static plan.logo_url %}" alt="{{ plan.name }}" class="plan-emoji" style="width:64px;height:64px;object-fit:contain;background:#fff;border-radius:12px;padding:6px;">{% else %}<span class="plan-emoji">{{ plan.emoji }}</span>{% endif %}
                         <h1 class="plan-title">{{ plan.name }}</h1>
                         <p class="plan-subtitle">{{ plan.phase }}</p>
                     </div>

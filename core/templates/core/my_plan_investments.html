@@ -309,7 +309,7 @@
                     <div class="investment-card active">
                         <div class="investment-header">
                             <div class="plan-info">
-                                <span class="plan-emoji">{{ investment.plan.emoji }}</span>
+                                {% if investment.plan.logo_url %}<img src="{% static investment.plan.logo_url %}" alt="{{ investment.plan.name }}" class="plan-emoji" style="width:48px;height:48px;object-fit:contain;background:#fff;border-radius:10px;padding:4px;">{% else %}<span class="plan-emoji">{{ investment.plan.emoji }}</span>{% endif %}
                                 <div class="plan-details">
                                     <h4>{{ investment.plan.name }}</h4>
                                     <div class="plan-phase">{{ investment.plan.phase }}</div>
@@ -388,7 +388,7 @@
                     <div class="investment-card completed">
                         <div class="investment-header">
                             <div class="plan-info">
-                                <span class="plan-emoji">{{ investment.plan.emoji }}</span>
+                                {% if investment.plan.logo_url %}<img src="{% static investment.plan.logo_url %}" alt="{{ investment.plan.name }}" class="plan-emoji" style="width:48px;height:48px;object-fit:contain;background:#fff;border-radius:10px;padding:4px;">{% else %}<span class="plan-emoji">{{ investment.plan.emoji }}</span>{% endif %}
                                 <div class="plan-details">
                                     <h4>{{ investment.plan.name }}</h4>
                                     <div class="plan-phase">{{ investment.plan.phase }}</div>

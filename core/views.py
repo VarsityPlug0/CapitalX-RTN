@@ -1853,23 +1853,11 @@ def investment_plans_view(request):
     user_investments = PlanInvestment.objects.filter(user=user).select_related('plan')
     invested_plan_ids = set(inv.plan.id for inv in user_investments)
     wallet, created = Wallet.objects.get_or_create(user=user)
-    plan_logos = {
-        'Shoprite Plan':      'images/logos/shoprite.png',
-        'Mr Price Plan':      'images/logos/mrprice.png',
-        'Capitec Plan':       'images/logos/capitec.png',
-        'MTN Plan':           'images/logos/mtn.png',
-        'Vodacom Plan':       'images/logos/vodacom.png',
-        'Discovery Plan':     'images/logos/discovery.png',
-        'Sasol Plan':         'images/logos/sasol.png',
-        'Standard Bank Plan': 'images/logos/standardbank.png',
-        'Naspers Plan':       'images/logos/naspers.png',
-    }
     for phase_plans in [phase_1_plans, phase_2_plans, phase_3_plans]:
         for plan in phase_plans:
             plan.user_has_invested = plan.id in invested_plan_ids
             plan.user_can_afford = wallet.balance >= plan.min_amount
             plan.user_investment = user_investments.filter(plan=plan).first()
-            plan.logo_url = plan_logos.get(plan.name, '')
     
     context = {
         'phase_1_plans': phase_1_plans,

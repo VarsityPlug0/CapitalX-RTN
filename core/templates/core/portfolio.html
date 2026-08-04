@@ -110,7 +110,7 @@
             {% for inv in matured_plan_investments %}
             <tr>
               <td>
-                <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
+                {% if inv.plan.logo_url %}<img src="{% static inv.plan.logo_url %}" alt="{{ inv.plan.name }}" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
               </td>
               <td>R{{ inv.amount|floatformat:2 }}</td>
@@ -155,7 +155,7 @@
             {% with remaining=inv.end_date|timeuntil %}
             <tr>
               <td>
-                <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
+                {% if inv.plan.logo_url %}<img src="{% static inv.plan.logo_url %}" alt="{{ inv.plan.name }}" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1" style="color:#fff">{{ inv.plan.name }}</span>
               </td>
               <td><span class="badge bg-secondary plan-badge">{{ inv.plan.phase|title }}</span></td>
@@ -235,7 +235,7 @@
             {% for inv in completed_plan_investments %}
             <tr>
               <td>
-                <span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>
+                {% if inv.plan.logo_url %}<img src="{% static inv.plan.logo_url %}" alt="{{ inv.plan.name }}" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;vertical-align:middle;">{% else %}<span style="font-size:1.1rem">{{ inv.plan.emoji }}</span>{% endif %}
                 <span class="fw-medium ms-1">{{ inv.plan.name }}</span>
               </td>
               <td>R{{ inv.amount|floatformat:2 }}</td>
