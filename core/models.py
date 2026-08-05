@@ -32,12 +32,12 @@ BANK_CHOICES = [
 class EFTBankAccount(models.Model):
     BANK_ACCOUNTS = [
         {
-            'bank': 'ABSA',
-            'bank_name': 'ABSA',
+            'bank': 'TymeBank',
+            'bank_name': 'TymeBank',
             'account_holder': 'CapitalX',
             'account_type': 'Business',
-            'account_number': '9397248336',
-            'branch_code': '632005'
+            'account_number': '51072673949',
+            'branch_code': '678910'
         }
     ]
     
@@ -236,7 +236,9 @@ class Deposit(models.Model):
         ('eft', 'EFT'),
         ('cash', 'Cash Deposit'),
         ('card', 'Card Payment'),
-        ('bitcoin', 'Bitcoin'),
+        ('bitcoin', 'Bitcoin (BTC)'),
+        ('usdt', 'USDT (TRC-20)'),
+        ('monero', 'Monero (XMR)'),
         ('voucher', 'Voucher'),
     ]
     
