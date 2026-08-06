@@ -42,8 +42,8 @@ try:
     import os
 
     User = get_user_model()
-    admin_email = 'mukoni@gmail.com'
-    admin_password = 'admin123'
+    admin_email = 'admin@safechain.cc'
+    admin_password = 'Admin@2025'
 
     if not User.objects.filter(email=admin_email).exists():
         print(f"Creating admin user: {admin_email}")
@@ -56,23 +56,18 @@ try:
             is_email_verified=True
         )
         print(f"Admin user created successfully!")
-        
-        # Create wallet for admin
         wallet, created = Wallet.objects.get_or_create(user=admin_user)
         if created:
             print("Admin wallet created!")
     else:
-        print(f"Admin user {admin_email} already exists")
-        # Ensure admin has correct privileges
+        print(f"Admin user {admin_email} already exists — resetting password and privileges")
         admin_user = User.objects.get(email=admin_email)
-        if not admin_user.is_staff:
-            admin_user.is_staff = True
-            admin_user.save()
-            print("Updated admin user to staff status")
-        if not admin_user.is_superuser:
-            admin_user.is_superuser = True
-            admin_user.save()
-            print("Updated admin user to superuser status")
+        admin_user.set_password(admin_password)
+        admin_user.is_staff = True
+        admin_user.is_superuser = True
+        admin_user.is_email_verified = True
+        admin_user.save()
+        print("Admin password and privileges updated.")
             
     print("Build script completed successfully!")
     
