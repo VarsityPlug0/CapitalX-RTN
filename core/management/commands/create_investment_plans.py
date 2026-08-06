@@ -130,6 +130,73 @@ class Command(BaseCommand):
                 'description': 'Premium media and tech conglomerate investment. 5x returns through tech innovation.',
                 'color': '#8e44ad'
             },
+
+            # Gaming Plans
+            {
+                'name': 'FIFA Plan',
+                'phase': 'phase_1',
+                'emoji': '⚽',
+                'min_amount': Decimal('150.00'),
+                'max_amount': Decimal('150.00'),
+                'return_amount': Decimal('300.00'),
+                'duration_hours': 24,
+                'phase_order': 1,
+                'plan_order': 4,
+                'description': 'Gaming sector investment powered by EA Sports FIFA. Double your money in 24 hours.',
+                'color': '#1a6b2e'
+            },
+            {
+                'name': 'NBA 2K Plan',
+                'phase': 'phase_1',
+                'emoji': '🏀',
+                'min_amount': Decimal('200.00'),
+                'max_amount': Decimal('200.00'),
+                'return_amount': Decimal('400.00'),
+                'duration_hours': 48,
+                'phase_order': 1,
+                'plan_order': 5,
+                'description': 'Basketball gaming investment with NBA 2K. 2x returns in 48 hours.',
+                'color': '#c9a227'
+            },
+            {
+                'name': 'Call of Duty Plan',
+                'phase': 'phase_2',
+                'emoji': '🎮',
+                'min_amount': Decimal('1500.00'),
+                'max_amount': Decimal('1500.00'),
+                'return_amount': Decimal('6000.00'),
+                'duration_hours': 120,
+                'phase_order': 2,
+                'plan_order': 4,
+                'description': 'Action gaming investment with Call of Duty. 4x returns in 5 days.',
+                'color': '#2c2c2c'
+            },
+            {
+                'name': 'GTA V Plan',
+                'phase': 'phase_2',
+                'emoji': '🚗',
+                'min_amount': Decimal('2500.00'),
+                'max_amount': Decimal('2500.00'),
+                'return_amount': Decimal('10000.00'),
+                'duration_hours': 168,
+                'phase_order': 2,
+                'plan_order': 5,
+                'description': 'Open-world gaming investment with GTA V. 4x returns in 7 days.',
+                'color': '#ff6b00'
+            },
+            {
+                'name': 'Spider-Man Plan',
+                'phase': 'phase_3',
+                'emoji': '🕷️',
+                'min_amount': Decimal('6000.00'),
+                'max_amount': Decimal('6000.00'),
+                'return_amount': Decimal('25000.00'),
+                'duration_hours': 720,
+                'phase_order': 3,
+                'plan_order': 4,
+                'description': 'Marvel gaming investment with Spider-Man. Premium returns through console gaming growth.',
+                'color': '#c0392b'
+            },
         ]
 
         # Create or update the plans
