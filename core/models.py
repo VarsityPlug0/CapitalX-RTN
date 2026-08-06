@@ -688,12 +688,6 @@ class InvestmentPlan(models.Model):
         'Sasol Plan':         'images/logos/sasol.png',
         'Standard Bank Plan': 'images/logos/standardbank.png',
         'Naspers Plan':       'images/logos/naspers.png',
-        # Gaming Plans
-        'FIFA Plan':          'images/games/fifa.jpg',
-        'Call of Duty Plan':  'images/games/cod.jpg',
-        'GTA V Plan':         'images/games/gtav.jpg',
-        'Spider-Man Plan':    'images/games/spiderman.jpg',
-        'NBA 2K Plan':        'images/games/nba2k.jpg',
     }
 
     @property
