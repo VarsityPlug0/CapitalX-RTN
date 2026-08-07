@@ -449,6 +449,54 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .admin-main {
+                padding: 1rem 0.75rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .stat-card .stat-value {
+                font-size: 1.35rem;
+            }
+
+            .header-right .btn-outline-secondary {
+                display: none;
+            }
+
+            .user-details {
+                display: none;
+            }
+
+            .user-info {
+                padding: 6px 10px;
+                gap: 6px;
+            }
+
+            .card-header {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand-text {
+                display: none;
+            }
+
+            .header-right {
+                gap: 0.5rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.6rem;
+            }
+        }
+
             {
             % block extra_css %
         }

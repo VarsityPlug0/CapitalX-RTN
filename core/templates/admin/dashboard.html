@@ -128,7 +128,7 @@ new Chart(depositsCtx, {
 
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -159,6 +159,21 @@ new Chart(depositsCtx, {
     display: grid;
     grid-template-columns: 150px 120px 120px 1fr;
     gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .activity-item {
+        grid-template-columns: 1fr 1fr;
+    }
+    .activity-details {
+        grid-column: 1 / -1;
+    }
+    .dashboard-container {
+        padding: 10px;
+    }
+    .chart-card {
+        height: 220px;
+    }
 }
 
 .activity-time {
