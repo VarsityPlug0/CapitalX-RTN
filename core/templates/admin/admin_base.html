@@ -83,6 +83,7 @@
             font-weight: 700;
             font-size: 1.25rem;
             color: var(--text-light);
+            white-space: nowrap;
         }
 
         .admin-header .brand-text span {
@@ -449,19 +450,7 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .admin-main {
-                padding: 1rem 0.75rem;
-            }
-
-            .page-header h1 {
-                font-size: 1.25rem;
-            }
-
-            .stat-card .stat-value {
-                font-size: 1.35rem;
-            }
-
+        @media (max-width: 992px) {
             .header-right .btn-outline-secondary {
                 display: none;
             }
@@ -475,6 +464,24 @@
                 gap: 6px;
             }
 
+            .header-right {
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-main {
+                padding: 1rem 0.75rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .stat-card .stat-value {
+                font-size: 1.35rem;
+            }
+
             .card-header {
                 flex-wrap: wrap;
                 gap: 0.5rem;
@@ -484,10 +491,6 @@
         @media (max-width: 480px) {
             .brand-text {
                 display: none;
-            }
-
-            .header-right {
-                gap: 0.5rem;
             }
 
             .table thead th,
